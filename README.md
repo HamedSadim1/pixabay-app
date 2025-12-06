@@ -1,46 +1,158 @@
-# Getting Started with Create React App
+# Pixabay App
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Een moderne React applicatie voor het zoeken naar afbeeldingen via Pixabay API, bekijken van blog posts en community interacties met een prachtig glasmorfisme design.
 
-## Available Scripts
+## 🚀 Features
 
-In the project directory, you can run:
+- **Glasmorfisme UI**: Moderne glazen effecten met backdrop blur
+- **Afbeelding zoeken**: Pixabay API integratie voor het zoeken naar afbeeldingen
+- **Blog posts**: Toon en beheer blog content
+- **Locatie services**: Geolocation functionaliteit
+- **Responsive design**: Werkt perfect op alle apparaten
+- **TypeScript**: Volledig getypeerd voor betere ontwikkelervaring
+- **Error boundaries**: Betere error handling en gebruikerservaring
 
-### `npm start`
+## 🛠️ Tech Stack
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+- **React 19** - UI framework
+- **Vite** - Build tool
+- **TypeScript** - Type safety
+- **Tailwind CSS v4** - Styling met glasmorfisme effecten
+- **React Router** - Client-side routing
+- **Axios** - HTTP client
+- **React Icons** - Icon library
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+## 📦 Installation
 
-### `npm test`
+1. Clone de repository:
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+   ```bash
+   git clone <repository-url>
+   cd pixabay-app
+   ```
 
-### `npm run build`
+2. Installeer dependencies:
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+   ```bash
+   npm install
+   ```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+3. Maak een `.env` bestand in de root directory:
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+   ```env
+   VITE_PIXABAY_API_KEY=jouw_pixabay_api_key
+   VITE_PIXABAY_BASE_URL=https://pixabay.com/api/
+   ```
 
-### `npm run eject`
+4. Start de development server:
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+   ```bash
+   npm run dev
+   ```
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## 🔧 Available Scripts
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+- `npm run dev` - Start development server
+- `npm run build` - Build voor productie (output naar `dist` folder)
+- `npm run preview` - Preview productie build lokaal
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+## 📁 Project Structure
 
-## Learn More
+```bash
+src/
+├── components/          # Reusable UI components
+│   ├── BlogPost.tsx     # Blog post display component
+│   ├── FilterPanel.tsx  # Image search filters
+│   ├── Geolocation.tsx  # Location services
+│   ├── ImageList.tsx    # Image gallery display
+│   ├── ImageSearch.tsx  # Main search interface
+│   ├── Navbar.tsx       # Navigation component
+│   ├── SearchHistory.tsx # Search history component
+│   ├── SinglePost.tsx   # Individual post view
+│   ├── UserCard.tsx     # User profile cards
+│   └── ...
+├── constants/           # Application constants
+│   ├── navLinks.ts      # Navigation links
+│   ├── types.ts         # TypeScript type definitions
+│   └── ui.ts           # UI constants and options
+├── hooks/               # Custom React hooks
+│   └── useSearch.ts     # Search functionality hook
+├── models/              # TypeScript interfaces
+│   └── IPixabay.tsx     # Pixabay API types
+└── App.tsx             # Main app component
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## 🧪 Code Quality
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+Dit project volgt moderne React best practices:
+
+- **Error Boundaries**: Voor graceful error handling
+- **Custom Hooks**: Voor herbruikbare logica
+- **TypeScript**: Voor type safety
+- **Environment Validation**: Voor configuration checks
+- **Component Composition**: Voor maintainable UI
+- **Constants**: Voor centralized configuration
+
+## 🔒 Environment Variables
+
+Zorg ervoor dat je de volgende environment variables instelt in een `.env` bestand:
+
+```env
+VITE_PIXABAY_API_KEY=jouw_pixabay_api_key_hier
+VITE_PIXABAY_BASE_URL=https://pixabay.com/api/
+```
+
+**API Key verkrijgen:**
+
+1. Ga naar [pixabay.com](https://pixabay.com/)
+2. Maak een gratis account aan
+3. Ga naar je account settings
+4. Kopieer je API key
+5. Plak deze in het `.env` bestand
+
+## 🚨 Error Handling
+
+De app bevat comprehensive error handling:
+
+- API fouten worden gracefully afgehandeld
+- Error boundaries vangen JavaScript fouten op
+- Loading states worden consistent weergegeven
+- Gebruikersvriendelijke foutmeldingen
+
+## 📱 Responsive Design
+
+De app is volledig responsive en werkt op:
+
+- Desktop computers
+- Tablets
+- Mobiele telefoons
+
+## 🎨 Styling
+
+- **Glasmorfisme**: Moderne glazen effecten
+- **Dark theme**: Donkere achtergrond voor oogcomfort
+- **Consistent spacing**: Gebruik van Tailwind's spacing scale
+- **Hover effects**: Subtiele animaties voor interactiviteit
+
+## 🤝 Contributing
+
+1. Fork de repository
+2. Maak een feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit je changes (`git commit -m 'Add amazing feature'`)
+4. Push naar de branch (`git push origin feature/amazing-feature`)
+5. Open een Pull Request
+
+## 📄 License
+
+Dit project is gelicenseerd onder de MIT License.
+
+## 🙏 Acknowledgments
+
+- [Pixabay](https://pixabay.com/) voor de gratis image API
+- [React](https://reactjs.org/) voor het UI framework
+- [Vite](https://vitejs.dev/) voor de snelle build tool
+- [Tailwind CSS](https://tailwindcss.com/) voor het utility-first CSS framework
+
+---
+
+Gemaakt met ❤️ voor de Webframeworks cursus
