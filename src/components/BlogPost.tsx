@@ -3,9 +3,9 @@ import { useNavigate } from "react-router-dom";
 import Avatar from "./Avatar";
 import Icon from "./Icon";
 import MetaLabel from "./MetaLabel";
-import { useShareFeedback } from "../hooks/useShareFeedback";
-import { useToggle } from "../hooks/useToggle";
-import { PATHS } from "../constants/routes";
+import { useShareFeedback } from "@/hooks/useShareFeedback";
+import { useToggle } from "@/hooks/useToggle";
+import { PATHS } from "@/constants/routes";
 
 interface BlockProps {
   name: string;

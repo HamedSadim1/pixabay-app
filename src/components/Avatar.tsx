@@ -1,5 +1,5 @@
 import React from "react";
-import { getInitials } from "../utils/format";
+import { getInitials } from "@/utils/format";
 
 interface AvatarProps {
   name: string;

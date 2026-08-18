@@ -1,5 +1,5 @@
 import React from "react";
-import { parseTags } from "../utils/format";
+import { parseTags } from "@/utils/format";
 
 interface TagListProps {
   tags: string;

@@ -1,5 +1,5 @@
 import React from "react";
-import { ICONS, type IconName } from "../constants/icons";
+import { ICONS, type IconName } from "@/constants/icons";
 
 interface IconProps {
   name: IconName;

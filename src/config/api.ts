@@ -1,4 +1,4 @@
-import { getRequiredEnvVar } from "../utils/env";
+import { getRequiredEnvVar } from "@/utils/env";
 
 export const API_CONFIG = {
   PIXABAY: {

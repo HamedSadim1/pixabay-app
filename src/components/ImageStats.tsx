@@ -1,7 +1,7 @@
 import React from "react";
 import Icon from "./Icon";
 import MetaLabel from "./MetaLabel";
-import { getImageStatsFields } from "../utils/format";
+import { getImageStatsFields } from "@/utils/format";
 
 interface ImageStatsProps {
   likes: number;

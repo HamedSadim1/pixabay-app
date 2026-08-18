@@ -3,7 +3,7 @@ import {
   buttonClasses,
   type ButtonSize,
   type ButtonVariant,
-} from "../constants/buttonStyles";
+} from "@/constants/buttonStyles";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;

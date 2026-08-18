@@ -2,7 +2,7 @@ import React from "react";
 import Avatar from "./Avatar";
 import Button from "./Button";
 import Icon from "./Icon";
-import { useToggle } from "../hooks/useToggle";
+import { useToggle } from "@/hooks/useToggle";
 
 interface BlockProps {
   children: React.ReactNode;

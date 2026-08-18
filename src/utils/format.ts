@@ -1,6 +1,6 @@
 // Shared formatting helpers.
 
-import type { Hit } from "../models/IPixabay";
+import type { Hit } from "@/models/IPixabay";
 
 // Extract up to two initials from a full name, e.g. "Jane Doe" → "JD".
 export function getInitials(name: string): string {
@@ -49,7 +49,7 @@ export function formatFileSize(bytes: number): string {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
 }
 
-import type { IconName } from "../constants/icons";
+import type { IconName } from "@/constants/icons";
 
 // Returns the key-value pairs displayed in the image-detail information panel.
 export function getImageInfoFields(

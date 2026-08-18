@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { sharePage } from "../utils/share";
+import { sharePage } from "@/utils/share";
 
 // Shared feedback state for share actions: flips `shared` to true for a short
 // time after a successful share/copy so callers can show a "Copied" state.

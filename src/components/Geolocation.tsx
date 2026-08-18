@@ -7,13 +7,13 @@ import Icon from "./Icon";
 import MetaLabel from "./MetaLabel";
 import Spinner from "./Spinner";
 import LocationMap from "./LocationMap";
-import { useGeolocation } from "../hooks/useGeolocation";
-import { useReverseGeocode } from "../hooks/useReverseGeocode";
+import { useGeolocation } from "@/hooks/useGeolocation";
+import { useReverseGeocode } from "@/hooks/useReverseGeocode";
 import {
   formatAccuracy,
   formatCoordinate,
   isValidCoordinates,
-} from "../utils/geo";
+} from "@/utils/geo";
 
 function Geolocation() {
   // Coordinates live in the URL so the location is shareable and is restored

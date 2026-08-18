@@ -5,9 +5,9 @@ import UserCard from "./UserCard";
 import Frame from "./Frame";
 import SprocketStrip from "./SprocketStrip";
 import Icon from "./Icon";
-import { buttonClasses } from "../constants/buttonStyles";
-import { FEATURED_POSTS, FEATURES } from "../constants/mockData";
-import { PATHS } from "../constants/routes";
+import { buttonClasses } from "@/constants/buttonStyles";
+import { FEATURED_POSTS, FEATURES } from "@/constants/mockData";
+import { PATHS } from "@/constants/routes";
 
 const Home: React.FC = () => {
   return (

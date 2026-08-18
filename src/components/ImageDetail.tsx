@@ -1,12 +1,12 @@
 import React from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { getImageById, NotFoundError } from "../api/pixabay";
-import { getErrorMessage } from "../utils/error";
-import { PATHS } from "../constants/routes";
-import { buttonClasses } from "../constants/buttonStyles";
-import { DOWNLOAD_TIMEOUT_MS } from "../config/api";
-import { getFileExtension, getImageInfoFields } from "../utils/format";
+import { getImageById, NotFoundError } from "@/api/pixabay";
+import { getErrorMessage } from "@/utils/error";
+import { PATHS } from "@/constants/routes";
+import { buttonClasses } from "@/constants/buttonStyles";
+import { DOWNLOAD_TIMEOUT_MS } from "@/config/api";
+import { getFileExtension, getImageInfoFields } from "@/utils/format";
 
 const IMAGE_NOT_FOUND_TITLE = "Image Not Found";
 const IMAGE_NOT_FOUND_MESSAGE = "The requested frame could not be found.";

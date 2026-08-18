@@ -1,8 +1,8 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { parseAsString, parseAsStringLiteral, useQueryStates } from "nuqs";
-import { searchImages, type SearchQuery } from "../api/pixabay";
-import { getErrorMessage } from "../utils/error";
+import { searchImages, type SearchQuery } from "@/api/pixabay";
+import { getErrorMessage } from "@/utils/error";
 import type { Hit } from "./../models/IPixabay";
 import {
   COLORS,
@@ -11,7 +11,7 @@ import {
   type Color,
   type ImageType,
   type Orientation,
-} from "../constants/filters";
+} from "@/constants/filters";
 import { useDebouncedValue } from "./useDebouncedValue";
 
 // Debounce for the min-width/min-height inputs, so typing doesn't change the

@@ -4,9 +4,9 @@ import Avatar from "./Avatar";
 import Button from "./Button";
 import Icon from "./Icon";
 import MetaLabel from "./MetaLabel";
-import { useShareFeedback } from "../hooks/useShareFeedback";
-import { useToggle } from "../hooks/useToggle";
-import { INITIAL_COMMENTS, type Comment } from "../constants/mockData";
+import { useShareFeedback } from "@/hooks/useShareFeedback";
+import { useToggle } from "@/hooks/useToggle";
+import { INITIAL_COMMENTS, type Comment } from "@/constants/mockData";
 
 function SinglePost() {
   const [isLiked, toggleLiked] = useToggle(false);

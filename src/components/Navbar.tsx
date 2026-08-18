@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { PRELOAD_DELAY_MS } from "../config/api";
-import { NAV_LINKS } from "../constants/navLinks";
-import { routePreloaders } from "../constants/routeLoaders";
-import { PATHS } from "../constants/routes";
+import { PRELOAD_DELAY_MS } from "@/config/api";
+import { NAV_LINKS } from "@/constants/navLinks";
+import { routePreloaders } from "@/constants/routeLoaders";
+import { PATHS } from "@/constants/routes";
 import Icon from "./Icon";
 
 const Navbar: React.FC = () => {

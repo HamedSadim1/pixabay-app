@@ -1,4 +1,4 @@
-import { API_CONFIG, REQUEST_TIMEOUT_MS } from "../config/api";
+import { API_CONFIG, REQUEST_TIMEOUT_MS } from "@/config/api";
 
 interface NominatimAddress {
   house_number?: string;

@@ -1,6 +1,6 @@
 import React from "react";
 import Icon from "./Icon";
-import type { IconName } from "../constants/icons";
+import type { IconName } from "@/constants/icons";
 
 type Tone = "neutral" | "warning" | "gold";
 

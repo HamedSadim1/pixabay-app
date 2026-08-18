@@ -6,9 +6,9 @@ import StatusCard from "./StatusCard";
 import Button from "./Button";
 import Icon from "./Icon";
 import Spinner from "./Spinner";
-import { useSearch } from "../hooks/useSearch";
-import { PER_PAGE } from "../api/pixabay";
-import { TRENDING_SEARCHES } from "../constants/navLinks";
+import { useSearch } from "@/hooks/useSearch";
+import { PER_PAGE } from "@/api/pixabay";
+import { TRENDING_SEARCHES } from "@/constants/navLinks";
 
 function ImageSearch() {
   const searchInputRef = useRef<HTMLInputElement>(null);

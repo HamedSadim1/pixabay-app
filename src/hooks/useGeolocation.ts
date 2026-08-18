@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { GEO_TIMEOUT_MS, GEO_MAX_AGE_MS } from "../config/api";
+import { GEO_TIMEOUT_MS, GEO_MAX_AGE_MS } from "@/config/api";
 
 export interface LocationDetails {
   accuracy: number | null;

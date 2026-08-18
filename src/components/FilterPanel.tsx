@@ -1,6 +1,6 @@
 import React from "react";
-import type { ImageType, Orientation, Color } from "../constants/filters";
-import { FILTER_OPTIONS } from "../constants/ui";
+import type { ImageType, Orientation, Color } from "@/constants/filters";
+import { FILTER_OPTIONS } from "@/constants/ui";
 
 interface FilterPanelProps {
   search: {

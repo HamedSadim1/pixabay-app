@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { fetchAddress } from "../api/geocoding";
-import { isValidCoordinates } from "../utils/geo";
+import { fetchAddress } from "@/api/geocoding";
+import { isValidCoordinates } from "@/utils/geo";
 
 // Resolves the human-readable address for the given coordinates. Returns
 // `resolvingAddress` while in-flight and `locationName` once done (or "" on
