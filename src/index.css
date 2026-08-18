@@ -216,3 +216,11 @@ button:not(:disabled),
   background: var(--color-panel-2);
   color: var(--color-gold);
 }
+/* Enlarge the zoom controls to a comfortable touch target (WCAG 2.5.5). */
+.leaflet-bar a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+}

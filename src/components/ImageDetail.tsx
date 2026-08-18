@@ -34,8 +34,12 @@ const ImageDetail: React.FC = () => {
   const [imageData, setImageData] = useState<Hit | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
+  // Bumping this re-runs the fetch, used by the error state's Retry button.
+  const [reloadKey, setReloadKey] = useState<number>(0);
 
   useEffect(() => {
+    const controller = new AbortController();
+
     const fetchImageDetail = async () => {
       if (!id) {
         setError("No image ID provided");
@@ -46,11 +50,14 @@ const ImageDetail: React.FC = () => {
       try {
         setLoading(true);
         setError("");
+        // Clear any previously-loaded image so switching IDs never shows a
+        // stale frame while the new one is still loading.
+        setImageData(null);
 
         // Retrieve the image by ID regardless of type (photo/illustration/vector).
         const response = await axios.get(
           `${API_ENDPOINTS.PIXABAY_SEARCH}&id=${id}`,
-          { timeout: 10000 },
+          { timeout: 10000, signal: controller.signal },
         );
 
         if (
@@ -63,6 +70,10 @@ const ImageDetail: React.FC = () => {
           throw new Error("Image not found");
         }
       } catch (err) {
+        // The request was aborted (navigated away or a new fetch) — not an error.
+        if (axios.isCancel(err)) {
+          return;
+        }
         const error = err as AxiosError<ApiError>;
         const errorMessage =
           error.response?.data?.message ||
@@ -75,7 +86,9 @@ const ImageDetail: React.FC = () => {
     };
 
     fetchImageDetail();
-  }, [id]);
+
+    return () => controller.abort();
+  }, [id, reloadKey]);
 
   const formatNumber = (num: number) => {
     if (num >= 1000000) {
@@ -165,9 +178,17 @@ const ImageDetail: React.FC = () => {
             Error Loading Image
           </h2>
           <p className="mb-5 font-mono text-xs text-muted">{error}</p>
-          <Button onClick={goBack}>
-            <Icon name="arrowLeft" /> Go Back
-          </Button>
+          <div className="flex flex-wrap justify-center gap-3">
+            <Button
+              variant="primary"
+              onClick={() => setReloadKey((key) => key + 1)}
+            >
+              <Icon name="rotateRight" /> Retry
+            </Button>
+            <Button onClick={goBack}>
+              <Icon name="arrowLeft" /> Go Back
+            </Button>
+          </div>
         </div>
       </div>
     );
@@ -209,7 +230,7 @@ const ImageDetail: React.FC = () => {
         </h1>
       </div>
 
-      <div className="relative border border-line bg-panel p-6 md:p-8">
+      <div className="relative border border-line bg-panel p-6">
         <span className="vf-corner vf-tl" />
         <span className="vf-corner vf-tr" />
         <span className="vf-corner vf-bl" />

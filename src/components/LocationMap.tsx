@@ -83,6 +83,8 @@ const LocationMap: React.FC<LocationMapProps> = ({ latitude, longitude }) => {
 
   return (
     <div
+      role="region"
+      aria-label="Location map"
       className={
         isFullscreen
           ? "fixed inset-0 z-[2000] bg-dark"

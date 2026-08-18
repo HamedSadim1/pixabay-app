@@ -139,6 +139,9 @@ export const useSearch = (): SearchState & SearchActions => {
   // Monotonic id so only the latest in-flight request may update state; an
   // earlier (slower) response is ignored instead of overwriting newer results.
   const requestIdRef = useRef(0);
+  // Aborts the in-flight request when the hook unmounts or a newer search
+  // supersedes it, so a stale response can't leak into state after navigation.
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const saveToHistory = useCallback(
     (query: string) => {
@@ -190,6 +193,10 @@ export const useSearch = (): SearchState & SearchActions => {
       // Commit the effective search to the URL (the source of truth).
       void setSearchParams({ q: qEffective, page: p });
 
+      abortControllerRef.current?.abort();
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
+
       const requestId = ++requestIdRef.current;
 
       try {
@@ -219,7 +226,10 @@ export const useSearch = (): SearchState & SearchActions => {
           queryString += `&min_height=${height}`;
         }
 
-        const response = await axios.get(queryString, { timeout: 10000 });
+        const response = await axios.get(queryString, {
+          timeout: 10000,
+          signal: controller.signal,
+        });
 
         // Ignore the response if a newer search has already started.
         if (requestId !== requestIdRef.current) {
@@ -244,6 +254,10 @@ export const useSearch = (): SearchState & SearchActions => {
         if (requestId !== requestIdRef.current) {
           return;
         }
+        // The request was cancelled (unmount or superseded) — not a real error.
+        if (axios.isCancel(err)) {
+          return;
+        }
         const error = err as AxiosError<ApiError>;
         const errorMessage =
           error.code === "ECONNABORTED"
@@ -255,6 +269,9 @@ export const useSearch = (): SearchState & SearchActions => {
         if (!append) {
           setResults([]);
           setTotalHits(0);
+          // A failed search must not stay "unchanged", or the Search button
+          // would stay disabled and block a retry.
+          setLastSearch(null);
         }
       } finally {
         if (requestId === requestIdRef.current) {
@@ -293,6 +310,14 @@ export const useSearch = (): SearchState & SearchActions => {
   useEffect(() => {
     setSearch(q);
   }, [q]);
+
+  // Abort any in-flight request when the hook unmounts, so navigating away
+  // mid-search doesn't leave a request that later writes to unmounted state.
+  useEffect(() => {
+    return () => {
+      abortControllerRef.current?.abort();
+    };
+  }, []);
 
   // Auto-apply filter changes: re-run the current search whenever a filter is
   // updated, debounced so typing in the min-width/min-height inputs doesn't
@@ -340,7 +365,9 @@ export const useSearch = (): SearchState & SearchActions => {
 
   const clearSearch = () => {
     requestIdRef.current++;
+    abortControllerRef.current?.abort();
     setSearch("");
+    setError("");
     setResults([]);
     setTotalHits(0);
     setHasSearched(false);

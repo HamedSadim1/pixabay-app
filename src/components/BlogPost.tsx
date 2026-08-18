@@ -63,7 +63,7 @@ const BlogPost: FC<BlockProps> = ({ name, image, text, frame }) => {
           </button>
           <button
             type="button"
-            onClick={() => navigate("/posts")}
+            onClick={() => navigate("/posts#comments")}
             className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-meta text-muted transition-colors hover:text-safelight"
           >
             <Icon name="comment" /> Reply

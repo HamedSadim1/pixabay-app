@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Avatar from "./Avatar";
 import Button from "./Button";
 import Icon from "./Icon";
@@ -18,6 +18,16 @@ function SinglePost() {
   const [shared, setShared] = useState(false);
   const [commentText, setCommentText] = useState("");
   const commentsRef = useRef<HTMLElement>(null);
+  const commentInputRef = useRef<HTMLTextAreaElement>(null);
+
+  // When arriving via a "Reply" link (e.g. from a home-page post), move focus
+  // to the comment composer so the user can start typing immediately.
+  useEffect(() => {
+    if (window.location.hash === "#comments") {
+      commentsRef.current?.scrollIntoView({ behavior: "smooth" });
+      commentInputRef.current?.focus({ preventScroll: true });
+    }
+  }, []);
   const [comments, setComments] = useState<Comment[]>([
     {
       name: "John Doe",
@@ -181,6 +191,7 @@ function SinglePost() {
           <Avatar name="You" size="sm" />
           <div className="flex-1">
             <textarea
+              ref={commentInputRef}
               value={commentText}
               onChange={(e) => setCommentText(e.target.value)}
               placeholder="Write a comment..."

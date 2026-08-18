@@ -224,7 +224,7 @@ function Geolocation() {
             <span className="text-2xl text-safelight">
               <Icon name="warning" />
             </span>
-            <h2 className="font-display text-xl uppercase tracking-[0.03em] text-paper">
+            <h2 className="font-display text-lg uppercase tracking-[0.03em] text-paper">
               Invalid Location
             </h2>
           </div>
@@ -246,7 +246,7 @@ function Geolocation() {
               <span className="text-2xl text-safelight">
                 <Icon name="warning" />
               </span>
-              <h2 className="font-display text-xl uppercase tracking-[0.03em] text-paper">
+              <h2 className="font-display text-lg uppercase tracking-[0.03em] text-paper">
                 Location Error
               </h2>
             </div>
@@ -326,25 +326,25 @@ function Geolocation() {
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="border border-line bg-panel-2 p-4">
-              <h3 className="mb-2 font-mono text-[10px] uppercase tracking-label text-muted">
+              <div className="mb-2 font-mono text-[10px] uppercase tracking-label text-muted">
                 Latitude
-              </h3>
+              </div>
               <p className="font-mono text-xl text-safelight">
                 {formatCoordinate(lat, "lat")}
               </p>
             </div>
             <div className="border border-line bg-panel-2 p-4">
-              <h3 className="mb-2 font-mono text-[10px] uppercase tracking-label text-muted">
+              <div className="mb-2 font-mono text-[10px] uppercase tracking-label text-muted">
                 Longitude
-              </h3>
+              </div>
               <p className="font-mono text-xl text-safelight">
                 {formatCoordinate(lon, "lng")}
               </p>
             </div>
             <div className="border border-line bg-panel-2 p-4 md:col-span-2">
-              <h3 className="mb-2 font-mono text-[10px] uppercase tracking-label text-muted">
+              <div className="mb-2 font-mono text-[10px] uppercase tracking-label text-muted">
                 Address
-              </h3>
+              </div>
               {resolvingAddress ? (
                 <p className="font-mono text-sm text-muted">
                   Resolving address…
@@ -365,9 +365,9 @@ function Geolocation() {
             <div className="mt-4 grid gap-4 md:grid-cols-3">
               {details.accuracy !== null && (
                 <div className="border border-line bg-panel-2 p-4">
-                  <h4 className="mb-1 font-mono text-[10px] uppercase tracking-label text-muted">
+                  <div className="mb-1 font-mono text-[10px] uppercase tracking-label text-muted">
                     Accuracy
-                  </h4>
+                  </div>
                   <p className="font-mono text-sm text-paper">
                     ±{formatAccuracy(details.accuracy)}
                   </p>
@@ -375,9 +375,9 @@ function Geolocation() {
               )}
               {details.altitude !== null && (
                 <div className="border border-line bg-panel-2 p-4">
-                  <h4 className="mb-1 font-mono text-[10px] uppercase tracking-label text-muted">
+                  <div className="mb-1 font-mono text-[10px] uppercase tracking-label text-muted">
                     Altitude
-                  </h4>
+                  </div>
                   <p className="font-mono text-sm text-paper">
                     {Math.round(details.altitude)}m
                   </p>
@@ -385,9 +385,9 @@ function Geolocation() {
               )}
               {details.speed !== null && (
                 <div className="border border-line bg-panel-2 p-4">
-                  <h4 className="mb-1 font-mono text-[10px] uppercase tracking-label text-muted">
+                  <div className="mb-1 font-mono text-[10px] uppercase tracking-label text-muted">
                     Speed
-                  </h4>
+                  </div>
                   <p className="font-mono text-sm text-paper">
                     {(details.speed * 3.6).toFixed(1)} km/h
                   </p>
