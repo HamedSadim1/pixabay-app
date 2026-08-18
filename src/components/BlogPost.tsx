@@ -1,9 +1,11 @@
-import { type FC, useMemo, useState } from "react";
+import { type FC, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import Avatar from "./Avatar";
 import Icon from "./Icon";
 import MetaLabel from "./MetaLabel";
 import { useShareFeedback } from "../hooks/useShareFeedback";
+import { useToggle } from "../hooks/useToggle";
+import { PATHS } from "../constants/routes";
 
 interface BlockProps {
   name: string;
@@ -14,7 +16,7 @@ interface BlockProps {
 
 const BlogPost: FC<BlockProps> = ({ name, image, text, frame }) => {
   const navigate = useNavigate();
-  const [liked, setLiked] = useState(false);
+  const [liked, toggleLiked] = useToggle(false);
   const { shared, share } = useShareFeedback();
 
   const formattedTime = useMemo(
@@ -46,7 +48,7 @@ const BlogPost: FC<BlockProps> = ({ name, image, text, frame }) => {
         <div className="mt-3 flex gap-5 border-t border-line pt-3">
           <button
             type="button"
-            onClick={() => setLiked((prev) => !prev)}
+            onClick={toggleLiked}
             className={`inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-meta transition-colors ${
               liked ? "text-safelight" : "text-muted hover:text-safelight"
             }`}
@@ -55,14 +57,16 @@ const BlogPost: FC<BlockProps> = ({ name, image, text, frame }) => {
           </button>
           <button
             type="button"
-            onClick={() => navigate("/posts#comments")}
+            onClick={() => navigate(PATHS.postsComments)}
             className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-meta text-muted transition-colors hover:text-safelight"
           >
             <Icon name="comment" /> Reply
           </button>
           <button
             type="button"
-            onClick={() => void share(name, `${window.location.origin}/posts`)}
+            onClick={() =>
+              void share(name, `${window.location.origin}${PATHS.posts}`)
+            }
             className={`inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-meta transition-colors ${
               shared ? "text-gold" : "text-muted hover:text-safelight"
             }`}

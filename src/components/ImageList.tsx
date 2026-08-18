@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import Icon from "./Icon";
 import type { Hit } from "./../models/IPixabay";
+import { PATHS } from "../constants/routes";
 
 interface ImageListProps {
   images: Hit[];
@@ -13,7 +14,7 @@ const ImageList: React.FC<ImageListProps> = ({ images }) => {
       {images.map((result, index) => (
         <Link
           key={result.id}
-          to={`/image/${result.id}`}
+          to={PATHS.image(result.id)}
           aria-label={`View image: ${result.tags}`}
           className="group relative block overflow-hidden border border-line bg-panel text-left transition-colors hover:border-gold"
         >

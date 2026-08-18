@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { NAV_LINKS } from "../constants/navLinks";
 import { routePreloaders } from "../constants/routeLoaders";
+import { PATHS } from "../constants/routes";
 import Icon from "./Icon";
 
 // Only start downloading a route's chunk after the user has hovered/focused
@@ -52,7 +53,7 @@ const Navbar: React.FC = () => {
   const isLinkActive = (linkTo: string) => {
     return (
       location.pathname === linkTo ||
-      (linkTo === "/search" && location.pathname.startsWith("/image/"))
+      (linkTo === PATHS.search && location.pathname.startsWith("/image/"))
     );
   };
 

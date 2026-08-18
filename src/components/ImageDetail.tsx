@@ -2,7 +2,9 @@ import React from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getImageById, getErrorMessage, NotFoundError } from "../api/pixabay";
+import { PATHS } from "../constants/routes";
 import { buttonClasses } from "../constants/buttonStyles";
+import AuthorHeader from "./AuthorHeader";
 import Avatar from "./Avatar";
 import Button from "./Button";
 import Frame from "./Frame";
@@ -24,7 +26,7 @@ const ImageDetail: React.FC = () => {
   // return to, so fall back to the search page instead of doing nothing.
   const goBack = () => {
     if (location.key === "default") {
-      navigate("/search");
+      navigate(PATHS.search);
     } else {
       navigate(-1);
     }
@@ -304,14 +306,10 @@ const ImageDetail: React.FC = () => {
             src={imageData.userImageURL}
             size="md"
           />
-          <div>
-            <span className="font-display text-sm uppercase tracking-wider text-paper">
-              {imageData.user}
-            </span>
-            <MetaLabel as="p">
-              Photographer · Member #{imageData.user_id}
-            </MetaLabel>
-          </div>
+          <AuthorHeader
+            name={imageData.user}
+            caption={`Photographer · Member #${imageData.user_id}`}
+          />
         </div>
       </Frame>
     </div>

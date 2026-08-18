@@ -1,9 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
+import AuthorHeader from "./AuthorHeader";
 import Avatar from "./Avatar";
 import Button from "./Button";
 import Icon from "./Icon";
 import MetaLabel from "./MetaLabel";
 import { useShareFeedback } from "../hooks/useShareFeedback";
+import { useToggle } from "../hooks/useToggle";
 
 interface Comment {
   name: string;
@@ -13,8 +15,8 @@ interface Comment {
 }
 
 function SinglePost() {
-  const [isLiked, setIsLiked] = useState(false);
-  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [isLiked, toggleLiked] = useToggle(false);
+  const [isBookmarked, toggleBookmarked] = useToggle(false);
   const [likesCount, setLikesCount] = useState(42);
   const [commentText, setCommentText] = useState("");
   const { shared, share } = useShareFeedback();
@@ -51,12 +53,8 @@ function SinglePost() {
   ]);
 
   const handleLike = () => {
-    setIsLiked(!isLiked);
+    toggleLiked();
     setLikesCount((prev) => (isLiked ? prev - 1 : prev + 1));
-  };
-
-  const handleBookmark = () => {
-    setIsBookmarked(!isBookmarked);
   };
 
   const scrollToComments = () => {
@@ -85,12 +83,7 @@ function SinglePost() {
             src="https://picsum.photos/200/200?random=1"
             size="md"
           />
-          <div>
-            <span className="font-display text-sm uppercase tracking-wider text-paper">
-              Sarah
-            </span>
-            <MetaLabel as="p">New member • Today at 14:30</MetaLabel>
-          </div>
+          <AuthorHeader name="Sarah" caption="New member • Today at 14:30" />
         </div>
 
         <h2 className="mb-3 font-display text-2xl uppercase tracking-[0.02em] text-paper">
@@ -139,7 +132,7 @@ function SinglePost() {
           <Button
             size="sm"
             variant={isBookmarked ? "goldActive" : "gold"}
-            onClick={handleBookmark}
+            onClick={toggleBookmarked}
             aria-label="Bookmark"
           >
             <Icon name="bookmark" />

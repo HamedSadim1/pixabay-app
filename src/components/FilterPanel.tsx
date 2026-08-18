@@ -1,5 +1,5 @@
 import React from "react";
-import type { ImageType, Orientation, Color } from "../constants/types";
+import type { ImageType, Orientation, Color } from "../constants/filters";
 import { FILTER_OPTIONS } from "../constants/ui";
 
 interface FilterPanelProps {
@@ -131,7 +131,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ search }) => {
               <button
                 key={option.value}
                 type="button"
-                onClick={() => setColor(option.value as Color)}
+                onClick={() => setColor(option.value)}
                 className={`flex items-center gap-2 border px-3 py-1.5 font-mono text-xs uppercase tracking-[0.08em] transition-colors ${
                   isSelected
                     ? "border-gold bg-panel text-paper"
@@ -140,7 +140,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ search }) => {
               >
                 <span
                   aria-hidden="true"
-                  className={`h-3 w-3 border border-line ${COLOR_SWATCHES[option.value as Color]}`}
+                  className={`h-3 w-3 border border-line ${COLOR_SWATCHES[option.value]}`}
                 />
                 {option.label}
               </button>

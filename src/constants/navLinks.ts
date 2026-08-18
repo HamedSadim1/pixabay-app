@@ -1,4 +1,5 @@
 import type { IconName } from "./icons";
+import { PATHS } from "./routes";
 
 export interface NavLink {
   to: string;
@@ -7,11 +8,11 @@ export interface NavLink {
 }
 
 export const NAV_LINKS: NavLink[] = [
-  { to: "/", label: "Home", icon: "home" },
-  { to: "/search", label: "Search", icon: "search" },
-  { to: "/posts", label: "Posts", icon: "pen" },
-  { to: "/location", label: "Location", icon: "location" },
-  { to: "/profile", label: "Profile", icon: "user" },
+  { to: PATHS.home, label: "Home", icon: "home" },
+  { to: PATHS.search, label: "Search", icon: "search" },
+  { to: PATHS.posts, label: "Posts", icon: "pen" },
+  { to: PATHS.location, label: "Location", icon: "location" },
+  { to: PATHS.profile, label: "Profile", icon: "user" },
 ];
 
 export const TRENDING_SEARCHES = [

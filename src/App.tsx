@@ -9,6 +9,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import SprocketStrip from "./components/SprocketStrip";
 import Spinner from "./components/Spinner";
 import { buttonClasses } from "./constants/buttonStyles";
+import { PATHS } from "./constants/routes";
 import {
   loadGeolocation,
   loadImageSearch,
@@ -61,9 +62,9 @@ function App() {
             <Navbar />
             <main className="mx-auto max-w-6xl px-4 py-8 md:py-10">
               <Routes>
-                <Route path="/" element={<Home />} />
+                <Route path={PATHS.home} element={<Home />} />
                 <Route
-                  path="/search"
+                  path={PATHS.search}
                   element={
                     <section className="animate-fade-in">
                       <PageHeader
@@ -78,7 +79,7 @@ function App() {
                   }
                 />
                 <Route
-                  path="/posts"
+                  path={PATHS.posts}
                   element={
                     <section className="animate-fade-in">
                       <PageHeader
@@ -93,7 +94,7 @@ function App() {
                   }
                 />
                 <Route
-                  path="/location"
+                  path={PATHS.location}
                   element={
                     <section className="animate-fade-in">
                       <PageHeader
@@ -108,7 +109,7 @@ function App() {
                   }
                 />
                 <Route
-                  path="/image/:id"
+                  path={PATHS.image(":id")}
                   element={
                     <section className="animate-fade-in">
                       <ImageDetail />
@@ -116,7 +117,7 @@ function App() {
                   }
                 />
                 <Route
-                  path="/profile"
+                  path={PATHS.profile}
                   element={
                     <section className="animate-fade-in">
                       <PageHeader
@@ -146,7 +147,10 @@ function App() {
                           The page you're looking for is out of the contact
                           sheet.
                         </p>
-                        <Link to="/" className={buttonClasses("default")}>
+                        <Link
+                          to={PATHS.home}
+                          className={buttonClasses("default")}
+                        >
                           Back to Home
                         </Link>
                       </div>

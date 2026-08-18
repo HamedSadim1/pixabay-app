@@ -7,40 +7,15 @@ import {
   type SearchQuery,
 } from "../api/pixabay";
 import type { Hit } from "./../models/IPixabay";
-import type { Color, ImageType, Orientation } from "../constants/types";
+import {
+  COLORS,
+  IMAGE_TYPES,
+  ORIENTATIONS,
+  type Color,
+  type ImageType,
+  type Orientation,
+} from "../constants/filters";
 import { useDebouncedValue } from "./useDebouncedValue";
-
-// Accepted literal values for the URL-backed filters. These mirror the unions
-// in constants/types.ts so the parsers stay type-safe (a typo here is caught
-// at compile time via the `satisfies` check below).
-const IMAGE_TYPES = [
-  "all",
-  "photo",
-  "illustration",
-  "vector",
-] as const satisfies readonly ImageType[];
-const ORIENTATIONS = [
-  "all",
-  "horizontal",
-  "vertical",
-] as const satisfies readonly Orientation[];
-const COLORS = [
-  "all",
-  "grayscale",
-  "transparent",
-  "red",
-  "orange",
-  "yellow",
-  "green",
-  "turquoise",
-  "blue",
-  "lilac",
-  "pink",
-  "white",
-  "gray",
-  "black",
-  "brown",
-] as const satisfies readonly Color[];
 
 // Debounce for the min-width/min-height inputs, so typing doesn't change the
 // query key (and trigger a request) on every keystroke.

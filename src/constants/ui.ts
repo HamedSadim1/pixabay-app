@@ -1,32 +1,58 @@
 // UI constants
 
+import {
+  COLORS,
+  IMAGE_TYPES,
+  ORIENTATIONS,
+  type Color,
+  type ImageType,
+  type Orientation,
+} from "./filters";
+
+// Labels are keyed by the full union type, so TypeScript enforces that every
+// filter value (in filters.ts) has a label here.
+const IMAGE_TYPE_LABELS: Record<ImageType, string> = {
+  all: "All",
+  photo: "Photo",
+  illustration: "Illustration",
+  vector: "Vector",
+};
+
+const ORIENTATION_LABELS: Record<Orientation, string> = {
+  all: "All",
+  horizontal: "Horizontal",
+  vertical: "Vertical",
+};
+
+const COLOR_LABELS: Record<Color, string> = {
+  all: "All",
+  grayscale: "Grayscale",
+  transparent: "Transparent",
+  red: "Red",
+  orange: "Orange",
+  yellow: "Yellow",
+  green: "Green",
+  turquoise: "Turquoise",
+  blue: "Blue",
+  lilac: "Lilac",
+  pink: "Pink",
+  white: "White",
+  gray: "Gray",
+  black: "Black",
+  brown: "Brown",
+};
+
 export const FILTER_OPTIONS = {
-  imageTypes: [
-    { value: "all", label: "All" },
-    { value: "photo", label: "Photo" },
-    { value: "illustration", label: "Illustration" },
-    { value: "vector", label: "Vector" },
-  ] as const,
-  orientations: [
-    { value: "all", label: "All" },
-    { value: "horizontal", label: "Horizontal" },
-    { value: "vertical", label: "Vertical" },
-  ] as const,
-  colors: [
-    { value: "all", label: "All" },
-    { value: "grayscale", label: "Grayscale" },
-    { value: "transparent", label: "Transparent" },
-    { value: "red", label: "Red" },
-    { value: "orange", label: "Orange" },
-    { value: "yellow", label: "Yellow" },
-    { value: "green", label: "Green" },
-    { value: "turquoise", label: "Turquoise" },
-    { value: "blue", label: "Blue" },
-    { value: "lilac", label: "Lilac" },
-    { value: "pink", label: "Pink" },
-    { value: "white", label: "White" },
-    { value: "gray", label: "Gray" },
-    { value: "black", label: "Black" },
-    { value: "brown", label: "Brown" },
-  ] as const,
-} as const;
+  imageTypes: IMAGE_TYPES.map((value) => ({
+    value,
+    label: IMAGE_TYPE_LABELS[value],
+  })),
+  orientations: ORIENTATIONS.map((value) => ({
+    value,
+    label: ORIENTATION_LABELS[value],
+  })),
+  colors: COLORS.map((value) => ({
+    value,
+    label: COLOR_LABELS[value],
+  })),
+};

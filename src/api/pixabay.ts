@@ -1,7 +1,7 @@
 import axios from "axios";
 import { API_ENDPOINTS, REQUEST_TIMEOUT_MS } from "../config/api";
 import type { Images, Hit } from "../models/IPixabay";
-import type { Color, ImageType, Orientation } from "../constants/types";
+import type { Color, ImageType, Orientation } from "../constants/filters";
 
 // Number of results fetched per page. Kept here (single source of truth) so the
 // search UI and the pagination logic agree on the page size.

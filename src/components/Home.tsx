@@ -7,6 +7,7 @@ import SprocketStrip from "./SprocketStrip";
 import Icon from "./Icon";
 import { buttonClasses } from "../constants/buttonStyles";
 import type { IconName } from "../constants/icons";
+import { PATHS } from "../constants/routes";
 
 const Home: React.FC = () => {
   const featuredPosts = [
@@ -37,19 +38,19 @@ const Home: React.FC = () => {
       icon: "pen",
       title: "Blog Posts",
       description: "Read and share stories from the community.",
-      to: "/posts",
+      to: PATHS.posts,
     },
     {
       icon: "search",
       title: "Image Search",
       description: "Query the Pixabay archive by keyword and filter.",
-      to: "/search",
+      to: PATHS.search,
     },
     {
       icon: "location",
       title: "Location",
       description: "Find your position with the geolocation service.",
-      to: "/location",
+      to: PATHS.location,
     },
   ];
 
@@ -72,10 +73,10 @@ const Home: React.FC = () => {
           location — all inside one warm, low-light darkroom.
         </p>
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-          <Link to="/search" className={buttonClasses("primary")}>
+          <Link to={PATHS.search} className={buttonClasses("primary")}>
             <Icon name="search" /> Search Images
           </Link>
-          <Link to="/posts" className={buttonClasses("default")}>
+          <Link to={PATHS.posts} className={buttonClasses("default")}>
             <Icon name="pen" /> Explore Posts
           </Link>
         </div>
@@ -120,7 +121,7 @@ const Home: React.FC = () => {
           ))}
         </div>
         <div className="mt-5">
-          <Link to="/posts" className={buttonClasses("default")}>
+          <Link to={PATHS.posts} className={buttonClasses("default")}>
             View All Posts <Icon name="arrowRight" />
           </Link>
         </div>

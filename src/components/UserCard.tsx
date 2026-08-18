@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React from "react";
 import Avatar from "./Avatar";
 import Button from "./Button";
 import Icon from "./Icon";
+import { useToggle } from "../hooks/useToggle";
 
 interface BlockProps {
   children: React.ReactNode;
@@ -18,7 +19,7 @@ const UserCard: React.FC<BlockProps> = ({
   role,
   isOnline = false,
 }) => {
-  const [isFriend, setIsFriend] = useState(false);
+  const [isFriend, toggleFriend] = useToggle(false);
 
   return (
     <div className="border border-line bg-panel p-6 transition-colors hover:border-muted">
@@ -40,7 +41,7 @@ const UserCard: React.FC<BlockProps> = ({
           </div>
           <Button
             variant={isFriend ? "goldActive" : "primary"}
-            onClick={() => setIsFriend((prev) => !prev)}
+            onClick={toggleFriend}
             aria-pressed={isFriend}
           >
             <Icon name="userPlus" /> {isFriend ? "Friend Added" : "Add Friend"}

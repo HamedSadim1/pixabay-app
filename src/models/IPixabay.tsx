@@ -1,4 +1,4 @@
-import type { ImageType } from "../constants/types";
+import type { ImageType } from "../constants/filters";
 
 export interface Images {
   total: number;
