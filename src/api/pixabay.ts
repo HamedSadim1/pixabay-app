@@ -1,5 +1,5 @@
 import axios from "axios";
-import { API_ENDPOINTS } from "../config/api";
+import { API_ENDPOINTS, REQUEST_TIMEOUT_MS } from "../config/api";
 import type { Images, Hit } from "../models/IPixabay";
 import type { Color, ImageType, Orientation } from "../constants/types";
 
@@ -75,7 +75,9 @@ export async function searchImages(params: SearchQuery): Promise<Images> {
     queryString += `&min_height=${minHeight}`;
   }
 
-  const response = await axios.get<Images>(queryString, { timeout: 10000 });
+  const response = await axios.get<Images>(queryString, {
+    timeout: REQUEST_TIMEOUT_MS,
+  });
 
   if (!response.data || !Array.isArray(response.data.hits)) {
     throw new Error("Invalid API response format");
@@ -86,7 +88,7 @@ export async function searchImages(params: SearchQuery): Promise<Images> {
 export async function getImageById(id: string): Promise<Hit> {
   const response = await axios.get<Images>(
     `${API_ENDPOINTS.PIXABAY_SEARCH}&id=${id}`,
-    { timeout: 10000 },
+    { timeout: REQUEST_TIMEOUT_MS },
   );
 
   const hit = response.data?.hits?.[0];

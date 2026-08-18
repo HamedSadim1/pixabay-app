@@ -7,6 +7,7 @@ import Button from "./Button";
 import Icon from "./Icon";
 import Spinner from "./Spinner";
 import { useSearch } from "../hooks/useSearch";
+import { PER_PAGE } from "../api/pixabay";
 import { TRENDING_SEARCHES } from "../constants/navLinks";
 
 function ImageSearch() {
@@ -187,7 +188,7 @@ function ImageSearch() {
           <Button onClick={loadMore} disabled={loadingMore}>
             {loadingMore
               ? "Loading…"
-              : `Load More (${Math.min(20, totalHits - results.length)})`}
+              : `Load More (${Math.min(PER_PAGE, totalHits - results.length)})`}
           </Button>
         </div>
       )}

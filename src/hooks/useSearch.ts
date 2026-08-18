@@ -45,6 +45,8 @@ const COLORS = [
 // Debounce for the min-width/min-height inputs, so typing doesn't change the
 // query key (and trigger a request) on every keystroke.
 const FILTER_DEBOUNCE_MS = 300;
+const SEARCH_HISTORY_KEY = "searchHistory";
+const MAX_HISTORY_ITEMS = 10;
 
 // URL-backed search parameters. nuqs keeps the query string in sync with these
 // values, so the URL is the single source of truth. Pagination is managed by
@@ -102,7 +104,7 @@ export const useSearch = (): SearchState & SearchActions => {
   const [showFilters, setShowFilters] = useState<boolean>(false);
   const [searchHistory, setSearchHistory] = useState<string[]>(() => {
     try {
-      const history = localStorage.getItem("searchHistory");
+      const history = localStorage.getItem(SEARCH_HISTORY_KEY);
       return history ? (JSON.parse(history) as string[]) : [];
     } catch {
       return [];
@@ -165,9 +167,12 @@ export const useSearch = (): SearchState & SearchActions => {
       return;
     }
     setSearchHistory((prev) => {
-      const next = [term, ...prev.filter((item) => item !== term)].slice(0, 10);
+      const next = [term, ...prev.filter((item) => item !== term)].slice(
+        0,
+        MAX_HISTORY_ITEMS,
+      );
       try {
-        localStorage.setItem("searchHistory", JSON.stringify(next));
+        localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(next));
       } catch {
         // Storage can fail (private browsing / quota) — the in-memory history
         // still works, so ignore.

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useEffectEvent } from "react";
 import { parseAsFloat, useQueryStates } from "nuqs";
+import { API_CONFIG, REQUEST_TIMEOUT_MS } from "../config/api";
 import Button from "./Button";
 import Frame from "./Frame";
 import Icon from "./Icon";
@@ -30,14 +31,24 @@ interface LocationDetails {
   lastUpdated: Date | null;
 }
 
+const GEO_TIMEOUT_MS = 15_000;
+const GEO_MAX_AGE_MS = 300_000; // 5 minutes
+const ACCURACY_KM_THRESHOLD_M = 100;
+const COORD_BOUNDS = {
+  LAT_MIN: -90,
+  LAT_MAX: 90,
+  LON_MIN: -180,
+  LON_MAX: 180,
+} as const;
+
 async function fetchAddress(
   latitude: number,
   longitude: number,
 ): Promise<string> {
   try {
     const response = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=jsonv2&addressdetails=1&accept-language=en`,
-      { signal: AbortSignal.timeout(10000) },
+      `${API_CONFIG.NOMINATIM.BASE_URL}?lat=${latitude}&lon=${longitude}&format=jsonv2&addressdetails=1&accept-language=en`,
+      { signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) },
     );
     const geoData = (await response.json()) as NominatimResponse;
     const address = geoData.address;
@@ -93,10 +104,10 @@ function Geolocation() {
   const hasValidCoordinates =
     lat !== null &&
     lon !== null &&
-    lat >= -90 &&
-    lat <= 90 &&
-    lon >= -180 &&
-    lon <= 180;
+    lat >= COORD_BOUNDS.LAT_MIN &&
+    lat <= COORD_BOUNDS.LAT_MAX &&
+    lon >= COORD_BOUNDS.LON_MIN &&
+    lon <= COORD_BOUNDS.LON_MAX;
 
   const [details, setDetails] = useState<LocationDetails>({
     accuracy: null,
@@ -132,8 +143,8 @@ function Geolocation() {
         (resolve, reject) => {
           navigator.geolocation.getCurrentPosition(resolve, reject, {
             enableHighAccuracy: true,
-            timeout: 15000,
-            maximumAge: 300000, // 5 minutes
+            timeout: GEO_TIMEOUT_MS,
+            maximumAge: GEO_MAX_AGE_MS,
           });
         },
       );
@@ -236,7 +247,7 @@ function Geolocation() {
   };
 
   const formatAccuracy = (accuracy: number) => {
-    if (accuracy < 100) {
+    if (accuracy < ACCURACY_KM_THRESHOLD_M) {
       return `${Math.round(accuracy)}m`;
     }
     return `${(accuracy / 1000).toFixed(1)}km`;

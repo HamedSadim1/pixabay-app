@@ -12,6 +12,9 @@ import Spinner from "./Spinner";
 import StatusCard from "./StatusCard";
 import type { IconName } from "../constants/icons";
 
+// Timeout (ms) for the image-download blob fetch.
+const DOWNLOAD_TIMEOUT_MS = 15_000;
+
 const ImageDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -87,7 +90,7 @@ const ImageDetail: React.FC = () => {
     }
     try {
       const response = await fetch(imageData.largeImageURL, {
-        signal: AbortSignal.timeout(15000),
+        signal: AbortSignal.timeout(DOWNLOAD_TIMEOUT_MS),
       });
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);

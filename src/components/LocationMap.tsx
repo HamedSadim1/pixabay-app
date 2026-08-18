@@ -23,6 +23,8 @@ const DARK_TILES_URL =
 const DARK_TILES_ATTRIBUTION =
   '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>';
 
+const DEFAULT_ZOOM = 15;
+
 // react-leaflet only applies `center` on mount, so re-center when the
 // coordinates change (e.g. after a "refresh").
 function RecenterMap({ latitude, longitude }: LocationMapProps) {
@@ -93,7 +95,7 @@ const LocationMap: React.FC<LocationMapProps> = ({ latitude, longitude }) => {
     >
       <MapContainer
         center={position}
-        zoom={15}
+        zoom={DEFAULT_ZOOM}
         scrollWheelZoom={false}
         className="h-full w-full"
       >

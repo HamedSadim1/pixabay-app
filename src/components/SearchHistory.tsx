@@ -1,5 +1,7 @@
 import React from "react";
 
+const MAX_VISIBLE_HISTORY = 5;
+
 interface SearchHistoryProps {
   search: {
     showHistory: boolean;
@@ -37,7 +39,7 @@ const SearchHistory: React.FC<SearchHistoryProps> = ({ search }) => {
             Recent Searches
           </div>
           <div className="flex flex-wrap gap-2">
-            {searchHistory.slice(0, 5).map((query, index) => (
+            {searchHistory.slice(0, MAX_VISIBLE_HISTORY).map((query, index) => (
               <button
                 key={index}
                 onClick={() => handleHistoryClick(query)}
