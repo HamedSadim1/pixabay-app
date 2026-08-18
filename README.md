@@ -79,37 +79,83 @@ Een moderne React applicatie voor het zoeken naar afbeeldingen via Pixabay API, 
 
 ```bash
 src/
-├── components/           # Reusable UI components
-│   ├── BlogPost.tsx      # Blog post display component
-│   ├── ErrorBoundary.tsx # Error boundary voor graceful error handling
-│   ├── FilterPanel.tsx   # Image search filters
-│   ├── Geolocation.tsx   # Location services
-│   ├── Home.tsx          # Home page
-│   ├── ImageDetail.tsx   # Image detail view
-│   ├── ImageList.tsx     # Image gallery display
-│   ├── ImageSearch.tsx   # Main search interface
-│   ├── LoadingSpinner.tsx # Loading state component
-│   ├── Navbar.tsx        # Navigation component
-│   ├── SearchHistory.tsx # Search history component
-│   ├── SearchInput.tsx   # Search input component
-│   ├── SinglePost.tsx    # Individual post view
-│   └── UserCard.tsx      # User profile cards
-├── config/               # Configuration
-│   └── api.ts            # API configuration
-├── constants/            # Application constants
-│   ├── navLinks.ts       # Navigation links
-│   ├── types.ts          # TypeScript type definitions
-│   └── ui.ts             # UI constants and options
-├── hooks/                # Custom React hooks
-│   ├── useApi.ts         # Generic API hook
-│   └── useSearch.ts      # Search functionality hook
-├── models/               # TypeScript interfaces
-│   └── IPixabay.tsx      # Pixabay API types
-├── utils/                # Utilities
-│   └── env.ts            # Environment validation
-├── App.tsx               # Main app component
-└── main.tsx              # Entry point
+├── api/                          # API client modules
+│   ├── geocoding.ts              # Reverse geocoding API
+│   └── pixabay.ts                # Pixabay API client
+├── components/                   # Components georganiseerd per feature
+│   ├── blog/                     # Blog-gerelateerde componenten
+│   │   ├── AuthorHeader.tsx      # Auteur header
+│   │   ├── BlogPost.tsx          # Blog post weergave
+│   │   └── SinglePost.tsx        # Individuele post view
+│   ├── image/                    # Afbeelding zoeken & galerij
+│   │   ├── FilterPanel.tsx       # Zoekfilters
+│   │   ├── ImageDetail.tsx       # Afbeelding detail view
+│   │   ├── ImageList.tsx         # Afbeelding galerij
+│   │   ├── ImageSearch.tsx       # Hoofd zoekinterface
+│   │   ├── ImageStats.tsx        # Afbeelding statistieken
+│   │   ├── SearchHistory.tsx     # Zoekgeschiedenis
+│   │   └── TagList.tsx           # Tag weergave
+│   ├── layout/                   # App shell componenten
+│   │   ├── ErrorBoundary.tsx     # Error boundary
+│   │   ├── Navbar.tsx            # Navigatie component
+│   │   └── SprocketStrip.tsx     # Decoratieve strip
+│   ├── ui/                       # Herbruikbare UI componenten
+│   │   ├── Avatar.tsx            # Gebruikersavatar
+│   │   ├── Button.tsx            # Button component
+│   │   ├── DataField.tsx         # Data veld weergave
+│   │   ├── Frame.tsx             # Decoratieve frame
+│   │   ├── Icon.tsx              # Icon wrapper
+│   │   ├── MetaLabel.tsx         # Metadata label
+│   │   ├── Spinner.tsx           # Laad state component
+│   │   └── StatusCard.tsx        # Status kaart
+│   ├── Geolocation.tsx           # Locatie services (pagina-level)
+│   ├── Home.tsx                  # Home pagina (pagina-level)
+│   ├── LocationMap.tsx           # Leaflet map component
+│   └── UserCard.tsx              # Gebruikersprofiel kaart
+├── config/                       # Configuratie
+│   └── api.ts                    # API configuratie & env validatie
+├── constants/                    # Applicatie constanten
+│   ├── buttonStyles.ts           # Button stijlen
+│   ├── filters.ts                # Filter type definities
+│   ├── icons.ts                  # Icon mapping
+│   ├── mockData.ts               # Mock data voor posts/comments
+│   ├── navLinks.ts               # Navigatie links
+│   ├── routeLoaders.ts           # Lazy route loaders
+│   ├── routes.ts                 # Route paden
+│   └── ui.ts                     # UI constanten en opties
+├── hooks/                        # Custom React hooks
+│   ├── useDebouncedValue.ts      # Debounced waarde hook
+│   ├── useGeolocation.ts         # Geolocation hook
+│   ├── useReverseGeocode.ts      # Reverse geocoding hook
+│   ├── useSearch.ts              # Zoekfunctionaliteit hook
+│   ├── useShareFeedback.ts       # Share feedback hook
+│   └── useToggle.ts              # Boolean toggle hook
+├── models/                       # TypeScript interfaces
+│   └── IPixabay.tsx              # Pixabay API types
+├── utils/                        # Hulpprogramma's
+│   ├── cn.ts                     # Classname merge utility
+│   ├── env.ts                    # Environment validatie
+│   ├── error.ts                  # Foutafhandeling
+│   ├── format.ts                 # Formattering utilities
+│   ├── geo.ts                    # Geocoördinaat utilities
+│   └── share.ts                  # Deel functionaliteit
+├── App.tsx                       # Hoofd app component
+└── main.tsx                      # Entry point
 ```
+
+### 🔗 Path Alias
+
+Dit project gebruikt een `@/` alias voor absolute imports vanuit `src/`:
+
+```typescript
+// ❌ Diep relatief pad
+import { Hit } from "../../models/IPixabay";
+
+// ✅ Schoon en leesbaar
+import { Hit } from "@/models/IPixabay";
+```
+
+De alias is geconfigureerd in `tsconfig.json` en `vite.config.ts`.
 
 ## 🧪 Code Quality
 
@@ -173,10 +219,6 @@ De app is volledig responsive en werkt op:
 5. Open een Pull Request — de CI workflow draait automatisch lint, typecheck en build
 
 > **Let op:** De commit-msg hook vereist een conventionele commit message (`feat:`, `fix:`, `chore:`, ...). Een message zoals "Add amazing feature" wordt geweigerd. Pre-commit worden je gestagde bestanden automatisch geformat (Prettier) en gelint (ESLint).
-
-## 📄 License
-
-Dit project is gelicenseerd onder de MIT License.
 
 ## 🙏 Acknowledgments
 
