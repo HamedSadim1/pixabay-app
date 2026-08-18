@@ -1,12 +1,15 @@
 import { type FC, useState } from "react";
+import Avatar from "./Avatar";
+import Icon from "./Icon";
 
 interface BlockProps {
   name: string;
   image: string;
   text: string;
+  frame?: string;
 }
 
-const BlogPost: FC<BlockProps> = ({ name, image, text }) => {
+const BlogPost: FC<BlockProps> = ({ name, image, text, frame }) => {
   const [formattedTime] = useState<string>(() => {
     const now = new Date();
     return now.toLocaleTimeString("en-US", {
@@ -17,45 +20,36 @@ const BlogPost: FC<BlockProps> = ({ name, image, text }) => {
   });
 
   return (
-    <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10 hover:bg-white/10 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl">
-      <div className="flex items-start space-x-4">
-        <div className="shrink-0">
-          <img
-            alt={`${name} avatar`}
-            src={image}
-            className="w-12 h-12 rounded-full border-2 border-white/20 shadow-lg"
-          />
+    <article className="relative flex gap-4 border border-line bg-panel p-4 transition-colors hover:border-muted">
+      {frame && (
+        <span className="absolute right-3 top-3 font-mono text-[10px] uppercase tracking-[0.2em] text-gold">
+          {frame}
+        </span>
+      )}
+      <Avatar name={name} src={image} size="md" />
+      <div className="min-w-0 flex-1 pr-14">
+        <div className="mb-1.5 flex flex-wrap items-baseline gap-x-2 gap-y-1">
+          <span className="font-display text-sm uppercase tracking-[0.05em] text-paper">
+            {name}
+          </span>
+          <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted">
+            Today at {formattedTime}
+          </span>
         </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center space-x-2 mb-2">
-            <h4 className="text-lg font-semibold text-white hover:text-purple-300 transition-colors cursor-pointer">
-              {name}
-            </h4>
-            <span className="text-sm text-gray-400">•</span>
-            <span className="text-sm text-gray-400">
-              Today at {formattedTime}
-            </span>
-          </div>
-          <p className="text-gray-200 leading-relaxed">{text}</p>
-          <div className="flex items-center space-x-4 mt-4 pt-4 border-t border-white/10">
-            <button className="flex items-center space-x-1 text-gray-400 hover:text-red-400 transition-all duration-300 text-sm hover:scale-105 group">
-              <span className="group-hover:animate-bounce-subtle">❤️</span>
-              <span>Like</span>
-            </button>
-            <button className="flex items-center space-x-1 text-gray-400 hover:text-blue-400 transition-all duration-300 text-sm hover:scale-105 group">
-              <span className="group-hover:animate-pulse-slow">💬</span>
-              <span>Reply</span>
-            </button>
-            <button className="flex items-center space-x-1 text-gray-400 hover:text-green-400 transition-all duration-300 text-sm hover:scale-105 group">
-              <span className="group-hover:rotate-12 transition-transform duration-300">
-                🔗
-              </span>
-              <span>Share</span>
-            </button>
-          </div>
+        <p className="text-sm leading-relaxed text-muted">{text}</p>
+        <div className="mt-3 flex gap-5 border-t border-line pt-3">
+          <button className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.15em] text-muted transition-colors hover:text-safelight">
+            <Icon name="heart" /> Like
+          </button>
+          <button className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.15em] text-muted transition-colors hover:text-safelight">
+            <Icon name="comment" /> Reply
+          </button>
+          <button className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.15em] text-muted transition-colors hover:text-safelight">
+            <Icon name="share" /> Share
+          </button>
         </div>
       </div>
-    </div>
+    </article>
   );
 };
 

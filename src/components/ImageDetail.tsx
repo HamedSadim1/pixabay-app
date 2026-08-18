@@ -1,16 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios, { type AxiosError } from "axios";
-import {
-  FaArrowLeft,
-  FaDownload,
-  FaHeart,
-  FaEye,
-  FaUser,
-  FaCalendar,
-  FaExclamationTriangle,
-} from "react-icons/fa";
 import type { Hit } from "../models/IPixabay";
+import Button from "./Button";
+import Icon from "./Icon";
+import type { IconName } from "../constants/icons";
 
 interface ApiError {
   message: string;
@@ -90,26 +84,28 @@ const ImageDetail: React.FC = () => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
+  const backButton = (
+    <button
+      onClick={() => navigate(-1)}
+      className="inline-flex items-center gap-2 border border-line px-3 py-1.5 font-mono text-xs uppercase tracking-[0.12em] text-muted transition-colors hover:border-safelight hover:text-safelight"
+    >
+      <Icon name="arrowLeft" /> Back
+    </button>
+  );
+
   if (loading) {
     return (
-      <div className="max-w-6xl mx-auto space-y-6">
-        <div className="flex items-center space-x-4">
-          <button
-            onClick={() => navigate(-1)}
-            className="bg-white/10 backdrop-blur-md hover:bg-white/20 text-white px-4 py-2 rounded-lg transition-all duration-300 flex items-center space-x-2"
-          >
-            <FaArrowLeft />
-            <span>Back</span>
-          </button>
-          <h1 className="text-2xl font-bold text-white">Image Details</h1>
+      <div className="space-y-6">
+        <div className="flex items-center gap-4">
+          {backButton}
+          <h1 className="font-display text-2xl uppercase tracking-[0.03em] text-paper">
+            Image Details
+          </h1>
         </div>
-
-        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-2xl border border-white/20">
-          <div className="flex justify-center items-center py-12">
-            <div className="animate-spin rounded-full h-16 w-16 border-4 border-white/20 border-t-white"></div>
-          </div>
-          <p className="text-center text-gray-300 mt-4">
-            Loading image details...
+        <div className="border border-line bg-panel p-12 text-center">
+          <div className="mx-auto h-10 w-10 animate-spin rounded-full border-2 border-line border-t-safelight" />
+          <p className="mt-4 font-mono text-xs uppercase tracking-[0.15em] text-muted">
+            Developing frame…
           </p>
         </div>
       </div>
@@ -118,32 +114,24 @@ const ImageDetail: React.FC = () => {
 
   if (error) {
     return (
-      <div className="max-w-6xl mx-auto space-y-6">
-        <div className="flex items-center space-x-4">
-          <button
-            onClick={() => navigate(-1)}
-            className="bg-white/10 backdrop-blur-md hover:bg-white/20 text-white px-4 py-2 rounded-lg transition-all duration-300 flex items-center space-x-2"
-          >
-            <FaArrowLeft />
-            <span>Back</span>
-          </button>
-          <h1 className="text-2xl font-bold text-white">Image Details</h1>
+      <div className="space-y-6">
+        <div className="flex items-center gap-4">
+          {backButton}
+          <h1 className="font-display text-2xl uppercase tracking-[0.03em] text-paper">
+            Image Details
+          </h1>
         </div>
-
-        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-2xl border border-white/20">
-          <div className="text-center py-12">
-            <FaExclamationTriangle className="text-red-400 text-6xl mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-white mb-2">
-              Error Loading Image
-            </h3>
-            <p className="text-gray-300 mb-4">{error}</p>
-            <button
-              onClick={() => navigate(-1)}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg transition-colors"
-            >
-              Go Back
-            </button>
+        <div className="border border-safelight bg-safelight/10 p-10 text-center">
+          <div className="mb-3 text-4xl text-safelight">
+            <Icon name="warning" />
           </div>
+          <h3 className="mb-2 font-display text-lg uppercase tracking-[0.03em] text-paper">
+            Error Loading Image
+          </h3>
+          <p className="mb-5 font-mono text-xs text-muted">{error}</p>
+          <Button onClick={() => navigate(-1)}>
+            <Icon name="arrowLeft" /> Go Back
+          </Button>
         </div>
       </div>
     );
@@ -151,139 +139,129 @@ const ImageDetail: React.FC = () => {
 
   if (!imageData) {
     return (
-      <div className="max-w-6xl mx-auto space-y-6">
-        <div className="flex items-center space-x-4">
-          <button
-            onClick={() => navigate(-1)}
-            className="bg-white/10 backdrop-blur-md hover:bg-white/20 text-white px-4 py-2 rounded-lg transition-all duration-300 flex items-center space-x-2"
-          >
-            <FaArrowLeft />
-            <span>Back</span>
-          </button>
-          <h1 className="text-2xl font-bold text-white">Image Details</h1>
+      <div className="space-y-6">
+        <div className="flex items-center gap-4">
+          {backButton}
+          <h1 className="font-display text-2xl uppercase tracking-[0.03em] text-paper">
+            Image Details
+          </h1>
         </div>
-
-        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-2xl border border-white/20">
-          <div className="text-center py-12">
-            <FaExclamationTriangle className="text-yellow-400 text-6xl mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-white mb-2">
-              Image Not Found
-            </h3>
-            <p className="text-gray-300 mb-4">
-              The requested image could not be found.
-            </p>
-            <button
-              onClick={() => navigate(-1)}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg transition-colors"
-            >
-              Go Back
-            </button>
+        <div className="border border-gold bg-gold/10 p-10 text-center">
+          <div className="mb-3 text-4xl text-gold">
+            <Icon name="warning" />
           </div>
+          <h3 className="mb-2 font-display text-lg uppercase tracking-[0.03em] text-paper">
+            Image Not Found
+          </h3>
+          <p className="mb-5 font-mono text-xs text-muted">
+            The requested frame could not be found.
+          </p>
+          <Button onClick={() => navigate(-1)}>
+            <Icon name="arrowLeft" /> Go Back
+          </Button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="flex items-center space-x-4">
-        <button
-          onClick={() => navigate(-1)}
-          className="bg-white/10 backdrop-blur-md hover:bg-white/20 text-white px-4 py-2 rounded-lg transition-all duration-300 flex items-center space-x-2"
-        >
-          <FaArrowLeft />
-          <span>Back</span>
-        </button>
-        <h1 className="text-2xl font-bold text-white">Image Details</h1>
+    <div className="space-y-6">
+      <div className="flex items-center gap-4">
+        {backButton}
+        <h1 className="font-display text-2xl uppercase tracking-[0.03em] text-paper">
+          Image Details
+        </h1>
       </div>
 
-      {/* Main Image */}
-      <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-2xl border border-white/20">
-        <div className="relative group">
+      <div className="relative border border-line bg-panel p-5 md:p-8">
+        <span className="vf-corner vf-tl" />
+        <span className="vf-corner vf-tr" />
+        <span className="vf-corner vf-bl" />
+        <span className="vf-corner vf-br" />
+
+        <div className="group relative">
           <img
             src={imageData.largeImageURL}
             alt={imageData.tags}
-            className="w-full max-h-96 object-contain rounded-xl shadow-2xl"
+            className="max-h-96 w-full border border-line object-contain"
           />
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 rounded-xl flex items-center justify-center opacity-0 group-hover:opacity-100">
-            <a
-              href={imageData.largeImageURL}
-              download
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-white/20 hover:bg-white/30 text-white px-6 py-3 rounded-lg transition-all duration-300 flex items-center space-x-2 backdrop-blur-sm"
-            >
-              <FaDownload />
-              <span>Download</span>
-            </a>
-          </div>
+          <a
+            href={imageData.largeImageURL}
+            download
+            target="_blank"
+            rel="noopener noreferrer"
+            className="absolute right-3 top-3 border border-safelight bg-safelight px-4 py-2 font-mono text-xs uppercase tracking-[0.12em] text-dark transition-colors hover:border-gold hover:bg-gold"
+          >
+            <Icon name="download" /> Download
+          </a>
         </div>
 
         {/* Image Info */}
-        <div className="mt-6 grid md:grid-cols-2 gap-6">
-          <div className="space-y-4">
-            <h3 className="text-xl font-semibold text-white">
+        <div className="mt-6 grid gap-6 md:grid-cols-2">
+          <div>
+            <h3 className="mb-3 font-display text-sm uppercase tracking-[0.05em] text-paper">
               Image Information
             </h3>
-            <div className="space-y-3">
-              <div className="flex justify-between items-center py-2 border-b border-white/10">
-                <span className="text-gray-300">Dimensions</span>
-                <span className="text-white font-medium">
-                  {imageData.imageWidth} × {imageData.imageHeight}
-                </span>
-              </div>
-              <div className="flex justify-between items-center py-2 border-b border-white/10">
-                <span className="text-gray-300">File Size</span>
-                <span className="text-white font-medium">
-                  {formatFileSize(imageData.imageSize)}
-                </span>
-              </div>
-              <div className="flex justify-between items-center py-2 border-b border-white/10">
-                <span className="text-gray-300">Type</span>
-                <span className="text-white font-medium capitalize">
-                  {imageData.type}
-                </span>
-              </div>
-            </div>
+            <dl className="space-y-2">
+              {[
+                [
+                  "Dimensions",
+                  `${imageData.imageWidth} × ${imageData.imageHeight}`,
+                ],
+                ["File Size", formatFileSize(imageData.imageSize)],
+                ["Type", imageData.type],
+              ].map(([label, value]) => (
+                <div
+                  key={label}
+                  className="flex justify-between border-b border-line pb-2 font-mono text-xs"
+                >
+                  <dt className="text-muted">{label}</dt>
+                  <dd className="text-paper">{value}</dd>
+                </div>
+              ))}
+            </dl>
           </div>
 
-          <div className="space-y-4">
-            <h3 className="text-xl font-semibold text-white">Statistics</h3>
-            <div className="grid grid-cols-3 gap-4">
-              <div className="bg-slate-800/50 rounded-lg p-4 text-center border border-slate-600">
-                <FaHeart className="text-red-400 text-2xl mx-auto mb-2" />
-                <div className="text-2xl font-bold text-white">
-                  {formatNumber(imageData.likes)}
+          <div>
+            <h3 className="mb-3 font-display text-sm uppercase tracking-[0.05em] text-paper">
+              Statistics
+            </h3>
+            <div className="grid grid-cols-3 gap-3">
+              {" "}
+              {(
+                [
+                  ["heart", formatNumber(imageData.likes), "Likes"],
+                  ["eye", formatNumber(imageData.views), "Views"],
+                  ["download", formatNumber(imageData.downloads), "Downloads"],
+                ] as [IconName, string, string][]
+              ).map(([icon, value, label]) => (
+                <div
+                  key={label}
+                  className="border border-line bg-panel-2 p-3 text-center"
+                >
+                  <div className="text-lg text-safelight">
+                    <Icon name={icon} />
+                  </div>
+                  <div className="font-mono text-lg text-paper">{value}</div>
+                  <div className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted">
+                    {label}
+                  </div>
                 </div>
-                <div className="text-sm text-gray-400">Likes</div>
-              </div>
-              <div className="bg-slate-800/50 rounded-lg p-4 text-center border border-slate-600">
-                <FaEye className="text-blue-400 text-2xl mx-auto mb-2" />
-                <div className="text-2xl font-bold text-white">
-                  {formatNumber(imageData.views)}
-                </div>
-                <div className="text-sm text-gray-400">Views</div>
-              </div>
-              <div className="bg-slate-800/50 rounded-lg p-4 text-center border border-slate-600">
-                <FaDownload className="text-green-400 text-2xl mx-auto mb-2" />
-                <div className="text-2xl font-bold text-white">
-                  {formatNumber(imageData.downloads)}
-                </div>
-                <div className="text-sm text-gray-400">Downloads</div>
-              </div>
+              ))}
             </div>
           </div>
         </div>
 
         {/* Tags */}
         <div className="mt-6">
-          <h3 className="text-xl font-semibold text-white mb-3">Tags</h3>
+          <h3 className="mb-3 font-display text-sm uppercase tracking-[0.05em] text-paper">
+            Tags
+          </h3>
           <div className="flex flex-wrap gap-2">
             {imageData.tags.split(", ").map((tag, index) => (
               <span
                 key={index}
-                className="bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full text-sm border border-purple-500/30"
+                className="border border-line px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.1em] text-muted"
               >
                 {tag.trim()}
               </span>
@@ -291,24 +269,20 @@ const ImageDetail: React.FC = () => {
           </div>
         </div>
 
-        {/* Photographer Info */}
-        <div className="mt-6 pt-6 border-t border-white/20">
-          <div className="flex items-center space-x-4">
-            <img
-              src={imageData.userImageURL}
-              alt={imageData.user}
-              className="w-12 h-12 rounded-full border-2 border-white/20"
-            />
-            <div>
-              <div className="flex items-center space-x-2">
-                <FaUser className="text-gray-400" />
-                <span className="text-white font-medium">{imageData.user}</span>
-              </div>
-              <div className="flex items-center space-x-2 text-sm text-gray-400">
-                <FaCalendar />
-                <span>Photographer</span>
-              </div>
-            </div>
+        {/* Photographer */}
+        <div className="mt-6 flex items-center gap-3 border-t border-line pt-5">
+          <img
+            src={imageData.userImageURL}
+            alt={imageData.user}
+            className="h-10 w-10 rounded-full border border-line object-cover"
+          />
+          <div>
+            <span className="font-display text-sm uppercase tracking-[0.05em] text-paper">
+              {imageData.user}
+            </span>
+            <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted">
+              Photographer
+            </p>
           </div>
         </div>
       </div>

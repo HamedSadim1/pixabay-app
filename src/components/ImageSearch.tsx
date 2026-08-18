@@ -1,8 +1,9 @@
 import React, { useRef } from "react";
-import { FaSearch, FaFilter, FaTimes } from "react-icons/fa";
 import ImageList from "./ImageList";
 import FilterPanel from "./FilterPanel";
 import SearchHistory from "./SearchHistory";
+import Button from "./Button";
+import Icon from "./Icon";
 import { useSearch } from "../hooks/useSearch";
 import { TRENDING_SEARCHES } from "../constants/navLinks";
 
@@ -59,15 +60,15 @@ function ImageSearch() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Search Form */}
-      <form
-        className="bg-white/10 backdrop-blur-md rounded-lg p-6 border border-white/20 shadow-lg"
-        onSubmit={onSubmitForm}
-      >
-        <div className="flex space-x-4 mb-4">
-          <div className="flex-1 relative">
-            <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+      <form onSubmit={onSubmitForm}>
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <div className="relative flex-1">
+            <Icon
+              name="search"
+              className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted"
+            />
             <input
               ref={searchInputRef}
               type="text"
@@ -75,39 +76,40 @@ function ImageSearch() {
               value={search}
               onChange={onInputChange}
               onKeyDown={handleKeyDownInput}
-              className="w-full pl-10 pr-10 py-3 bg-white/20 border border-white/30 rounded-lg text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-300 focus:border-transparent backdrop-blur-sm"
+              className="w-full border border-line bg-panel py-3 pl-11 pr-10 font-mono text-sm text-paper placeholder-muted focus:border-safelight focus:outline-none"
             />
             {search && (
               <button
                 type="button"
                 onClick={handleClearSearch}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted transition-colors hover:text-safelight"
               >
-                <FaTimes />
+                <Icon name="xmark" />
               </button>
             )}
           </div>
-          <button
+          <Button
             type="button"
+            variant={showFilters ? "primary" : "default"}
             onClick={() => setShowFilters(!showFilters)}
-            className={`px-4 py-3 rounded-lg transition-all duration-300 ${
-              showFilters
-                ? "bg-purple-600 text-white"
-                : "bg-white/20 hover:bg-white/30 text-white"
-            }`}
           >
-            <FaFilter />
-          </button>
-          <button
+            <Icon name="filter" /> Filters
+          </Button>
+          <Button
             type="submit"
+            variant="primary"
             disabled={loading || !search.trim()}
-            className="px-6 py-3 bg-linear-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed font-medium hover:scale-105 shadow-lg hover:shadow-purple-500/25 focus-ring"
           >
-            {loading ? "Searching..." : "Search"}
-          </button>
+            {loading ? (
+              "Searching…"
+            ) : (
+              <>
+                <Icon name="search" /> Search
+              </>
+            )}
+          </Button>
         </div>
 
-        {/* Filter Panel */}
         <FilterPanel
           search={{
             showFilters,
@@ -124,7 +126,6 @@ function ImageSearch() {
           }}
         />
 
-        {/* Search History */}
         <SearchHistory
           search={{
             showHistory: !search,
@@ -138,41 +139,35 @@ function ImageSearch() {
       </form>
 
       {error && (
-        <div className="bg-red-500/20 backdrop-blur-md border border-red-400 text-red-200 p-4 rounded-lg">
-          <div className="flex items-center space-x-2">
-            <FaTimes className="text-red-400" />
-            <span>Error: {error}</span>
-          </div>
+        <div className="flex items-center gap-2 border border-safelight bg-safelight/10 p-4 font-mono text-xs uppercase tracking-[0.12em] text-safelight">
+          <Icon name="xmark" /> Error: {error}
         </div>
       )}
 
       {hasSearched && (
-        <div className="text-white text-lg font-medium">
-          Found {totalHits.toLocaleString()} images{" "}
-          {results.length > 0 && `(${results.length} loaded)`}
-        </div>
+        <p className="font-mono text-xs uppercase tracking-[0.15em] text-muted">
+          Found <span className="text-paper">{totalHits.toLocaleString()}</span>{" "}
+          images
+          {results.length > 0 && ` — ${results.length} loaded`}
+        </p>
       )}
 
       {loading && results.length === 0 && (
-        <div className="flex justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+        <div className="flex justify-center py-8">
+          <div className="h-10 w-10 animate-spin rounded-full border-2 border-line border-t-safelight" />
         </div>
       )}
 
       <ImageList images={results} />
 
-      {/* Load More Button */}
+      {/* Load More */}
       {results.length > 0 && results.length < totalHits && (
         <div className="flex justify-center">
-          <button
-            onClick={loadMore}
-            disabled={loading}
-            className="px-8 py-3 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-all duration-300 disabled:opacity-50 font-medium"
-          >
+          <Button onClick={loadMore} disabled={loading}>
             {loading
-              ? "Loading..."
+              ? "Loading…"
               : `Load More (${Math.min(20, totalHits - results.length)})`}
-          </button>
+          </Button>
         </div>
       )}
     </div>

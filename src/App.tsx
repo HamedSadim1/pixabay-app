@@ -8,24 +8,51 @@ import UserCard from "./components/UserCard";
 import ImageSearch from "./components/ImageSearch";
 import ImageDetail from "./components/ImageDetail";
 import ErrorBoundary from "./components/ErrorBoundary";
+import SprocketStrip from "./components/SprocketStrip";
+
+interface PageHeaderProps {
+  index: string;
+  title: string;
+  subtitle?: string;
+}
+
+const PageHeader: React.FC<PageHeaderProps> = ({ index, title, subtitle }) => (
+  <header className="mb-8">
+    <div className="flex items-baseline gap-3">
+      <h2 className="font-display text-3xl uppercase tracking-[0.03em] text-paper md:text-4xl">
+        {title}
+      </h2>
+      <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-gold">
+        {index}
+      </span>
+    </div>
+    {subtitle && (
+      <p className="mt-2 font-mono text-xs uppercase tracking-[0.15em] text-muted">
+        {subtitle}
+      </p>
+    )}
+    <SprocketStrip className="mt-4" />
+  </header>
+);
 
 function App() {
   return (
     <BrowserRouter>
       <ErrorBoundary>
-        <div className="min-h-screen">
+        <div className="min-h-screen bg-dark">
           <Navbar />
-          <div className="container mx-auto p-4">
+          <main className="mx-auto max-w-6xl px-4 py-8 md:py-10">
             <Routes>
               <Route path="/" element={<Home />} />
               <Route
                 path="/search"
                 element={
-                  <section className=" backdrop-blur-lg rounded-xl p-6 shadow-2xl border border-white/20 animate-fade-in">
-                    <h2 className="text-3xl font-bold mb-6 text-white flex items-center space-x-2">
-                      <span>🔍</span>
-                      <span>Image Search</span>
-                    </h2>
+                  <section className="animate-fade-in">
+                    <PageHeader
+                      index="EXH. 02"
+                      title="Image Search"
+                      subtitle="Query the Pixabay archive"
+                    />
                     <ImageSearch />
                   </section>
                 }
@@ -33,11 +60,12 @@ function App() {
               <Route
                 path="/posts"
                 element={
-                  <section className="backdrop-blur-lg rounded-xl p-6 shadow-2xl border border-white/20 animate-fade-in">
-                    <h2 className="text-3xl font-bold mb-6 text-white flex items-center space-x-2">
-                      <span>📝</span>
-                      <span>Blog Posts</span>
-                    </h2>
+                  <section className="animate-fade-in">
+                    <PageHeader
+                      index="EXH. 03"
+                      title="Blog Posts"
+                      subtitle="Community contact sheet"
+                    />
                     <SinglePost />
                   </section>
                 }
@@ -45,11 +73,12 @@ function App() {
               <Route
                 path="/location"
                 element={
-                  <section className=" backdrop-blur-lg rounded-xl p-6 shadow-2xl border border-white/20 animate-fade-in">
-                    <h2 className="text-3xl font-bold mb-6 text-white flex items-center space-x-2">
-                      <span>📍</span>
-                      <span>Your Location</span>
-                    </h2>
+                  <section className="animate-fade-in">
+                    <PageHeader
+                      index="EXH. 04"
+                      title="Location"
+                      subtitle="Geolocation darkroom"
+                    />
                     <Geolocation />
                   </section>
                 }
@@ -57,7 +86,7 @@ function App() {
               <Route
                 path="/image/:id"
                 element={
-                  <section className="backdrop-blur-lg rounded-xl p-6 shadow-2xl border border-white/20 animate-fade-in">
+                  <section className="animate-fade-in">
                     <ImageDetail />
                   </section>
                 }
@@ -65,13 +94,14 @@ function App() {
               <Route
                 path="/profile"
                 element={
-                  <section className="backdrop-blur-lg rounded-xl p-6 shadow-2xl border border-white/20 animate-fade-in">
-                    <h2 className="text-3xl font-bold mb-6 text-white flex items-center space-x-2">
-                      <span>👤</span>
-                      <span>User Profile</span>
-                    </h2>
+                  <section className="animate-fade-in">
+                    <PageHeader
+                      index="EXH. 05"
+                      title="Profile"
+                      subtitle="Member record"
+                    />
                     <UserCard>
-                      <p className="text-gray-200">
+                      <p className="text-sm leading-relaxed text-muted">
                         This is some user content.
                       </p>
                     </UserCard>
@@ -79,7 +109,7 @@ function App() {
                 }
               />
             </Routes>
-          </div>
+          </main>
         </div>
       </ErrorBoundary>
     </BrowserRouter>

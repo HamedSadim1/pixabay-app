@@ -1,51 +1,87 @@
 @import "tailwindcss";
 
+@theme {
+  /* Darkroom / contact-sheet palette */
+  --color-dark: #14120f;
+  --color-panel: #1d1a15;
+  --color-panel-2: #24201a;
+  --color-line: #3a342a;
+  --color-paper: #f5f1e8;
+  --color-muted: #9c948a;
+  --color-safelight: #ff6a39;
+  --color-gold: #f2c879;
+
+  /* Typography */
+  --font-sans: "Work Sans", system-ui, -apple-system, sans-serif;
+  --font-display: "Oswald", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+
 body {
   margin: 0;
-  font-family:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu",
-    "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  min-height: 100vh;
+  background-color: var(--color-dark);
+  color: var(--color-paper);
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: #0f0c29;
-  min-height: 100vh;
 }
 
-code {
-  font-family:
-    source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+/* Accessible focus states */
+:focus-visible {
+  outline: 2px solid var(--color-safelight);
+  outline-offset: 2px;
 }
 
+/* Sprocket strip — film-perforation divider */
+.sprocket {
+  height: 8px;
+  background-image: repeating-linear-gradient(
+    90deg,
+    var(--color-line) 0 6px,
+    transparent 6px 12px
+  );
+}
+
+/* Viewfinder corner accents */
+.vf-corner {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-style: solid;
+  border-color: var(--color-gold);
+  pointer-events: none;
+}
+.vf-tl {
+  top: -1px;
+  left: -1px;
+  border-width: 2px 0 0 2px;
+}
+.vf-tr {
+  top: -1px;
+  right: -1px;
+  border-width: 2px 2px 0 0;
+}
+.vf-bl {
+  bottom: -1px;
+  left: -1px;
+  border-width: 0 0 2px 2px;
+}
+.vf-br {
+  bottom: -1px;
+  right: -1px;
+  border-width: 0 2px 2px 0;
+}
+
+/* Animations */
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(12px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-@keyframes slideInLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes slideInRight {
-  from {
-    opacity: 0;
-    transform: translateX(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
   }
 }
 
@@ -55,77 +91,38 @@ code {
     opacity: 1;
   }
   50% {
-    opacity: 0.5;
-  }
-}
-
-@keyframes bounce {
-  0%,
-  20%,
-  53%,
-  80%,
-  100% {
-    transform: translate3d(0, 0, 0);
-  }
-  40%,
-  43% {
-    transform: translate3d(0, -30px, 0);
-  }
-  70% {
-    transform: translate3d(0, -15px, 0);
-  }
-  90% {
-    transform: translate3d(0, -4px, 0);
+    opacity: 0.4;
   }
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.8s ease-out;
-}
-
-.animate-slide-in-left {
-  animation: slideInLeft 0.6s ease-out;
-}
-
-.animate-slide-in-right {
-  animation: slideInRight 0.6s ease-out;
+  animation: fadeIn 0.5s ease-out;
 }
 
 .animate-pulse-slow {
-  animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  animation: pulse 2.4s ease-in-out infinite;
 }
 
-.animate-bounce-subtle {
-  animation: bounce 2s infinite;
-}
-
-/* Custom scrollbar */
+/* Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
+  background: var(--color-dark);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #8b5cf6, #ec4899);
-  border-radius: 4px;
+  background: var(--color-line);
+  border: 2px solid var(--color-dark);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #7c3aed, #db2777);
+  background: var(--color-muted);
 }
 
-/* Selection styling */
+/* Selection */
 ::selection {
-  background: rgba(139, 92, 246, 0.3);
-  color: white;
-}
-
-/* Focus styles */
-.focus-ring:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.5);
+  background: rgba(255, 106, 57, 0.35);
+  color: var(--color-paper);
 }

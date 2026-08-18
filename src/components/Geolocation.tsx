@@ -1,11 +1,7 @@
 import React, { useState, useEffect } from "react";
-import {
-  FaMapMarkerAlt,
-  FaSync,
-  FaCheckCircle,
-  FaExclamationTriangle,
-  FaInfoCircle,
-} from "react-icons/fa";
+import Button from "./Button";
+import Frame from "./Frame";
+import Icon from "./Icon";
 
 interface LocationData {
   latitude: number;
@@ -128,46 +124,28 @@ function Geolocation() {
 
   if (loading) {
     return (
-      <div className="max-w-2xl mx-auto space-y-6">
-        <div className="text-center">
-          <div className="relative">
-            <div className="animate-spin rounded-full h-16 w-16 border-4 border-white/20 border-t-white mx-auto mb-4"></div>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <FaMapMarkerAlt className="text-2xl text-white animate-pulse" />
-            </div>
-          </div>
-          <h2 className="text-2xl font-bold text-white mb-2">
+      <div className="mx-auto max-w-2xl space-y-6">
+        <div className="border border-line bg-panel p-10 text-center">
+          <div className="mx-auto h-12 w-12 animate-spin rounded-full border-2 border-line border-t-safelight" />
+          <h2 className="mt-5 font-display text-xl uppercase tracking-[0.03em] text-paper">
             Finding Your Location
           </h2>
-          <p className="text-gray-300">
-            Please allow location access for the best experience
+          <p className="mt-2 font-mono text-xs uppercase tracking-[0.15em] text-muted">
+            Please allow location access
           </p>
         </div>
 
         {permissionStatus && (
           <div
-            className={`p-4 rounded-lg border backdrop-blur-sm ${
+            className={`border p-4 font-mono text-xs uppercase tracking-[0.12em] ${
               permissionStatus === "granted"
-                ? "bg-green-500/20 border-green-400 text-green-200"
+                ? "border-gold text-gold"
                 : permissionStatus === "denied"
-                  ? "bg-red-500/20 border-red-400 text-red-200"
-                  : "bg-yellow-500/20 border-yellow-400 text-yellow-200"
+                  ? "border-safelight text-safelight"
+                  : "border-line text-muted"
             }`}
           >
-            <div className="flex items-center space-x-2">
-              {permissionStatus === "granted" ? (
-                <FaCheckCircle />
-              ) : permissionStatus === "denied" ? (
-                <FaExclamationTriangle />
-              ) : (
-                <FaInfoCircle />
-              )}
-              <span className="font-medium">
-                Location Permission:{" "}
-                {permissionStatus.charAt(0).toUpperCase() +
-                  permissionStatus.slice(1)}
-              </span>
-            </div>
+            Location Permission: {permissionStatus}
           </div>
         )}
       </div>
@@ -175,150 +153,129 @@ function Geolocation() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="text-center">
-        <div className="flex items-center justify-center space-x-3 mb-4">
-          <FaMapMarkerAlt className="text-3xl text-purple-400" />
-          <h1 className="text-4xl font-bold text-white">Location Services</h1>
-        </div>
-        <p className="text-gray-300 text-lg">
-          Discover your current location with precision
-        </p>
-      </div>
-
+    <div className="mx-auto max-w-4xl space-y-6">
       {errorMessage ? (
-        <div className="bg-red-500/20 backdrop-blur-lg border border-red-400 text-red-200 p-6 rounded-xl shadow-2xl">
-          <div className="flex items-center space-x-3 mb-4">
-            <FaExclamationTriangle className="text-2xl" />
-            <h3 className="text-xl font-bold">Location Error</h3>
+        <div className="border border-safelight bg-safelight/10 p-6">
+          <div className="mb-3 flex items-center gap-3">
+            <span className="text-2xl text-safelight">
+              <Icon name="warning" />
+            </span>
+            <h3 className="font-display text-xl uppercase tracking-[0.03em] text-paper">
+              Location Error
+            </h3>
           </div>
-          <p className="mb-4">{errorMessage}</p>
-          <button
-            onClick={getLocation}
-            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center space-x-2"
-          >
-            <FaSync />
-            <span>Try Again</span>
-          </button>
+          <p className="mb-5 font-mono text-xs text-muted">{errorMessage}</p>
+          <Button onClick={getLocation} variant="primary">
+            <Icon name="rotateRight" /> Try Again
+          </Button>
         </div>
       ) : locationData ? (
         <div className="space-y-6">
           {/* Main Location Card */}
-          <div className="bg-white/10 backdrop-blur-lg rounded-xl p-8 shadow-2xl border border-white/20">
-            <div className="flex justify-between items-start mb-6">
-              <div>
-                <h2 className="text-2xl font-bold text-white mb-2">
-                  Your Current Location
-                </h2>
-                {locationName && (
-                  <p className="text-purple-300 text-lg font-medium">
-                    {locationName}
-                  </p>
-                )}
-              </div>
-              <button
-                onClick={getLocation}
-                disabled={loading}
-                className="bg-white/20 hover:bg-white/30 text-white p-3 rounded-lg transition-all duration-300 hover:scale-105 disabled:opacity-50"
-                title="Refresh Location"
-              >
-                <FaSync className={loading ? "animate-spin" : ""} />
-              </button>
-            </div>
-
-            {/* Coordinates Grid */}
-            <div className="grid md:grid-cols-2 gap-6 mb-6">
-              <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-600">
-                <h3 className="text-lg font-semibold text-white mb-3 flex items-center space-x-2">
-                  <span className="w-2 h-2 bg-green-400 rounded-full"></span>
-                  <span>Latitude</span>
-                </h3>
-                <p className="text-2xl font-mono text-green-300">
-                  {formatCoordinate(locationData.latitude, "lat")}
-                </p>
-                <p className="text-sm text-gray-400 mt-1">
-                  Decimal: {locationData.latitude.toFixed(8)}
-                </p>
+          <Frame frame="COORD/01">
+            <div className="p-6">
+              <div className="mb-6 flex items-start justify-between gap-4">
+                <div>
+                  <h2 className="font-display text-xl uppercase tracking-[0.03em] text-paper">
+                    Current Location
+                  </h2>
+                  {locationName && (
+                    <p className="mt-1 font-mono text-xs uppercase tracking-[0.15em] text-safelight">
+                      {locationName}
+                    </p>
+                  )}
+                </div>
+                <button
+                  onClick={getLocation}
+                  disabled={loading}
+                  title="Refresh Location"
+                  className="border border-line px-3 py-2 text-muted transition-colors hover:border-safelight hover:text-safelight disabled:opacity-50"
+                >
+                  <Icon name="rotateRight" />
+                </button>
               </div>
 
-              <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-600">
-                <h3 className="text-lg font-semibold text-white mb-3 flex items-center space-x-2">
-                  <span className="w-2 h-2 bg-blue-400 rounded-full"></span>
-                  <span>Longitude</span>
-                </h3>
-                <p className="text-2xl font-mono text-blue-300">
-                  {formatCoordinate(locationData.longitude, "lng")}
-                </p>
-                <p className="text-sm text-gray-400 mt-1">
-                  Decimal: {locationData.longitude.toFixed(8)}
-                </p>
-              </div>
-            </div>
-
-            {/* Additional Info Grid */}
-            <div className="grid md:grid-cols-3 gap-4">
-              <div className="bg-slate-800/30 rounded-lg p-4 border border-slate-700">
-                <h4 className="text-sm font-medium text-gray-300 mb-1">
-                  Accuracy
-                </h4>
-                <p className="text-lg font-semibold text-white">
-                  ±{formatAccuracy(locationData.accuracy)}
-                </p>
-              </div>
-
-              {locationData.altitude && (
-                <div className="bg-slate-800/30 rounded-lg p-4 border border-slate-700">
-                  <h4 className="text-sm font-medium text-gray-300 mb-1">
-                    Altitude
-                  </h4>
-                  <p className="text-lg font-semibold text-white">
-                    {Math.round(locationData.altitude)}m
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="border border-line bg-panel-2 p-4">
+                  <h3 className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-muted">
+                    Latitude
+                  </h3>
+                  <p className="font-mono text-xl text-safelight">
+                    {formatCoordinate(locationData.latitude, "lat")}
                   </p>
                 </div>
-              )}
+                <div className="border border-line bg-panel-2 p-4">
+                  <h3 className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-muted">
+                    Longitude
+                  </h3>
+                  <p className="font-mono text-xl text-safelight">
+                    {formatCoordinate(locationData.longitude, "lng")}
+                  </p>
+                </div>
+              </div>
 
-              {locationData.speed !== null &&
-                locationData.speed !== undefined && (
-                  <div className="bg-slate-800/30 rounded-lg p-4 border border-slate-700">
-                    <h4 className="text-sm font-medium text-gray-300 mb-1">
-                      Speed
+              <div className="mt-4 grid gap-4 md:grid-cols-3">
+                <div className="border border-line bg-panel-2 p-4">
+                  <h4 className="mb-1 font-mono text-[10px] uppercase tracking-[0.2em] text-muted">
+                    Accuracy
+                  </h4>
+                  <p className="font-mono text-sm text-paper">
+                    ±{formatAccuracy(locationData.accuracy)}
+                  </p>
+                </div>
+                {locationData.altitude && (
+                  <div className="border border-line bg-panel-2 p-4">
+                    <h4 className="mb-1 font-mono text-[10px] uppercase tracking-[0.2em] text-muted">
+                      Altitude
                     </h4>
-                    <p className="text-lg font-semibold text-white">
-                      {(locationData.speed * 3.6).toFixed(1)} km/h
+                    <p className="font-mono text-sm text-paper">
+                      {Math.round(locationData.altitude)}m
                     </p>
                   </div>
                 )}
-            </div>
-
-            {lastUpdated && (
-              <div className="mt-6 pt-4 border-t border-white/10">
-                <p className="text-sm text-gray-400">
-                  Last updated: {lastUpdated.toLocaleString()}
-                </p>
+                {locationData.speed !== null &&
+                  locationData.speed !== undefined && (
+                    <div className="border border-line bg-panel-2 p-4">
+                      <h4 className="mb-1 font-mono text-[10px] uppercase tracking-[0.2em] text-muted">
+                        Speed
+                      </h4>
+                      <p className="font-mono text-sm text-paper">
+                        {(locationData.speed * 3.6).toFixed(1)} km/h
+                      </p>
+                    </div>
+                  )}
               </div>
-            )}
-          </div>
+
+              {lastUpdated && (
+                <div className="mt-5 border-t border-line pt-4 font-mono text-[10px] uppercase tracking-[0.15em] text-muted">
+                  Last updated: {lastUpdated.toLocaleString()}
+                </div>
+              )}
+            </div>
+          </Frame>
 
           {/* Map Placeholder */}
-          <div className="bg-slate-900/50 backdrop-blur-lg rounded-xl p-8 shadow-2xl border border-slate-700">
-            <h3 className="text-xl font-bold text-white mb-4 flex items-center space-x-2">
-              <FaMapMarkerAlt />
-              <span>Location Preview</span>
-            </h3>
-            <div className="bg-slate-800 rounded-lg h-64 flex items-center justify-center border-2 border-dashed border-slate-600">
-              <div className="text-center">
-                <FaMapMarkerAlt className="text-4xl text-gray-400 mx-auto mb-3" />
-                <p className="text-gray-400">
-                  Interactive map would be displayed here
-                </p>
-                <p className="text-sm text-gray-500 mt-1">
-                  Coordinates: {locationData.latitude.toFixed(4)},{" "}
-                  {locationData.longitude.toFixed(4)}
-                </p>
+          <Frame frame="COORD/02">
+            <div className="p-6">
+              <h3 className="mb-4 font-display text-lg uppercase tracking-[0.03em] text-paper">
+                Location Preview
+              </h3>
+              <div className="flex h-56 items-center justify-center border border-dashed border-line bg-panel-2 text-center">
+                <div>
+                  <div className="mb-2 text-3xl text-gold">
+                    <Icon name="location" />
+                  </div>
+                  <p className="font-mono text-xs uppercase tracking-[0.15em] text-muted">
+                    Interactive map would be displayed here
+                  </p>
+                  <p className="mt-1 font-mono text-[10px] text-muted">
+                    {locationData.latitude.toFixed(4)},{" "}
+                    {locationData.longitude.toFixed(4)}
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
+          </Frame>
         </div>
       ) : null}
     </div>

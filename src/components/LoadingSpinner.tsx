@@ -10,15 +10,15 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   className = "",
 }) => {
   const sizeClasses = {
-    sm: "h-4 w-4",
-    md: "h-8 w-8",
-    lg: "h-12 w-12",
+    sm: "h-4 w-4 border-2",
+    md: "h-8 w-8 border-2",
+    lg: "h-12 w-12 border-2",
   };
 
   return (
-    <div className={`flex justify-center items-center ${className}`}>
+    <div className={`flex items-center justify-center ${className}`}>
       <div
-        className={`animate-spin rounded-full border-2 border-white border-t-transparent ${sizeClasses[size]}`}
+        className={`animate-spin rounded-full border-line border-t-safelight ${sizeClasses[size]}`}
         role="status"
         aria-label="Loading"
       >

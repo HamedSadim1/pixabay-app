@@ -1,5 +1,7 @@
 import React, { useState } from "react";
-import { FaHeart, FaComment, FaShare, FaBookmark } from "react-icons/fa";
+import Avatar from "./Avatar";
+import Button from "./Button";
+import Icon from "./Icon";
 
 function SinglePost() {
   const [isLiked, setIsLiked] = useState(false);
@@ -17,173 +19,131 @@ function SinglePost() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold text-white mb-2">Blog Post</h1>
-        <p className="text-gray-300">Read the full story</p>
-      </div>
-
-      {/* Main Post Card */}
-      <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-2xl border border-white/20 mb-8">
-        {/* Author Info */}
-        <div className="flex items-center space-x-4 mb-6">
-          <img
+      {/* Main Post */}
+      <article className="border border-line bg-panel p-6">
+        <div className="mb-6 flex items-center gap-3">
+          <Avatar
+            name="Sarah"
             src="https://picsum.photos/200/200?random=1"
-            alt="Sarah"
-            className="w-16 h-16 rounded-full border-2 border-white/30"
+            size="md"
           />
           <div>
-            <h2 className="text-xl font-bold text-white">Sarah</h2>
-            <p className="text-gray-300">New member • Today at 14:30</p>
+            <span className="font-display text-sm uppercase tracking-[0.05em] text-paper">
+              Sarah
+            </span>
+            <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted">
+              New member • Today at 14:30
+            </p>
           </div>
         </div>
 
-        {/* Post Content */}
-        <div className="mb-8">
-          <h3 className="text-2xl font-bold text-white mb-4">
-            Hey, I'm new here! 👋
-          </h3>
-          <p className="text-gray-200 text-lg leading-relaxed mb-6">
-            Just joined this amazing community and I'm so excited to be part of
-            it! Looking forward to connecting with everyone and sharing some
-            awesome content. This is my first post, so please be gentle! 😊
-          </p>
-
-          {/* Sample Image */}
-          <div className="rounded-xl p-1 mb-6">
-            <img
-              src="https://picsum.photos/800/400?random=2"
-              alt="Community"
-              className="w-full h-64 object-cover rounded-lg"
-            />
-          </div>
+        <h3 className="mb-3 font-display text-2xl uppercase tracking-[0.02em] text-paper">
+          Hey, I'm new here!
+        </h3>
+        <p className="mb-5 text-sm leading-relaxed text-muted">
+          Just joined this amazing community and I'm so excited to be part of
+          it! Looking forward to connecting with everyone and sharing some
+          awesome content. This is my first post, so please be gentle! 😊
+        </p>
+        <div className="mb-6 overflow-hidden border border-line">
+          <img
+            src="https://picsum.photos/800/400?random=2"
+            alt="Community"
+            className="h-56 w-full object-cover grayscale transition-all duration-300 hover:grayscale-0 md:h-72"
+          />
         </div>
 
-        {/* Interaction Buttons */}
-        <div className="flex items-center justify-between pt-6 border-t border-white/20">
-          <div className="flex items-center space-x-6">
+        <div className="flex items-center justify-between border-t border-line pt-4">
+          <div className="flex items-center gap-2">
             <button
               onClick={handleLike}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 ${
+              className={`inline-flex items-center gap-1.5 border px-3.5 py-2 font-mono text-[10px] uppercase tracking-[0.15em] transition-colors ${
                 isLiked
-                  ? "bg-red-500/20 text-red-300"
-                  : "bg-white/10 hover:bg-white/20 text-white"
+                  ? "border-safelight bg-safelight/10 text-safelight"
+                  : "border-line text-muted hover:border-safelight hover:text-safelight"
               }`}
             >
-              <FaHeart className={isLiked ? "text-red-400" : ""} />
-              <span>{likesCount}</span>
+              <Icon name="heart" /> {likesCount}
             </button>
-
-            <button className="flex items-center space-x-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg transition-all duration-300">
-              <FaComment />
-              <span>12</span>
+            <button className="inline-flex items-center gap-1.5 border border-line px-3.5 py-2 font-mono text-[10px] uppercase tracking-[0.15em] text-muted transition-colors hover:border-safelight hover:text-safelight">
+              <Icon name="comment" /> 12
             </button>
-
-            <button className="flex items-center space-x-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg transition-all duration-300">
-              <FaShare />
-              <span>Share</span>
+            <button className="inline-flex items-center gap-1.5 border border-line px-3.5 py-2 font-mono text-[10px] uppercase tracking-[0.15em] text-muted transition-colors hover:border-safelight hover:text-safelight">
+              <Icon name="share" /> Share
             </button>
           </div>
-
           <button
             onClick={handleBookmark}
-            className={`p-3 rounded-lg transition-all duration-300 ${
+            aria-label="Bookmark"
+            className={`border p-2.5 transition-colors ${
               isBookmarked
-                ? "bg-yellow-500/20 text-yellow-300"
-                : "bg-white/10 hover:bg-white/20 text-white"
+                ? "border-gold bg-gold/10 text-gold"
+                : "border-line text-muted hover:border-gold hover:text-gold"
             }`}
           >
-            <FaBookmark className={isBookmarked ? "text-yellow-400" : ""} />
+            <Icon name="bookmark" />
           </button>
         </div>
-      </div>
+      </article>
 
-      {/* Comments Section */}
-      <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 shadow-2xl border border-white/20">
-        <h3 className="text-xl font-bold text-white mb-6">Comments (3)</h3>
+      {/* Comments */}
+      <section className="border border-line bg-panel p-6">
+        <h3 className="mb-5 font-display text-lg uppercase tracking-[0.03em] text-paper">
+          Comments — 3
+        </h3>
 
-        <div className="space-y-4">
-          {/* Sample Comments */}
-          <div className="flex space-x-4">
-            <img
-              src="https://picsum.photos/200/200?random=3"
-              alt="John"
-              className="w-10 h-10 rounded-full border border-white/20"
-            />
-            <div className="flex-1">
-              <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-600">
-                <div className="flex items-center space-x-2 mb-2">
-                  <span className="font-semibold text-white">John Doe</span>
-                  <span className="text-sm text-gray-400">2 hours ago</span>
+        <div className="space-y-3">
+          {[
+            {
+              name: "John Doe",
+              time: "2 hours ago",
+              avatar: "https://picsum.photos/200/200?random=3",
+              text: "Welcome to the community, Sarah! Looking forward to your posts! 🚀",
+            },
+            {
+              name: "Jane Smith",
+              time: "1 hour ago",
+              avatar: "https://picsum.photos/200/200?random=4",
+              text: "So glad you're here! The community is amazing. 💫",
+            },
+            {
+              name: "Mike Johnson",
+              time: "30 min ago",
+              avatar: "https://picsum.photos/200/200?random=5",
+              text: "Welcome aboard! Don't forget to check out the guidelines. 📚",
+            },
+          ].map((comment) => (
+            <div key={comment.name} className="flex gap-3">
+              <Avatar name={comment.name} src={comment.avatar} size="sm" />
+              <div className="flex-1 border border-line bg-panel-2 p-3.5">
+                <div className="mb-1 flex items-baseline gap-2">
+                  <span className="font-display text-xs uppercase tracking-[0.05em] text-paper">
+                    {comment.name}
+                  </span>
+                  <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted">
+                    {comment.time}
+                  </span>
                 </div>
-                <p className="text-gray-200">
-                  Welcome to the community, Sarah! Looking forward to your
-                  posts! 🚀
-                </p>
+                <p className="text-sm text-muted">{comment.text}</p>
               </div>
             </div>
-          </div>
-
-          <div className="flex space-x-4">
-            <img
-              src="https://picsum.photos/200/200?random=4"
-              alt="Jane"
-              className="w-10 h-10 rounded-full border border-white/20"
-            />
-            <div className="flex-1">
-              <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-600">
-                <div className="flex items-center space-x-2 mb-2">
-                  <span className="font-semibold text-white">Jane Smith</span>
-                  <span className="text-sm text-gray-400">1 hour ago</span>
-                </div>
-                <p className="text-gray-200">
-                  So glad you're here! The community is amazing. 💫
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex space-x-4">
-            <img
-              src="https://picsum.photos/200/200?random=5"
-              alt="Mike"
-              className="w-10 h-10 rounded-full border border-white/20"
-            />
-            <div className="flex-1">
-              <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-600">
-                <div className="flex items-center space-x-2 mb-2">
-                  <span className="font-semibold text-white">Mike Johnson</span>
-                  <span className="text-sm text-gray-400">30 min ago</span>
-                </div>
-                <p className="text-gray-200">
-                  Welcome aboard! Don't forget to check out the guidelines. 📚
-                </p>
-              </div>
-            </div>
-          </div>
+          ))}
         </div>
 
-        {/* Add Comment */}
-        <div className="mt-6 pt-6 border-t border-white/20">
-          <div className="flex space-x-4">
-            <img
-              src="https://picsum.photos/200/200?random=6"
-              alt="You"
-              className="w-10 h-10 rounded-full border border-white/20"
+        <div className="mt-6 flex gap-3 border-t border-line pt-5">
+          <Avatar name="You" size="sm" />
+          <div className="flex-1">
+            <textarea
+              placeholder="Write a comment..."
+              className="w-full resize-none border border-line bg-panel-2 p-3 font-mono text-sm text-paper placeholder-muted focus:border-safelight focus:outline-none"
+              rows={3}
             />
-            <div className="flex-1">
-              <textarea
-                placeholder="Write a comment..."
-                className="w-full bg-slate-800/50 border border-slate-600 rounded-lg p-3 text-white placeholder-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-purple-500"
-                rows={3}
-              />
-              <button className="mt-2 bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg transition-colors">
-                Post Comment
-              </button>
-            </div>
+            <Button variant="primary" className="mt-2">
+              <Icon name="pen" /> Post Comment
+            </Button>
           </div>
         </div>
-      </div>
+      </section>
     </div>
   );
 }

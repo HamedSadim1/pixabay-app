@@ -1,49 +1,92 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { NAV_LINKS, NAV_ICONS } from "../constants/navLinks";
+import { NAV_LINKS } from "../constants/navLinks";
+import Icon from "./Icon";
 
 const Navbar: React.FC = () => {
   const location = useLocation();
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  const getIcon = (iconName: string) => {
-    return NAV_ICONS[iconName as keyof typeof NAV_ICONS];
+  const isLinkActive = (linkTo: string) => {
+    return (
+      location.pathname === linkTo ||
+      (linkTo === "/search" && location.pathname.startsWith("/image/"))
+    );
   };
+
+  const linkClasses = (active: boolean) =>
+    `flex items-center gap-2 border-b-2 px-3 py-2 font-mono text-xs uppercase tracking-[0.12em] transition-colors ${
+      active
+        ? "border-safelight text-paper"
+        : "border-transparent text-muted hover:text-paper"
+    }`;
+
   return (
-    <nav className="bg-black/20 backdrop-blur-md border-b border-white/30 sticky top-0 z-10 shadow-lg">
-      <div className="container mx-auto flex justify-between items-center p-4">
+    <nav className="sticky top-0 z-20 border-b border-line bg-dark/95 backdrop-blur">
+      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
         <Link
           to="/"
-          className="text-2xl font-bold text-white hover:text-purple-300 transition-all duration-300 flex items-center space-x-2 drop-shadow-lg hover:scale-105 group"
+          onClick={() => setMenuOpen(false)}
+          className="flex items-center gap-2.5"
         >
-          <span className="group-hover:animate-bounce-subtle">✨</span>
-          <span>Pixabay App</span>
+          <span className="flex h-8 w-8 items-center justify-center border border-gold text-gold">
+            <Icon name="camera" />
+          </span>
+          <span className="font-display text-lg uppercase tracking-[0.08em] text-paper">
+            Pixabay<span className="text-safelight">App</span>
+          </span>
         </Link>
-        <ul className="flex space-x-8">
-          {NAV_LINKS.map((link) => {
-            const IconComponent = getIcon(link.icon);
-            const isActive =
-              location.pathname === link.to ||
-              (link.to === "/search" &&
-                location.pathname.startsWith("/image/"));
 
+        <ul className="hidden items-center gap-1 md:flex">
+          {NAV_LINKS.map((link) => {
+            const active = isLinkActive(link.to);
             return (
               <li key={link.to}>
                 <Link
                   to={link.to}
-                  className={`px-3 py-2 rounded-lg font-medium flex items-center space-x-2 drop-shadow-lg transition-all duration-300 hover:scale-105 ${
-                    isActive
-                      ? "bg-linear-to-r from-purple-600/80 to-pink-600/80 text-white shadow-lg border border-white/20 backdrop-blur-sm"
-                      : "text-white hover:text-purple-300 hover:bg-white/10 hover:shadow-md"
-                  }`}
+                  onClick={() => setMenuOpen(false)}
+                  className={linkClasses(active)}
                 >
-                  <IconComponent />
+                  <Icon name={link.icon} className="text-safelight" />
                   <span>{link.label}</span>
                 </Link>
               </li>
             );
           })}
         </ul>
+
+        <button
+          type="button"
+          onClick={() => setMenuOpen(!menuOpen)}
+          aria-label={menuOpen ? "Close menu" : "Open menu"}
+          aria-expanded={menuOpen}
+          className="flex h-9 w-9 items-center justify-center border border-line text-paper transition-colors hover:border-safelight hover:text-safelight md:hidden"
+        >
+          <Icon name={menuOpen ? "xmark" : "bars"} />
+        </button>
       </div>
+
+      {menuOpen && (
+        <div className="border-t border-line bg-dark md:hidden animate-fade-in">
+          <ul className="space-y-1 px-4 py-3">
+            {NAV_LINKS.map((link) => {
+              const active = isLinkActive(link.to);
+              return (
+                <li key={link.to}>
+                  <Link
+                    to={link.to}
+                    onClick={() => setMenuOpen(false)}
+                    className={`block ${linkClasses(active)}`}
+                  >
+                    <Icon name={link.icon} className="text-safelight" />
+                    <span>{link.label}</span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
     </nav>
   );
 };

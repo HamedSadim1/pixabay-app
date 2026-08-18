@@ -1,43 +1,17 @@
-import {
-  FaHome,
-  FaSearch,
-  FaBlog,
-  FaMapMarkerAlt,
-  FaUser,
-} from "react-icons/fa";
+import type { IconName } from "./icons";
 
 export interface NavLink {
   to: string;
   label: string;
-  icon: string;
+  icon: IconName;
 }
 
 export const NAV_LINKS: NavLink[] = [
-  {
-    to: "/",
-    label: "Home",
-    icon: "FaHome",
-  },
-  {
-    to: "/search",
-    label: "Search",
-    icon: "FaSearch",
-  },
-  {
-    to: "/posts",
-    label: "Posts",
-    icon: "FaBlog",
-  },
-  {
-    to: "/location",
-    label: "Location",
-    icon: "FaMapMarkerAlt",
-  },
-  {
-    to: "/profile",
-    label: "Profile",
-    icon: "FaUser",
-  },
+  { to: "/", label: "Home", icon: "home" },
+  { to: "/search", label: "Search", icon: "search" },
+  { to: "/posts", label: "Posts", icon: "pen" },
+  { to: "/location", label: "Location", icon: "location" },
+  { to: "/profile", label: "Profile", icon: "user" },
 ];
 
 export const TRENDING_SEARCHES = [
@@ -48,11 +22,3 @@ export const TRENDING_SEARCHES = [
   "travel",
   "technology",
 ];
-
-export const NAV_ICONS = {
-  FaHome,
-  FaSearch,
-  FaBlog,
-  FaMapMarkerAlt,
-  FaUser,
-};
