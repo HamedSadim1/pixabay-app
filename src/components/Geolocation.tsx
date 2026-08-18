@@ -1,97 +1,19 @@
-import React, { useState, useEffect, useEffectEvent } from "react";
+import { useEffect, useEffectEvent } from "react";
 import { parseAsFloat, useQueryStates } from "nuqs";
-import { API_CONFIG, REQUEST_TIMEOUT_MS } from "../config/api";
 import Button from "./Button";
+import DataField from "./DataField";
 import Frame from "./Frame";
 import Icon from "./Icon";
 import MetaLabel from "./MetaLabel";
 import Spinner from "./Spinner";
 import LocationMap from "./LocationMap";
-
-interface NominatimAddress {
-  house_number?: string;
-  road?: string;
-  postcode?: string;
-  city?: string;
-  town?: string;
-  village?: string;
-  country?: string;
-}
-
-interface NominatimResponse {
-  display_name?: string;
-  address?: NominatimAddress;
-}
-
-// Browser-only extras that aren't persisted to the URL.
-interface LocationDetails {
-  accuracy: number | null;
-  altitude: number | null;
-  speed: number | null;
-  lastUpdated: Date | null;
-}
-
-const GEO_TIMEOUT_MS = 15_000;
-const GEO_MAX_AGE_MS = 300_000; // 5 minutes
-const ACCURACY_KM_THRESHOLD_M = 100;
-const COORD_BOUNDS = {
-  LAT_MIN: -90,
-  LAT_MAX: 90,
-  LON_MIN: -180,
-  LON_MAX: 180,
-} as const;
-
-async function fetchAddress(
-  latitude: number,
-  longitude: number,
-): Promise<string> {
-  try {
-    const response = await fetch(
-      `${API_CONFIG.NOMINATIM.BASE_URL}?lat=${latitude}&lon=${longitude}&format=jsonv2&addressdetails=1&accept-language=en`,
-      { signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) },
-    );
-    const geoData = (await response.json()) as NominatimResponse;
-    const address = geoData.address;
-    if (address) {
-      const street = [address.house_number, address.road]
-        .filter(Boolean)
-        .join(" ");
-      const locality = address.city || address.town || address.village || "";
-      const parts = [street, address.postcode, locality, address.country]
-        .filter(Boolean)
-        .join(", ");
-      return parts || geoData.display_name || "";
-    }
-    return geoData.display_name || "";
-  } catch (geoError) {
-    console.warn("Could not fetch location address:", geoError);
-    return "";
-  }
-}
-
-interface DataFieldProps {
-  label: string;
-  children: React.ReactNode;
-  valueClassName?: string;
-  className?: string;
-}
-
-// Label + value block used for coordinates, address and location details.
-function DataField({
-  label,
-  children,
-  valueClassName = "text-sm text-paper",
-  className = "",
-}: DataFieldProps) {
-  return (
-    <div className={`border border-line bg-panel-2 p-4 ${className}`}>
-      <div className="mb-2 font-mono text-[10px] uppercase tracking-label text-muted">
-        {label}
-      </div>
-      <p className={`font-mono ${valueClassName}`}>{children}</p>
-    </div>
-  );
-}
+import { useGeolocation } from "../hooks/useGeolocation";
+import { useReverseGeocode } from "../hooks/useReverseGeocode";
+import {
+  formatAccuracy,
+  formatCoordinate,
+  isValidCoordinates,
+} from "../utils/geo";
 
 function Geolocation() {
   // Coordinates live in the URL so the location is shareable and is restored
@@ -101,85 +23,24 @@ function Geolocation() {
     { history: "replace" },
   );
 
-  const hasValidCoordinates =
-    lat !== null &&
-    lon !== null &&
-    lat >= COORD_BOUNDS.LAT_MIN &&
-    lat <= COORD_BOUNDS.LAT_MAX &&
-    lon >= COORD_BOUNDS.LON_MIN &&
-    lon <= COORD_BOUNDS.LON_MAX;
+  const hasValidCoordinates = isValidCoordinates(lat, lon);
 
-  const [details, setDetails] = useState<LocationDetails>({
-    accuracy: null,
-    altitude: null,
-    speed: null,
-    lastUpdated: null,
-  });
-  const [locationName, setLocationName] = useState<string>("");
-  const [resolvingAddress, setResolvingAddress] = useState<boolean>(
-    () => hasValidCoordinates,
-  );
-  const [errorMessage, setErrorMessage] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(
-    () => lat === null || lon === null,
-  );
-  const [permissionStatus, setPermissionStatus] =
-    useState<PermissionState | null>(null);
-  const [permissionDenied, setPermissionDenied] = useState(false);
+  const {
+    details,
+    loading,
+    errorMessage,
+    permissionDenied,
+    permissionStatus,
+    getLocation,
+  } = useGeolocation();
 
+  const { locationName, resolvingAddress } = useReverseGeocode(lat, lon);
+
+  // Persist a successful browser lookup into the URL (the source of truth).
   const getBrowserLocation = async () => {
-    if (!navigator.geolocation) {
-      setErrorMessage("Geolocation is not supported by this browser");
-      setLoading(false);
-      return;
-    }
-
-    setLoading(true);
-    setErrorMessage("");
-    setPermissionDenied(false);
-
-    try {
-      const position = await new Promise<GeolocationPosition>(
-        (resolve, reject) => {
-          navigator.geolocation.getCurrentPosition(resolve, reject, {
-            enableHighAccuracy: true,
-            timeout: GEO_TIMEOUT_MS,
-            maximumAge: GEO_MAX_AGE_MS,
-          });
-        },
-      );
-
-      void setCoordinates({
-        lat: position.coords.latitude,
-        lon: position.coords.longitude,
-      });
-      setDetails({
-        accuracy: position.coords.accuracy,
-        altitude: position.coords.altitude ?? null,
-        speed: position.coords.speed ?? null,
-        lastUpdated: new Date(),
-      });
-    } catch (err) {
-      const error = err as GeolocationPositionError;
-      let message = "Unable to get your location";
-
-      switch (error.code) {
-        case error.PERMISSION_DENIED:
-          message =
-            "Location access denied. Please enable location permissions.";
-          setPermissionDenied(true);
-          break;
-        case error.POSITION_UNAVAILABLE:
-          message = "Location information is unavailable.";
-          break;
-        case error.TIMEOUT:
-          message = "Location request timed out. Please try again.";
-          break;
-      }
-
-      setErrorMessage(message);
-    } finally {
-      setLoading(false);
+    const coords = await getLocation();
+    if (coords) {
+      void setCoordinates({ lat: coords.latitude, lon: coords.longitude });
     }
   };
 
@@ -193,65 +54,6 @@ function Geolocation() {
   useEffect(() => {
     requestInitialLocation();
   }, []);
-
-  // Reverse geocode whenever the coordinates change (geolocation or restore).
-  useEffect(() => {
-    if (lat === null || lon === null) {
-      setResolvingAddress(false);
-      return;
-    }
-    let cancelled = false;
-    setResolvingAddress(true);
-    setLocationName("");
-    void fetchAddress(lat, lon).then((address) => {
-      if (!cancelled) {
-        setResolvingAddress(false);
-        setLocationName(address);
-      }
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [lat, lon]);
-
-  // Check permission status (and clean up the listener on unmount).
-  useEffect(() => {
-    if (!("permissions" in navigator)) {
-      return;
-    }
-    let cancelled = false;
-    let permissionStatus: PermissionStatus | null = null;
-    const onChange = () => {
-      if (permissionStatus) {
-        setPermissionStatus(permissionStatus.state);
-      }
-    };
-    void navigator.permissions.query({ name: "geolocation" }).then((result) => {
-      if (cancelled) {
-        return;
-      }
-      permissionStatus = result;
-      setPermissionStatus(result.state);
-      result.addEventListener("change", onChange);
-    });
-    return () => {
-      cancelled = true;
-      permissionStatus?.removeEventListener("change", onChange);
-    };
-  }, []);
-
-  const formatCoordinate = (coord: number, type: "lat" | "lng") => {
-    const direction =
-      type === "lat" ? (coord >= 0 ? "N" : "S") : coord >= 0 ? "E" : "W";
-    return `${Math.abs(coord).toFixed(6)}° ${direction}`;
-  };
-
-  const formatAccuracy = (accuracy: number) => {
-    if (accuracy < ACCURACY_KM_THRESHOLD_M) {
-      return `${Math.round(accuracy)}m`;
-    }
-    return `${(accuracy / 1000).toFixed(1)}km`;
-  };
 
   if (lat !== null && lon !== null && !hasValidCoordinates) {
     return (

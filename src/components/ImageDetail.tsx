@@ -4,15 +4,16 @@ import { useQuery } from "@tanstack/react-query";
 import { getImageById, getErrorMessage, NotFoundError } from "../api/pixabay";
 import { PATHS } from "../constants/routes";
 import { buttonClasses } from "../constants/buttonStyles";
+import { formatFileSize } from "../utils/format";
 import AuthorHeader from "./AuthorHeader";
 import Avatar from "./Avatar";
 import Button from "./Button";
 import Frame from "./Frame";
 import Icon from "./Icon";
-import MetaLabel from "./MetaLabel";
+import ImageStats from "./ImageStats";
 import Spinner from "./Spinner";
 import StatusCard from "./StatusCard";
-import type { IconName } from "../constants/icons";
+import TagList from "./TagList";
 
 // Timeout (ms) for the image-download blob fetch.
 const DOWNLOAD_TIMEOUT_MS = 15_000;
@@ -47,25 +48,6 @@ const ImageDetail: React.FC = () => {
     retry: (failureCount, err) =>
       err instanceof NotFoundError ? false : failureCount < 2,
   });
-
-  const formatNumber = (num: number) => {
-    if (num >= 1000000) {
-      return (num / 1000000).toFixed(1) + "M";
-    } else if (num >= 1000) {
-      return (num / 1000).toFixed(1) + "K";
-    }
-    return num.toString();
-  };
-
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) {
-      return "0 Bytes";
-    }
-    const k = 1024;
-    const sizes = ["Bytes", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
-  };
 
   const backButton = (
     <Button size="sm" onClick={goBack}>
@@ -249,32 +231,13 @@ const ImageDetail: React.FC = () => {
             <h2 className="mb-3 font-display text-lg uppercase tracking-[0.03em] text-paper">
               Statistics
             </h2>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
-              {(
-                [
-                  ["heart", formatNumber(imageData.likes), "Likes"],
-                  ["eye", formatNumber(imageData.views), "Views"],
-                  ["download", formatNumber(imageData.downloads), "Downloads"],
-                  ["comment", formatNumber(imageData.comments), "Comments"],
-                  [
-                    "bookmark",
-                    formatNumber(imageData.collections),
-                    "Collections",
-                  ],
-                ] as [IconName, string, string][]
-              ).map(([icon, value, label]) => (
-                <div
-                  key={label}
-                  className="border border-line bg-panel-2 p-3 text-center"
-                >
-                  <div className="text-lg text-safelight">
-                    <Icon name={icon} />
-                  </div>
-                  <div className="font-mono text-lg text-paper">{value}</div>
-                  <MetaLabel as="div">{label}</MetaLabel>
-                </div>
-              ))}
-            </div>
+            <ImageStats
+              likes={imageData.likes}
+              views={imageData.views}
+              downloads={imageData.downloads}
+              comments={imageData.comments}
+              collections={imageData.collections}
+            />
           </div>
         </div>
 
@@ -283,20 +246,7 @@ const ImageDetail: React.FC = () => {
           <h2 className="mb-3 font-display text-lg uppercase tracking-[0.03em] text-paper">
             Tags
           </h2>
-          <div className="flex flex-wrap gap-2">
-            {tags
-              .split(",")
-              .map((tag) => tag.trim())
-              .filter(Boolean)
-              .map((tag, index) => (
-                <span
-                  key={index}
-                  className="border border-line px-2.5 py-1 font-mono text-[10px] uppercase tracking-widest text-muted"
-                >
-                  {tag}
-                </span>
-              ))}
-          </div>
+          <TagList tags={tags} />
         </div>
 
         {/* Photographer */}
