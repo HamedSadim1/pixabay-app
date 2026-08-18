@@ -6,54 +6,10 @@ import Frame from "./Frame";
 import SprocketStrip from "./SprocketStrip";
 import Icon from "./Icon";
 import { buttonClasses } from "../constants/buttonStyles";
-import type { IconName } from "../constants/icons";
+import { FEATURED_POSTS, FEATURES } from "../constants/mockData";
 import { PATHS } from "../constants/routes";
 
 const Home: React.FC = () => {
-  const featuredPosts = [
-    {
-      name: "Sarah",
-      image: "https://picsum.photos/200/200?random=1",
-      text: "Just joined this amazing community! So excited to connect with everyone and share some awesome content. Looking forward to your posts! 🚀",
-    },
-    {
-      name: "Mike Johnson",
-      image: "https://picsum.photos/200/200?random=7",
-      text: "Great to see such an active community here. The discussions are always interesting and the people are so welcoming. Keep up the good work everyone!",
-    },
-    {
-      name: "Emma Davis",
-      image: "https://picsum.photos/200/200?random=8",
-      text: "Love the new features! The interface is so smooth and the content quality is outstanding. This platform keeps getting better and better.",
-    },
-  ];
-
-  const features: {
-    icon: IconName;
-    title: string;
-    description: string;
-    to: string;
-  }[] = [
-    {
-      icon: "pen",
-      title: "Blog Posts",
-      description: "Read and share stories from the community.",
-      to: PATHS.posts,
-    },
-    {
-      icon: "search",
-      title: "Image Search",
-      description: "Query the Pixabay archive by keyword and filter.",
-      to: PATHS.search,
-    },
-    {
-      icon: "location",
-      title: "Location",
-      description: "Find your position with the geolocation service.",
-      to: PATHS.location,
-    },
-  ];
-
   return (
     <div className="space-y-12">
       {/* Hero */}
@@ -84,7 +40,7 @@ const Home: React.FC = () => {
 
       {/* Features */}
       <section className="grid gap-4 md:grid-cols-3">
-        {features.map((feature, index) => (
+        {FEATURES.map((feature, index) => (
           <Link key={feature.title} to={feature.to} className="group block">
             <Frame
               frame={`FRAME/0${index + 1}`}
@@ -110,7 +66,7 @@ const Home: React.FC = () => {
       <section>
         <SprocketStrip label="Recent Activity" className="mb-6" />
         <div className="space-y-3">
-          {featuredPosts.map((post, index) => (
+          {FEATURED_POSTS.map((post, index) => (
             <BlogPost
               key={index}
               frame={`#${String(index + 1).padStart(3, "0")}`}

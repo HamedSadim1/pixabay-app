@@ -1,13 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { PRELOAD_DELAY_MS } from "../config/api";
 import { NAV_LINKS } from "../constants/navLinks";
 import { routePreloaders } from "../constants/routeLoaders";
 import { PATHS } from "../constants/routes";
 import Icon from "./Icon";
-
-// Only start downloading a route's chunk after the user has hovered/focused
-// the link for this long, so a quick pass over the menu doesn't fetch it.
-const PRELOAD_DELAY_MS = 120;
 
 const Navbar: React.FC = () => {
   const location = useLocation();

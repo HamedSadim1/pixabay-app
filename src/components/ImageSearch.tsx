@@ -41,11 +41,11 @@ function ImageSearch() {
     setMinHeight,
   } = useSearch();
 
-  const onInputChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
+  const onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
   };
 
-  const onSubmitForm: React.FormEventHandler<HTMLFormElement> = (e) => {
+  const onSubmitForm = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (search.trim() && !isSearchUnchanged) {
       performSearch();
@@ -57,9 +57,7 @@ function ImageSearch() {
     searchInputRef.current?.focus();
   };
 
-  const handleKeyDownInput: React.KeyboardEventHandler<HTMLInputElement> = (
-    e,
-  ) => {
+  const handleKeyDownInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Escape") {
       handleClearSearch();
     }

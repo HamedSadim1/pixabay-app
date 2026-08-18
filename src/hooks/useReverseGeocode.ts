@@ -11,14 +11,29 @@ export function useReverseGeocode(lat: number | null, lon: number | null) {
     isValidCoordinates(lat, lon),
   );
 
-  useEffect(() => {
+  // Derive synchronous state transitions during render instead of inside an
+  // effect, so we avoid cascading renders (React docs pattern for "storing
+  // information from previous renders").
+  const [prevLat, setPrevLat] = useState(lat);
+  const [prevLon, setPrevLon] = useState(lon);
+  if (prevLat !== lat || prevLon !== lon) {
+    setPrevLat(lat);
+    setPrevLon(lon);
     if (lat === null || lon === null) {
       setResolvingAddress(false);
+    } else {
+      setResolvingAddress(true);
+      setLocationName("");
+    }
+  }
+
+  // The effect only handles the async fetch — all synchronous state transitions
+  // are derived during render above.
+  useEffect(() => {
+    if (lat === null || lon === null) {
       return;
     }
     let cancelled = false;
-    setResolvingAddress(true);
-    setLocationName("");
     void fetchAddress(lat, lon).then((address) => {
       if (!cancelled) {
         setResolvingAddress(false);

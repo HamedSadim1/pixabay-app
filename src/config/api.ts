@@ -16,3 +16,13 @@ export const API_ENDPOINTS = {
 
 // Shared timeout (ms) for outbound API requests.
 export const REQUEST_TIMEOUT_MS = 10_000;
+
+// Timeout (ms) for image-download blob fetch.
+export const DOWNLOAD_TIMEOUT_MS = 15_000;
+
+// Browser geolocation timeout (ms) and maximum cached age (ms).
+export const GEO_TIMEOUT_MS = 15_000;
+export const GEO_MAX_AGE_MS = 300_000; // 5 minutes
+
+// Delay (ms) before preloading a route on hover/focus.
+export const PRELOAD_DELAY_MS = 120;

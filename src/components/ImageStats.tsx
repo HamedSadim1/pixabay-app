@@ -1,8 +1,7 @@
 import React from "react";
 import Icon from "./Icon";
 import MetaLabel from "./MetaLabel";
-import { formatNumber } from "../utils/format";
-import type { IconName } from "../constants/icons";
+import { getImageStatsFields } from "../utils/format";
 
 interface ImageStatsProps {
   likes: number;
@@ -20,13 +19,13 @@ const ImageStats: React.FC<ImageStatsProps> = ({
   comments,
   collections,
 }) => {
-  const stats: [IconName, string, string][] = [
-    ["heart", formatNumber(likes), "Likes"],
-    ["eye", formatNumber(views), "Views"],
-    ["download", formatNumber(downloads), "Downloads"],
-    ["comment", formatNumber(comments), "Comments"],
-    ["bookmark", formatNumber(collections), "Collections"],
-  ];
+  const stats = getImageStatsFields({
+    likes,
+    views,
+    downloads,
+    comments,
+    collections,
+  });
 
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">

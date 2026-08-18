@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { GEO_TIMEOUT_MS, GEO_MAX_AGE_MS } from "../config/api";
 
 export interface LocationDetails {
   accuracy: number | null;
@@ -11,9 +12,6 @@ export interface Coordinates {
   latitude: number;
   longitude: number;
 }
-
-const GEO_TIMEOUT_MS = 15_000;
-const GEO_MAX_AGE_MS = 300_000; // 5 minutes
 
 // Browser geolocation + permission handling. `getLocation` resolves to the
 // coordinates on success (and sets `details`) or null on failure (with

@@ -5,7 +5,11 @@ import { getImageById, NotFoundError } from "../api/pixabay";
 import { getErrorMessage } from "../utils/error";
 import { PATHS } from "../constants/routes";
 import { buttonClasses } from "../constants/buttonStyles";
+import { DOWNLOAD_TIMEOUT_MS } from "../config/api";
 import { getFileExtension, getImageInfoFields } from "../utils/format";
+
+const IMAGE_NOT_FOUND_TITLE = "Image Not Found";
+const IMAGE_NOT_FOUND_MESSAGE = "The requested frame could not be found.";
 import AuthorHeader from "./AuthorHeader";
 import Avatar from "./Avatar";
 import Button from "./Button";
@@ -15,9 +19,6 @@ import ImageStats from "./ImageStats";
 import Spinner from "./Spinner";
 import StatusCard from "./StatusCard";
 import TagList from "./TagList";
-
-// Timeout (ms) for the image-download blob fetch.
-const DOWNLOAD_TIMEOUT_MS = 15_000;
 
 const ImageDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -113,8 +114,8 @@ const ImageDetail: React.FC = () => {
         <StatusCard
           tone="gold"
           icon="warning"
-          title="Image Not Found"
-          message="The requested frame could not be found."
+          title={IMAGE_NOT_FOUND_TITLE}
+          message={IMAGE_NOT_FOUND_MESSAGE}
           actions={
             <Button onClick={goBack}>
               <Icon name="arrowLeft" /> Go Back
@@ -156,8 +157,8 @@ const ImageDetail: React.FC = () => {
         <StatusCard
           tone="gold"
           icon="warning"
-          title="Image Not Found"
-          message="The requested frame could not be found."
+          title={IMAGE_NOT_FOUND_TITLE}
+          message={IMAGE_NOT_FOUND_MESSAGE}
           actions={
             <Button onClick={goBack}>
               <Icon name="arrowLeft" /> Go Back

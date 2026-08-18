@@ -167,9 +167,14 @@ export const useSearch = (): SearchState & SearchActions => {
 
   // Keep the draft input in sync with the committed URL query when it changes
   // externally (e.g. browser back/forward), so the field never goes stale.
-  useEffect(() => {
+  // Using render-time state adjustment instead of an effect avoids cascading
+  // renders (see https://react.dev/reference/react/useState#storing-information-
+  // from-previous-renders).
+  const [prevQ, setPrevQ] = useState(q);
+  if (prevQ !== q) {
+    setPrevQ(q);
     setSearch(q);
-  }, [q]);
+  }
 
   const setImageType = (value: ImageType) => {
     void setSearchParams({ type: value });

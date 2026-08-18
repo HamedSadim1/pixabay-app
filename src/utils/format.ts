@@ -49,6 +49,8 @@ export function formatFileSize(bytes: number): string {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
 }
 
+import type { IconName } from "../constants/icons";
+
 // Returns the key-value pairs displayed in the image-detail information panel.
 export function getImageInfoFields(
   image: Pick<Hit, "id" | "imageWidth" | "imageHeight" | "imageSize" | "type">,
@@ -59,4 +61,22 @@ export function getImageInfoFields(
     ["File Size", formatFileSize(image.imageSize)],
     ["Type", image.type],
   ];
+}
+
+// Returns the icon / formatted-value / label triples for the image statistics grid.
+export function getImageStatsFields(
+  stats: Record<string, number>,
+): [icon: IconName, value: string, label: string][] {
+  const STAT_CONFIG: { key: string; icon: IconName; label: string }[] = [
+    { key: "likes", icon: "heart", label: "Likes" },
+    { key: "views", icon: "eye", label: "Views" },
+    { key: "downloads", icon: "download", label: "Downloads" },
+    { key: "comments", icon: "comment", label: "Comments" },
+    { key: "collections", icon: "bookmark", label: "Collections" },
+  ];
+  return STAT_CONFIG.map(({ key, icon, label }) => [
+    icon,
+    formatNumber(stats[key] ?? 0),
+    label,
+  ]);
 }

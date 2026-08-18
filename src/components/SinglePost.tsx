@@ -6,13 +6,7 @@ import Icon from "./Icon";
 import MetaLabel from "./MetaLabel";
 import { useShareFeedback } from "../hooks/useShareFeedback";
 import { useToggle } from "../hooks/useToggle";
-
-interface Comment {
-  name: string;
-  time: string;
-  avatar: string;
-  text: string;
-}
+import { INITIAL_COMMENTS, type Comment } from "../constants/mockData";
 
 function SinglePost() {
   const [isLiked, toggleLiked] = useToggle(false);
@@ -31,26 +25,7 @@ function SinglePost() {
       commentInputRef.current?.focus({ preventScroll: true });
     }
   }, []);
-  const [comments, setComments] = useState<Comment[]>([
-    {
-      name: "John Doe",
-      time: "2 hours ago",
-      avatar: "https://picsum.photos/200/200?random=3",
-      text: "Welcome to the community, Sarah! Looking forward to your posts! 🚀",
-    },
-    {
-      name: "Jane Smith",
-      time: "1 hour ago",
-      avatar: "https://picsum.photos/200/200?random=4",
-      text: "So glad you're here! The community is amazing. 💫",
-    },
-    {
-      name: "Mike Johnson",
-      time: "30 min ago",
-      avatar: "https://picsum.photos/200/200?random=5",
-      text: "Welcome aboard! Don't forget to check out the guidelines. 📚",
-    },
-  ]);
+  const [comments, setComments] = useState<Comment[]>(INITIAL_COMMENTS);
 
   const handleLike = () => {
     toggleLiked();

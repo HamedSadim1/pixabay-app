@@ -89,7 +89,7 @@ const LocationMap: React.FC<LocationMapProps> = ({ latitude, longitude }) => {
       aria-label="Location map"
       className={
         isFullscreen
-          ? "fixed inset-0 z-[2000] bg-dark"
+          ? "fixed inset-0 z-2000 bg-dark"
           : "relative h-64 w-full sm:h-80 lg:h-96"
       }
     >
@@ -109,7 +109,7 @@ const LocationMap: React.FC<LocationMapProps> = ({ latitude, longitude }) => {
         <FullscreenController isFullscreen={isFullscreen} />
       </MapContainer>
       {tilesFailed && (
-        <div className="pointer-events-none absolute inset-0 z-[500] flex items-center justify-center bg-dark/60">
+        <div className="pointer-events-none absolute inset-0 z-500 flex items-center justify-center bg-dark/60">
           <p className="border border-safelight bg-panel px-3 py-2 font-mono text-[10px] uppercase tracking-meta text-safelight">
             Map tiles unavailable
           </p>
@@ -118,7 +118,7 @@ const LocationMap: React.FC<LocationMapProps> = ({ latitude, longitude }) => {
       <button
         type="button"
         onClick={() => setIsFullscreen((prev) => !prev)}
-        className="absolute right-3 top-3 z-[1000] inline-flex items-center gap-1.5 border border-line bg-panel px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.12em] text-paper transition-colors hover:border-gold hover:text-gold"
+        className="absolute right-3 top-3 z-1000 inline-flex items-center gap-1.5 border border-line bg-panel px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.12em] text-paper transition-colors hover:border-gold hover:text-gold"
       >
         <Icon name={isFullscreen ? "compress" : "expand"} />
         {isFullscreen ? "Close" : "Expand"}
