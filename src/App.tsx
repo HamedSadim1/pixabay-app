@@ -3,15 +3,16 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { NuqsAdapter } from "nuqs/adapters/react-router/v7";
 import Navbar from "./components/Navbar";
 import Home from "./components/Home";
-import SinglePost from "./components/SinglePost";
-import UserCard from "./components/UserCard";
-import ImageSearch from "./components/ImageSearch";
 import ImageDetail from "./components/ImageDetail";
+import UserCard from "./components/UserCard";
 import ErrorBoundary from "./components/ErrorBoundary";
 import SprocketStrip from "./components/SprocketStrip";
 
-// Load the map (Leaflet) only when the location route is visited.
+// Heavy routes are lazy-loaded so their dependencies (Leaflet, the search UI,
+// the post list) only download when the route is visited.
 const Geolocation = lazy(() => import("./components/Geolocation"));
+const ImageSearch = lazy(() => import("./components/ImageSearch"));
+const SinglePost = lazy(() => import("./components/SinglePost"));
 
 interface PageHeaderProps {
   index: string;
@@ -38,6 +39,12 @@ const PageHeader: React.FC<PageHeaderProps> = ({ index, title, subtitle }) => (
   </header>
 );
 
+const RouteFallback: React.FC = () => (
+  <div className="flex justify-center py-16">
+    <div className="h-10 w-10 animate-spin rounded-full border-2 border-line border-t-safelight" />
+  </div>
+);
+
 function App() {
   return (
     <BrowserRouter>
@@ -57,7 +64,9 @@ function App() {
                         title="Image Search"
                         subtitle="Query the Pixabay archive"
                       />
-                      <ImageSearch />
+                      <Suspense fallback={<RouteFallback />}>
+                        <ImageSearch />
+                      </Suspense>
                     </section>
                   }
                 />
@@ -70,7 +79,9 @@ function App() {
                         title="Blog Posts"
                         subtitle="Community contact sheet"
                       />
-                      <SinglePost />
+                      <Suspense fallback={<RouteFallback />}>
+                        <SinglePost />
+                      </Suspense>
                     </section>
                   }
                 />
@@ -83,13 +94,7 @@ function App() {
                         title="Location"
                         subtitle="Geolocation darkroom"
                       />
-                      <Suspense
-                        fallback={
-                          <div className="flex justify-center py-16">
-                            <div className="h-10 w-10 animate-spin rounded-full border-2 border-line border-t-safelight" />
-                          </div>
-                        }
-                      >
+                      <Suspense fallback={<RouteFallback />}>
                         <Geolocation />
                       </Suspense>
                     </section>
