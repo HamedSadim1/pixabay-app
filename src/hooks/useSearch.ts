@@ -322,8 +322,10 @@ export const useSearch = (): SearchState & SearchActions => {
   // Auto-apply filter changes: re-run the current search whenever a filter is
   // updated, debounced so typing in the min-width/min-height inputs doesn't
   // fire a request per keystroke. The effect event always reads the latest
-  // state, and the ref skips the initial mount so we don't double-fetch right
-  // after restoring a query from the URL.
+  // state. Comparing against the previous filter values (rather than a
+  // "first run" flag) skips the initial mount AND survives StrictMode's
+  // double-invoked effects, so navigating back never fires a duplicate fetch
+  // that makes the results flicker.
   const applyFilterSearch = useEffectEvent(() => {
     if (lastSearch === null) {
       return;
@@ -331,12 +333,31 @@ export const useSearch = (): SearchState & SearchActions => {
     performSearch(1, false, q);
   });
 
-  const isFirstFilterRun = useRef(true);
+  const prevFiltersRef = useRef({
+    imageType,
+    orientation,
+    color,
+    minWidth,
+    minHeight,
+  });
   useEffect(() => {
-    if (isFirstFilterRun.current) {
-      isFirstFilterRun.current = false;
+    const prev = prevFiltersRef.current;
+    if (
+      prev.imageType === imageType &&
+      prev.orientation === orientation &&
+      prev.color === color &&
+      prev.minWidth === minWidth &&
+      prev.minHeight === minHeight
+    ) {
       return;
     }
+    prevFiltersRef.current = {
+      imageType,
+      orientation,
+      color,
+      minWidth,
+      minHeight,
+    };
     const timer = setTimeout(() => {
       applyFilterSearch();
     }, FILTER_DEBOUNCE_MS);
