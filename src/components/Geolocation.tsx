@@ -1,19 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useEffectEvent } from "react";
+import { parseAsFloat, useQueryStates } from "nuqs";
 import Button from "./Button";
 import Frame from "./Frame";
 import Icon from "./Icon";
 import LocationMap from "./LocationMap";
-
-interface LocationData {
-  latitude: number;
-  longitude: number;
-  accuracy: number;
-  timestamp: number;
-  altitude?: number;
-  altitudeAccuracy?: number;
-  heading?: number;
-  speed?: number;
-}
 
 interface NominatimAddress {
   house_number?: string;
@@ -30,16 +20,64 @@ interface NominatimResponse {
   address?: NominatimAddress;
 }
 
+// Browser-only extras that aren't persisted to the URL.
+interface LocationDetails {
+  accuracy: number | null;
+  altitude: number | null;
+  speed: number | null;
+  lastUpdated: Date | null;
+}
+
+async function fetchAddress(
+  latitude: number,
+  longitude: number,
+): Promise<string> {
+  try {
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=jsonv2&addressdetails=1&accept-language=en`,
+    );
+    const geoData = (await response.json()) as NominatimResponse;
+    const address = geoData.address;
+    if (address) {
+      const street = [address.house_number, address.road]
+        .filter(Boolean)
+        .join(" ");
+      const locality = address.city || address.town || address.village || "";
+      const parts = [street, address.postcode, locality, address.country]
+        .filter(Boolean)
+        .join(", ");
+      return parts || geoData.display_name || "";
+    }
+    return geoData.display_name || "";
+  } catch (geoError) {
+    console.warn("Could not fetch location address:", geoError);
+    return "";
+  }
+}
+
 function Geolocation() {
-  const [locationData, setLocationData] = useState<LocationData | null>(null);
+  // Coordinates live in the URL so the location is shareable and is restored
+  // when navigating back. Extras (accuracy/altitude/speed) stay local.
+  const [{ lat, lon }, setCoordinates] = useQueryStates(
+    { lat: parseAsFloat, lon: parseAsFloat },
+    { history: "replace" },
+  );
+
+  const [details, setDetails] = useState<LocationDetails>({
+    accuracy: null,
+    altitude: null,
+    speed: null,
+    lastUpdated: null,
+  });
+  const [locationName, setLocationName] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(
+    () => lat === null || lon === null,
+  );
   const [permissionStatus, setPermissionStatus] =
     useState<PermissionState | null>(null);
-  const [locationName, setLocationName] = useState<string>("");
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
-  const getLocation = async () => {
+  const getBrowserLocation = async () => {
     if (!navigator.geolocation) {
       setErrorMessage("Geolocation is not supported by this browser");
       setLoading(false);
@@ -60,44 +98,16 @@ function Geolocation() {
         },
       );
 
-      const data: LocationData = {
-        latitude: position.coords.latitude,
-        longitude: position.coords.longitude,
+      void setCoordinates({
+        lat: position.coords.latitude,
+        lon: position.coords.longitude,
+      });
+      setDetails({
         accuracy: position.coords.accuracy,
-        timestamp: position.timestamp,
-        altitude: position.coords.altitude || undefined,
-        altitudeAccuracy: position.coords.altitudeAccuracy || undefined,
-        heading: position.coords.heading || undefined,
-        speed: position.coords.speed || undefined,
-      };
-
-      setLocationData(data);
-      setLastUpdated(new Date());
-
-      // Reverse geocode to a human-readable street address via OpenStreetMap
-      // Nominatim (free, no API key).
-      try {
-        const response = await fetch(
-          `https://nominatim.openstreetmap.org/reverse?lat=${data.latitude}&lon=${data.longitude}&format=jsonv2&addressdetails=1&accept-language=en`,
-        );
-        const geoData = (await response.json()) as NominatimResponse;
-        const address = geoData.address;
-        if (address) {
-          const street = [address.house_number, address.road]
-            .filter(Boolean)
-            .join(" ");
-          const locality =
-            address.city || address.town || address.village || "";
-          const parts = [street, address.postcode, locality, address.country]
-            .filter(Boolean)
-            .join(", ");
-          setLocationName(parts || geoData.display_name || "");
-        } else if (geoData.display_name) {
-          setLocationName(geoData.display_name);
-        }
-      } catch (geoError) {
-        console.warn("Could not fetch location address:", geoError);
-      }
+        altitude: position.coords.altitude ?? null,
+        speed: position.coords.speed ?? null,
+        lastUpdated: new Date(),
+      });
     } catch (err) {
       const error = err as GeolocationPositionError;
       let message = "Unable to get your location";
@@ -121,10 +131,35 @@ function Geolocation() {
     }
   };
 
-  useEffect(() => {
-    getLocation();
+  // On mount, request the browser location only if the URL has no coordinates.
+  const requestInitialLocation = useEffectEvent(() => {
+    if (lat === null || lon === null) {
+      void getBrowserLocation();
+    }
+  });
 
-    // Check permission status
+  useEffect(() => {
+    requestInitialLocation();
+  }, []);
+
+  // Reverse geocode whenever the coordinates change (geolocation or restore).
+  useEffect(() => {
+    if (lat === null || lon === null) {
+      return;
+    }
+    let cancelled = false;
+    void fetchAddress(lat, lon).then((address) => {
+      if (!cancelled) {
+        setLocationName(address);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [lat, lon]);
+
+  // Check permission status.
+  useEffect(() => {
     if ("permissions" in navigator) {
       navigator.permissions.query({ name: "geolocation" }).then((result) => {
         setPermissionStatus(result.state);
@@ -148,7 +183,28 @@ function Geolocation() {
     return `${(accuracy / 1000).toFixed(1)}km`;
   };
 
-  if (loading) {
+  if (lat === null || lon === null) {
+    if (errorMessage) {
+      return (
+        <div className="mx-auto max-w-4xl space-y-6">
+          <div className="border border-safelight bg-safelight/10 p-6">
+            <div className="mb-3 flex items-center gap-3">
+              <span className="text-2xl text-safelight">
+                <Icon name="warning" />
+              </span>
+              <h3 className="font-display text-xl uppercase tracking-[0.03em] text-paper">
+                Location Error
+              </h3>
+            </div>
+            <p className="mb-5 font-mono text-xs text-muted">{errorMessage}</p>
+            <Button onClick={getBrowserLocation} variant="primary">
+              <Icon name="rotateRight" /> Try Again
+            </Button>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="mx-auto max-w-2xl space-y-6">
         <div className="border border-line bg-panel p-10 text-center">
@@ -180,129 +236,109 @@ function Geolocation() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
-      {errorMessage ? (
-        <div className="border border-safelight bg-safelight/10 p-6">
-          <div className="mb-3 flex items-center gap-3">
-            <span className="text-2xl text-safelight">
-              <Icon name="warning" />
-            </span>
-            <h3 className="font-display text-xl uppercase tracking-[0.03em] text-paper">
-              Location Error
-            </h3>
+      {/* Main Location Card */}
+      <Frame frame="COORD/01">
+        <div className="p-6">
+          <div className="mb-6 flex items-start justify-between gap-4">
+            <div>
+              <h2 className="font-display text-xl uppercase tracking-[0.03em] text-paper">
+                Current Location
+              </h2>
+            </div>
+            <button
+              onClick={getBrowserLocation}
+              disabled={loading}
+              title="Refresh Location"
+              className="border border-line px-3 py-2 text-muted transition-colors hover:border-safelight hover:text-safelight disabled:opacity-50"
+            >
+              <Icon name="rotateRight" />
+            </button>
           </div>
-          <p className="mb-5 font-mono text-xs text-muted">{errorMessage}</p>
-          <Button onClick={getLocation} variant="primary">
-            <Icon name="rotateRight" /> Try Again
-          </Button>
-        </div>
-      ) : locationData ? (
-        <div className="space-y-6">
-          {/* Main Location Card */}
-          <Frame frame="COORD/01">
-            <div className="p-6">
-              <div className="mb-6 flex items-start justify-between gap-4">
-                <div>
-                  <h2 className="font-display text-xl uppercase tracking-[0.03em] text-paper">
-                    Current Location
-                  </h2>
-                </div>
-                <button
-                  onClick={getLocation}
-                  disabled={loading}
-                  title="Refresh Location"
-                  className="border border-line px-3 py-2 text-muted transition-colors hover:border-safelight hover:text-safelight disabled:opacity-50"
-                >
-                  <Icon name="rotateRight" />
-                </button>
-              </div>
 
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="border border-line bg-panel-2 p-4">
-                  <h3 className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-muted">
-                    Latitude
-                  </h3>
-                  <p className="font-mono text-xl text-safelight">
-                    {formatCoordinate(locationData.latitude, "lat")}
-                  </p>
-                </div>
-                <div className="border border-line bg-panel-2 p-4">
-                  <h3 className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-muted">
-                    Longitude
-                  </h3>
-                  <p className="font-mono text-xl text-safelight">
-                    {formatCoordinate(locationData.longitude, "lng")}
-                  </p>
-                </div>
-                {locationName && (
-                  <div className="border border-line bg-panel-2 p-4 md:col-span-2">
-                    <h3 className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-muted">
-                      Address
-                    </h3>
-                    <p className="font-mono text-sm text-paper">
-                      {locationName}
-                    </p>
-                  </div>
-                )}
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="border border-line bg-panel-2 p-4">
+              <h3 className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-muted">
+                Latitude
+              </h3>
+              <p className="font-mono text-xl text-safelight">
+                {formatCoordinate(lat, "lat")}
+              </p>
+            </div>
+            <div className="border border-line bg-panel-2 p-4">
+              <h3 className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-muted">
+                Longitude
+              </h3>
+              <p className="font-mono text-xl text-safelight">
+                {formatCoordinate(lon, "lng")}
+              </p>
+            </div>
+            {locationName && (
+              <div className="border border-line bg-panel-2 p-4 md:col-span-2">
+                <h3 className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-muted">
+                  Address
+                </h3>
+                <p className="font-mono text-sm text-paper">{locationName}</p>
               </div>
+            )}
+          </div>
 
-              <div className="mt-4 grid gap-4 md:grid-cols-3">
+          {(details.accuracy !== null ||
+            details.altitude !== null ||
+            details.speed !== null) && (
+            <div className="mt-4 grid gap-4 md:grid-cols-3">
+              {details.accuracy !== null && (
                 <div className="border border-line bg-panel-2 p-4">
                   <h4 className="mb-1 font-mono text-[10px] uppercase tracking-[0.2em] text-muted">
                     Accuracy
                   </h4>
                   <p className="font-mono text-sm text-paper">
-                    ±{formatAccuracy(locationData.accuracy)}
+                    ±{formatAccuracy(details.accuracy)}
                   </p>
                 </div>
-                {locationData.altitude && (
-                  <div className="border border-line bg-panel-2 p-4">
-                    <h4 className="mb-1 font-mono text-[10px] uppercase tracking-[0.2em] text-muted">
-                      Altitude
-                    </h4>
-                    <p className="font-mono text-sm text-paper">
-                      {Math.round(locationData.altitude)}m
-                    </p>
-                  </div>
-                )}
-                {locationData.speed !== null &&
-                  locationData.speed !== undefined && (
-                    <div className="border border-line bg-panel-2 p-4">
-                      <h4 className="mb-1 font-mono text-[10px] uppercase tracking-[0.2em] text-muted">
-                        Speed
-                      </h4>
-                      <p className="font-mono text-sm text-paper">
-                        {(locationData.speed * 3.6).toFixed(1)} km/h
-                      </p>
-                    </div>
-                  )}
-              </div>
-
-              {lastUpdated && (
-                <div className="mt-5 border-t border-line pt-4 font-mono text-[10px] uppercase tracking-[0.15em] text-muted">
-                  Last updated: {lastUpdated.toLocaleString()}
+              )}
+              {details.altitude !== null && (
+                <div className="border border-line bg-panel-2 p-4">
+                  <h4 className="mb-1 font-mono text-[10px] uppercase tracking-[0.2em] text-muted">
+                    Altitude
+                  </h4>
+                  <p className="font-mono text-sm text-paper">
+                    {Math.round(details.altitude)}m
+                  </p>
+                </div>
+              )}
+              {details.speed !== null && (
+                <div className="border border-line bg-panel-2 p-4">
+                  <h4 className="mb-1 font-mono text-[10px] uppercase tracking-[0.2em] text-muted">
+                    Speed
+                  </h4>
+                  <p className="font-mono text-sm text-paper">
+                    {(details.speed * 3.6).toFixed(1)} km/h
+                  </p>
                 </div>
               )}
             </div>
-          </Frame>
+          )}
 
-          {/* Map Preview */}
-          <Frame frame="COORD/02">
-            <div className="p-6">
-              <h3 className="mb-4 font-display text-lg uppercase tracking-[0.03em] text-paper">
-                Location Preview
-              </h3>
-              <LocationMap
-                latitude={locationData.latitude}
-                longitude={locationData.longitude}
-              />
-              <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.15em] text-muted">
-                {formatCoordinate(locationData.latitude, "lat")} ·{" "}
-                {formatCoordinate(locationData.longitude, "lng")}
-              </p>
+          {details.lastUpdated && (
+            <div className="mt-5 border-t border-line pt-4 font-mono text-[10px] uppercase tracking-[0.15em] text-muted">
+              Last updated: {details.lastUpdated.toLocaleString()}
             </div>
-          </Frame>
+          )}
         </div>
-      ) : null}
+      </Frame>
+
+      {/* Map Preview */}
+      <Frame frame="COORD/02">
+        <div className="p-6">
+          <h3 className="mb-4 font-display text-lg uppercase tracking-[0.03em] text-paper">
+            Location Preview
+          </h3>
+          <LocationMap latitude={lat} longitude={lon} />
+          <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.15em] text-muted">
+            {formatCoordinate(lat, "lat")} · {formatCoordinate(lon, "lng")}
+          </p>
+        </div>
+      </Frame>
     </div>
   );
 }
