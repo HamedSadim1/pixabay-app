@@ -1,15 +1,17 @@
-import React from "react";
+import React, { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { NuqsAdapter } from "nuqs/adapters/react-router/v7";
 import Navbar from "./components/Navbar";
 import Home from "./components/Home";
-import Geolocation from "./components/Geolocation";
 import SinglePost from "./components/SinglePost";
 import UserCard from "./components/UserCard";
 import ImageSearch from "./components/ImageSearch";
 import ImageDetail from "./components/ImageDetail";
 import ErrorBoundary from "./components/ErrorBoundary";
 import SprocketStrip from "./components/SprocketStrip";
+
+// Load the map (Leaflet) only when the location route is visited.
+const Geolocation = lazy(() => import("./components/Geolocation"));
 
 interface PageHeaderProps {
   index: string;
@@ -81,7 +83,15 @@ function App() {
                         title="Location"
                         subtitle="Geolocation darkroom"
                       />
-                      <Geolocation />
+                      <Suspense
+                        fallback={
+                          <div className="flex justify-center py-16">
+                            <div className="h-10 w-10 animate-spin rounded-full border-2 border-line border-t-safelight" />
+                          </div>
+                        }
+                      >
+                        <Geolocation />
+                      </Suspense>
                     </section>
                   }
                 />

@@ -140,13 +140,30 @@ body {
   border: none;
 }
 .map-marker__dot {
-  display: block;
-  width: 18px;
-  height: 18px;
+  position: absolute;
+  inset: 0;
   border-radius: 50%;
   background: var(--color-safelight);
   border: 3px solid var(--color-gold);
-  box-shadow: 0 0 0 4px rgba(255, 106, 57, 0.25);
+  box-shadow: 0 0 22px rgba(255, 106, 57, 1);
+}
+.map-marker__pulse {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(255, 106, 57, 0.5);
+  animation: map-pulse 1.8s ease-out infinite;
+}
+@keyframes map-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  70%,
+  100% {
+    transform: scale(3.5);
+    opacity: 0;
+  }
 }
 .leaflet-container {
   background: var(--color-panel-2);

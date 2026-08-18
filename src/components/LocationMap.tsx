@@ -12,9 +12,9 @@ interface LocationMapProps {
 // Leaflet's default marker images don't resolve cleanly under Vite.
 const markerIcon = L.divIcon({
   className: "map-marker",
-  html: '<span class="map-marker__dot"></span>',
-  iconSize: [18, 18],
-  iconAnchor: [9, 9],
+  html: '<span class="map-marker__pulse"></span><span class="map-marker__dot"></span>',
+  iconSize: [28, 28],
+  iconAnchor: [14, 14],
 });
 
 const DARK_TILES_URL =
@@ -35,9 +35,9 @@ function RecenterMap({ latitude, longitude }: LocationMapProps) {
   return null;
 }
 
-// Adjusts Leaflet when the map toggles between inline and fullscreen:
-// enables scroll-wheel zoom only in fullscreen and recalculates the size
-// after the container dimensions change.
+// The Leaflet container is always `height: 100%` of the wrapper, so the
+// wrapper controls the size. When toggling fullscreen we only have to tell
+// Leaflet to recalculate its size after the wrapper resizes.
 function FullscreenController({ isFullscreen }: { isFullscreen: boolean }) {
   const map = useMap();
 
@@ -47,10 +47,12 @@ function FullscreenController({ isFullscreen }: { isFullscreen: boolean }) {
     } else {
       map.scrollWheelZoom.disable();
     }
-    const id = window.setTimeout(() => {
+    // Wait a frame so the wrapper has reflowed to its new size before
+    // Leaflet re-measures.
+    const raf = requestAnimationFrame(() => {
       map.invalidateSize();
-    }, 60);
-    return () => window.clearTimeout(id);
+    });
+    return () => cancelAnimationFrame(raf);
   }, [isFullscreen, map]);
 
   return null;
@@ -80,15 +82,17 @@ const LocationMap: React.FC<LocationMapProps> = ({ latitude, longitude }) => {
 
   return (
     <div
-      className={isFullscreen ? "fixed inset-0 z-[2000] bg-dark" : "relative"}
+      className={
+        isFullscreen
+          ? "fixed inset-0 z-[2000] bg-dark"
+          : "relative h-64 w-full sm:h-80 lg:h-96"
+      }
     >
       <MapContainer
         center={position}
         zoom={15}
         scrollWheelZoom
-        className={
-          isFullscreen ? "h-full w-full" : "h-64 w-full sm:h-80 lg:h-96"
-        }
+        className="h-full w-full"
       >
         <TileLayer url={DARK_TILES_URL} attribution={DARK_TILES_ATTRIBUTION} />
         <Marker position={position} icon={markerIcon} />
