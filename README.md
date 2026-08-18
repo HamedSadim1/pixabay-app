@@ -1,11 +1,13 @@
 # Pixabay App
 
+[![CI](https://github.com/HamedSadim1/pixabay-app/actions/workflows/ci.yml/badge.svg)](https://github.com/HamedSadim1/pixabay-app/actions/workflows/ci.yml)
+
 Een moderne React applicatie voor het zoeken naar afbeeldingen via Pixabay API, bekijken van blog posts en community interacties met een prachtig glasmorfisme design.
 
 ## 🚀 Features
 
 - **Glasmorfisme UI**: Moderne glazen effecten met backdrop blur
-- **Afbeelding zoeken**: Pixabay API integratie voor het zoeken naar afbeeldingen
+- **Afbeelding zoeken**: Pixabay API integratie met filters (type, orientatie, kleur, minimale afmetingen) en zoekgeschiedenis
 - **Blog posts**: Toon en beheer blog content
 - **Locatie services**: Geolocation functionaliteit
 - **Responsive design**: Werkt perfect op alle apparaten
@@ -18,7 +20,7 @@ Een moderne React applicatie voor het zoeken naar afbeeldingen via Pixabay API, 
 - **Vite** - Build tool
 - **TypeScript** - Type safety
 - **Tailwind CSS v4** - Styling met glasmorfisme effecten
-- **React Router** - Client-side routing
+- **React Router 7** - Client-side routing
 - **Axios** - HTTP client
 - **React Icons** - Icon library
 
@@ -37,7 +39,11 @@ Een moderne React applicatie voor het zoeken naar afbeeldingen via Pixabay API, 
    npm install
    ```
 
-3. Maak een `.env` bestand in de root directory:
+3. Maak een `.env` bestand (of kopieer het template):
+
+   ```bash
+   cp .env.example .env
+   ```
 
    ```env
    VITE_PIXABAY_API_KEY=jouw_pixabay_api_key
@@ -55,31 +61,54 @@ Een moderne React applicatie voor het zoeken naar afbeeldingen via Pixabay API, 
 - `npm run dev` - Start development server
 - `npm run build` - Build voor productie (output naar `dist` folder)
 - `npm run preview` - Preview productie build lokaal
+- `npm run lint` - Draai ESLint over het hele project
+- `npm run lint:fix` - Draai ESLint en fix automatisch wat mogelijk is
+- `npm run typecheck` - TypeScript type check (`tsc --noEmit`)
+- `npm run format` - Format alle bestanden met Prettier
+- `npm run format:check` - Controleer of alles geformat is (gebruikt in CI)
+
+## 🛡️ Developer Tooling
+
+- **ESLint 9** - Strikt geconfigureerd (flat config): geen `any`, geen ongebruikte imports/variabelen, type-only imports, en meer
+- **Prettier** - Consistente formatting, geïntegreerd met ESLint via `eslint-config-prettier`
+- **Husky + lint-staged** - Git hooks: bij elke commit worden gestagde bestanden automatisch geformat en gelint
+- **Commitlint** - Commit messages moeten voldoen aan [Conventional Commits](https://www.conventionalcommits.org/) (bv. `feat:`, `fix:`, `chore:`)
+- **GitHub Actions** - CI workflow die lint, formatting-check, typecheck en build draait op elke pull request
 
 ## 📁 Project Structure
 
 ```bash
 src/
-├── components/          # Reusable UI components
-│   ├── BlogPost.tsx     # Blog post display component
-│   ├── FilterPanel.tsx  # Image search filters
-│   ├── Geolocation.tsx  # Location services
-│   ├── ImageList.tsx    # Image gallery display
-│   ├── ImageSearch.tsx  # Main search interface
-│   ├── Navbar.tsx       # Navigation component
+├── components/           # Reusable UI components
+│   ├── BlogPost.tsx      # Blog post display component
+│   ├── ErrorBoundary.tsx # Error boundary voor graceful error handling
+│   ├── FilterPanel.tsx   # Image search filters
+│   ├── Geolocation.tsx   # Location services
+│   ├── Home.tsx          # Home page
+│   ├── ImageDetail.tsx   # Image detail view
+│   ├── ImageList.tsx     # Image gallery display
+│   ├── ImageSearch.tsx   # Main search interface
+│   ├── LoadingSpinner.tsx # Loading state component
+│   ├── Navbar.tsx        # Navigation component
 │   ├── SearchHistory.tsx # Search history component
-│   ├── SinglePost.tsx   # Individual post view
-│   ├── UserCard.tsx     # User profile cards
-│   └── ...
-├── constants/           # Application constants
-│   ├── navLinks.ts      # Navigation links
-│   ├── types.ts         # TypeScript type definitions
-│   └── ui.ts           # UI constants and options
-├── hooks/               # Custom React hooks
-│   └── useSearch.ts     # Search functionality hook
-├── models/              # TypeScript interfaces
-│   └── IPixabay.tsx     # Pixabay API types
-└── App.tsx             # Main app component
+│   ├── SearchInput.tsx   # Search input component
+│   ├── SinglePost.tsx    # Individual post view
+│   └── UserCard.tsx      # User profile cards
+├── config/               # Configuration
+│   └── api.ts            # API configuration
+├── constants/            # Application constants
+│   ├── navLinks.ts       # Navigation links
+│   ├── types.ts          # TypeScript type definitions
+│   └── ui.ts             # UI constants and options
+├── hooks/                # Custom React hooks
+│   ├── useApi.ts         # Generic API hook
+│   └── useSearch.ts      # Search functionality hook
+├── models/               # TypeScript interfaces
+│   └── IPixabay.tsx      # Pixabay API types
+├── utils/                # Utilities
+│   └── env.ts            # Environment validation
+├── App.tsx               # Main app component
+└── main.tsx              # Entry point
 ```
 
 ## 🧪 Code Quality
@@ -92,6 +121,7 @@ Dit project volgt moderne React best practices:
 - **Environment Validation**: Voor configuration checks
 - **Component Composition**: Voor maintainable UI
 - **Constants**: Voor centralized configuration
+- **Strikte linting**: ESLint regels worden afgedwongen bij elke commit en in CI
 
 ## 🔒 Environment Variables
 
@@ -138,9 +168,11 @@ De app is volledig responsive en werkt op:
 
 1. Fork de repository
 2. Maak een feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit je changes (`git commit -m 'Add amazing feature'`)
+3. Commit je changes met een [Conventional Commit](https://www.conventionalcommits.org/) message (bv. `git commit -m "feat: add amazing feature"`)
 4. Push naar de branch (`git push origin feature/amazing-feature`)
-5. Open een Pull Request
+5. Open een Pull Request — de CI workflow draait automatisch lint, typecheck en build
+
+> **Let op:** De commit-msg hook vereist een conventionele commit message (`feat:`, `fix:`, `chore:`, ...). Een message zoals "Add amazing feature" wordt geweigerd. Pre-commit worden je gestagde bestanden automatisch geformat (Prettier) en gelint (ESLint).
 
 ## 📄 License
 
