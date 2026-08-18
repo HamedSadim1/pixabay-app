@@ -1,18 +1,37 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { NAV_LINKS } from "../constants/navLinks";
 import { routePreloaders } from "../constants/routeLoaders";
 import Icon from "./Icon";
 
-// Start downloading a route's chunk as soon as the user hovers/focuses its
-// link, so navigation feels instant.
-const preloadRoute = (to: string) => {
-  void routePreloaders[to]?.();
-};
+// Only start downloading a route's chunk after the user has hovered/focused
+// the link for this long, so a quick pass over the menu doesn't fetch it.
+const PRELOAD_DELAY_MS = 120;
 
 const Navbar: React.FC = () => {
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
+  const preloadTimers = useRef(new Map<string, number>());
+
+  const schedulePreload = (to: string) => {
+    const existing = preloadTimers.current.get(to);
+    if (existing !== undefined) {
+      window.clearTimeout(existing);
+    }
+    const timer = window.setTimeout(() => {
+      void routePreloaders[to]?.();
+      preloadTimers.current.delete(to);
+    }, PRELOAD_DELAY_MS);
+    preloadTimers.current.set(to, timer);
+  };
+
+  const cancelPreload = (to: string) => {
+    const timer = preloadTimers.current.get(to);
+    if (timer !== undefined) {
+      window.clearTimeout(timer);
+      preloadTimers.current.delete(to);
+    }
+  };
 
   const isLinkActive = (linkTo: string) => {
     return (
@@ -52,8 +71,10 @@ const Navbar: React.FC = () => {
                 <Link
                   to={link.to}
                   onClick={() => setMenuOpen(false)}
-                  onMouseEnter={() => preloadRoute(link.to)}
-                  onFocus={() => preloadRoute(link.to)}
+                  onMouseEnter={() => schedulePreload(link.to)}
+                  onMouseLeave={() => cancelPreload(link.to)}
+                  onFocus={() => schedulePreload(link.to)}
+                  onBlur={() => cancelPreload(link.to)}
                   className={linkClasses(active)}
                 >
                   <Icon name={link.icon} className="text-safelight" />
@@ -85,8 +106,10 @@ const Navbar: React.FC = () => {
                   <Link
                     to={link.to}
                     onClick={() => setMenuOpen(false)}
-                    onMouseEnter={() => preloadRoute(link.to)}
-                    onFocus={() => preloadRoute(link.to)}
+                    onMouseEnter={() => schedulePreload(link.to)}
+                    onMouseLeave={() => cancelPreload(link.to)}
+                    onFocus={() => schedulePreload(link.to)}
+                    onBlur={() => cancelPreload(link.to)}
                     className={`block ${linkClasses(active)}`}
                   >
                     <Icon name={link.icon} className="text-safelight" />
