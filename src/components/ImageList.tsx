@@ -32,7 +32,7 @@ const ImageList: React.FC<ImageListProps> = ({ images }) => {
           </span>
           <div className="aspect-[4/3] overflow-hidden bg-panel-2">
             <img
-              className="h-full w-full object-cover grayscale transition-all duration-300 group-hover:scale-105 group-hover:grayscale-0"
+              className="h-full w-full object-cover grayscale transition-[filter,transform] duration-300 group-hover:scale-105 group-hover:grayscale-0"
               src={result.webformatURL}
               alt={result.tags}
               loading="lazy"

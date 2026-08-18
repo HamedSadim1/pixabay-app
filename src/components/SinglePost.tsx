@@ -49,7 +49,7 @@ function SinglePost() {
           <img
             src="https://picsum.photos/800/400?random=2"
             alt="Community"
-            className="h-56 w-full object-cover grayscale transition-all duration-300 hover:grayscale-0 md:h-72"
+            className="h-56 w-full object-cover grayscale transition-[filter] duration-300 hover:grayscale-0 md:h-72"
           />
         </div>
 
