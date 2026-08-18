@@ -2,7 +2,8 @@ import { type FC, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Avatar from "./Avatar";
 import Icon from "./Icon";
-import { sharePage } from "../utils/share";
+import MetaLabel from "./MetaLabel";
+import { useShareFeedback } from "../hooks/useShareFeedback";
 
 interface BlockProps {
   name: string;
@@ -14,7 +15,7 @@ interface BlockProps {
 const BlogPost: FC<BlockProps> = ({ name, image, text, frame }) => {
   const navigate = useNavigate();
   const [liked, setLiked] = useState(false);
-  const [shared, setShared] = useState(false);
+  const { shared, share } = useShareFeedback();
 
   const formattedTime = useMemo(
     () =>
@@ -25,13 +26,6 @@ const BlogPost: FC<BlockProps> = ({ name, image, text, frame }) => {
       }),
     [],
   );
-
-  const handleShare = async () => {
-    if (await sharePage(name, `${window.location.origin}/posts`)) {
-      setShared(true);
-      window.setTimeout(() => setShared(false), 1500);
-    }
-  };
 
   return (
     <article className="relative flex gap-4 border border-line bg-panel p-6 transition-colors hover:border-muted">
@@ -46,9 +40,7 @@ const BlogPost: FC<BlockProps> = ({ name, image, text, frame }) => {
           <span className="font-display text-sm uppercase tracking-wider text-paper">
             {name}
           </span>
-          <span className="font-mono text-[10px] uppercase tracking-meta text-muted">
-            Today at {formattedTime}
-          </span>
+          <MetaLabel>Today at {formattedTime}</MetaLabel>
         </div>
         <p className="text-sm leading-relaxed text-muted">{text}</p>
         <div className="mt-3 flex gap-5 border-t border-line pt-3">
@@ -70,7 +62,7 @@ const BlogPost: FC<BlockProps> = ({ name, image, text, frame }) => {
           </button>
           <button
             type="button"
-            onClick={handleShare}
+            onClick={() => void share(name, `${window.location.origin}/posts`)}
             className={`inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-meta transition-colors ${
               shared ? "text-gold" : "text-muted hover:text-safelight"
             }`}

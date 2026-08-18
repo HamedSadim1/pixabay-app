@@ -20,3 +20,16 @@ export const buttonVariants = {
 
 export type ButtonSize = keyof typeof buttonSizes;
 export type ButtonVariant = keyof typeof buttonVariants;
+
+// Single entry point for building button class strings, so callers don't have
+// to concatenate `buttonBase`/`buttonSizes`/`buttonVariants` by hand (which is
+// easy to get wrong and duplicates the Button component's logic).
+export function buttonClasses(
+  variant: ButtonVariant = "default",
+  size: ButtonSize = "md",
+  className?: string,
+): string {
+  return [buttonBase, buttonSizes[size], buttonVariants[variant], className]
+    .filter(Boolean)
+    .join(" ");
+}

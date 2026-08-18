@@ -7,11 +7,8 @@ import ImageDetail from "./components/ImageDetail";
 import UserCard from "./components/UserCard";
 import ErrorBoundary from "./components/ErrorBoundary";
 import SprocketStrip from "./components/SprocketStrip";
-import {
-  buttonBase,
-  buttonSizes,
-  buttonVariants,
-} from "./constants/buttonStyles";
+import Spinner from "./components/Spinner";
+import { buttonClasses } from "./constants/buttonStyles";
 import {
   loadGeolocation,
   loadImageSearch,
@@ -51,7 +48,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({ index, title, subtitle }) => (
 
 const RouteFallback: React.FC = () => (
   <div className="flex justify-center py-16">
-    <div className="h-10 w-10 animate-spin rounded-full border-2 border-line border-t-safelight" />
+    <Spinner />
   </div>
 );
 
@@ -149,10 +146,7 @@ function App() {
                           The page you're looking for is out of the contact
                           sheet.
                         </p>
-                        <Link
-                          to="/"
-                          className={`${buttonBase} ${buttonSizes.md} ${buttonVariants.default}`}
-                        >
+                        <Link to="/" className={buttonClasses("default")}>
                           Back to Home
                         </Link>
                       </div>

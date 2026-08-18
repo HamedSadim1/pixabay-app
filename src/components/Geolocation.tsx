@@ -3,6 +3,8 @@ import { parseAsFloat, useQueryStates } from "nuqs";
 import Button from "./Button";
 import Frame from "./Frame";
 import Icon from "./Icon";
+import MetaLabel from "./MetaLabel";
+import Spinner from "./Spinner";
 import LocationMap from "./LocationMap";
 
 interface NominatimAddress {
@@ -54,6 +56,30 @@ async function fetchAddress(
     console.warn("Could not fetch location address:", geoError);
     return "";
   }
+}
+
+interface DataFieldProps {
+  label: string;
+  children: React.ReactNode;
+  valueClassName?: string;
+  className?: string;
+}
+
+// Label + value block used for coordinates, address and location details.
+function DataField({
+  label,
+  children,
+  valueClassName = "text-sm text-paper",
+  className = "",
+}: DataFieldProps) {
+  return (
+    <div className={`border border-line bg-panel-2 p-4 ${className}`}>
+      <div className="mb-2 font-mono text-[10px] uppercase tracking-label text-muted">
+        {label}
+      </div>
+      <p className={`font-mono ${valueClassName}`}>{children}</p>
+    </div>
+  );
 }
 
 function Geolocation() {
@@ -275,7 +301,7 @@ function Geolocation() {
     return (
       <div className="mx-auto max-w-2xl space-y-6">
         <div className="border border-line bg-panel p-10 text-center">
-          <div className="mx-auto h-12 w-12 animate-spin rounded-full border-2 border-line border-t-safelight" />
+          <Spinner size="lg" className="mx-auto" />
           <h2 className="mt-5 font-display text-xl uppercase tracking-[0.03em] text-paper">
             Finding Your Location
           </h2>
@@ -325,38 +351,28 @@ function Geolocation() {
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
-            <div className="border border-line bg-panel-2 p-4">
-              <div className="mb-2 font-mono text-[10px] uppercase tracking-label text-muted">
-                Latitude
-              </div>
-              <p className="font-mono text-xl text-safelight">
-                {formatCoordinate(lat, "lat")}
-              </p>
-            </div>
-            <div className="border border-line bg-panel-2 p-4">
-              <div className="mb-2 font-mono text-[10px] uppercase tracking-label text-muted">
-                Longitude
-              </div>
-              <p className="font-mono text-xl text-safelight">
-                {formatCoordinate(lon, "lng")}
-              </p>
-            </div>
-            <div className="border border-line bg-panel-2 p-4 md:col-span-2">
-              <div className="mb-2 font-mono text-[10px] uppercase tracking-label text-muted">
-                Address
-              </div>
-              {resolvingAddress ? (
-                <p className="font-mono text-sm text-muted">
-                  Resolving address…
-                </p>
-              ) : locationName ? (
-                <p className="font-mono text-sm text-paper">{locationName}</p>
-              ) : (
-                <p className="font-mono text-sm text-muted">
-                  Address unavailable
-                </p>
-              )}
-            </div>
+            <DataField label="Latitude" valueClassName="text-xl text-safelight">
+              {formatCoordinate(lat, "lat")}
+            </DataField>
+            <DataField
+              label="Longitude"
+              valueClassName="text-xl text-safelight"
+            >
+              {formatCoordinate(lon, "lng")}
+            </DataField>
+            <DataField
+              label="Address"
+              className="md:col-span-2"
+              valueClassName={
+                resolvingAddress || !locationName
+                  ? "text-sm text-muted"
+                  : "text-sm text-paper"
+              }
+            >
+              {resolvingAddress
+                ? "Resolving address…"
+                : locationName || "Address unavailable"}
+            </DataField>
           </div>
 
           {(details.accuracy !== null ||
@@ -364,42 +380,27 @@ function Geolocation() {
             details.speed !== null) && (
             <div className="mt-4 grid gap-4 md:grid-cols-3">
               {details.accuracy !== null && (
-                <div className="border border-line bg-panel-2 p-4">
-                  <div className="mb-1 font-mono text-[10px] uppercase tracking-label text-muted">
-                    Accuracy
-                  </div>
-                  <p className="font-mono text-sm text-paper">
-                    ±{formatAccuracy(details.accuracy)}
-                  </p>
-                </div>
+                <DataField label="Accuracy">
+                  ±{formatAccuracy(details.accuracy)}
+                </DataField>
               )}
               {details.altitude !== null && (
-                <div className="border border-line bg-panel-2 p-4">
-                  <div className="mb-1 font-mono text-[10px] uppercase tracking-label text-muted">
-                    Altitude
-                  </div>
-                  <p className="font-mono text-sm text-paper">
-                    {Math.round(details.altitude)}m
-                  </p>
-                </div>
+                <DataField label="Altitude">
+                  {Math.round(details.altitude)}m
+                </DataField>
               )}
               {details.speed !== null && (
-                <div className="border border-line bg-panel-2 p-4">
-                  <div className="mb-1 font-mono text-[10px] uppercase tracking-label text-muted">
-                    Speed
-                  </div>
-                  <p className="font-mono text-sm text-paper">
-                    {(details.speed * 3.6).toFixed(1)} km/h
-                  </p>
-                </div>
+                <DataField label="Speed">
+                  {(details.speed * 3.6).toFixed(1)} km/h
+                </DataField>
               )}
             </div>
           )}
 
           {details.lastUpdated && (
-            <div className="mt-5 border-t border-line pt-4 font-mono text-[10px] uppercase tracking-meta text-muted">
+            <MetaLabel as="div" className="mt-5 border-t border-line pt-4">
               Last updated: {details.lastUpdated.toLocaleString()}
-            </div>
+            </MetaLabel>
           )}
         </div>
       </Frame>
@@ -411,9 +412,9 @@ function Geolocation() {
             Location Preview
           </h2>
           <LocationMap latitude={lat} longitude={lon} />
-          <p className="mt-3 font-mono text-[10px] uppercase tracking-meta text-muted">
+          <MetaLabel as="p" className="mt-3">
             {formatCoordinate(lat, "lat")} · {formatCoordinate(lon, "lng")}
-          </p>
+          </MetaLabel>
         </div>
       </Frame>
     </div>

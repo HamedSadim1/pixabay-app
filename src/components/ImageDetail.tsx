@@ -2,14 +2,14 @@ import React from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getImageById, getErrorMessage, NotFoundError } from "../api/pixabay";
-import {
-  buttonBase,
-  buttonSizes,
-  buttonVariants,
-} from "../constants/buttonStyles";
+import { buttonClasses } from "../constants/buttonStyles";
 import Avatar from "./Avatar";
 import Button from "./Button";
+import Frame from "./Frame";
 import Icon from "./Icon";
+import MetaLabel from "./MetaLabel";
+import Spinner from "./Spinner";
+import StatusCard from "./StatusCard";
 import type { IconName } from "../constants/icons";
 
 const ImageDetail: React.FC = () => {
@@ -68,6 +68,16 @@ const ImageDetail: React.FC = () => {
     </Button>
   );
 
+  // Shared page header (back link + title) used by every render state.
+  const header = (
+    <div className="flex flex-wrap items-center gap-4">
+      {backButton}
+      <h1 className="font-display text-3xl uppercase tracking-[0.03em] text-paper md:text-4xl">
+        Image Details
+      </h1>
+    </div>
+  );
+
   // Cross-origin `download` attributes are ignored by browsers, so fetch the
   // image as a blob and trigger a real download, falling back to opening the
   // original in a new tab if the fetch is blocked (e.g. CORS).
@@ -98,14 +108,9 @@ const ImageDetail: React.FC = () => {
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <div className="flex flex-wrap items-center gap-4">
-          {backButton}
-          <h1 className="font-display text-3xl uppercase tracking-[0.03em] text-paper md:text-4xl">
-            Image Details
-          </h1>
-        </div>
+        {header}
         <div className="border border-line bg-panel p-12 text-center">
-          <div className="mx-auto h-10 w-10 animate-spin rounded-full border-2 border-line border-t-safelight" />
+          <Spinner className="mx-auto" />
           <p className="mt-4 font-mono text-xs uppercase tracking-meta text-muted">
             Developing frame…
           </p>
@@ -117,26 +122,18 @@ const ImageDetail: React.FC = () => {
   if (isError && error instanceof NotFoundError) {
     return (
       <div className="space-y-6">
-        <div className="flex flex-wrap items-center gap-4">
-          {backButton}
-          <h1 className="font-display text-3xl uppercase tracking-[0.03em] text-paper md:text-4xl">
-            Image Details
-          </h1>
-        </div>
-        <div className="border border-gold bg-gold/10 p-10 text-center">
-          <div className="mb-3 text-4xl text-gold">
-            <Icon name="warning" />
-          </div>
-          <h2 className="mb-2 font-display text-lg uppercase tracking-[0.03em] text-paper">
-            Image Not Found
-          </h2>
-          <p className="mb-5 font-mono text-xs text-muted">
-            The requested frame could not be found.
-          </p>
-          <Button onClick={goBack}>
-            <Icon name="arrowLeft" /> Go Back
-          </Button>
-        </div>
+        {header}
+        <StatusCard
+          tone="gold"
+          icon="warning"
+          title="Image Not Found"
+          message="The requested frame could not be found."
+          actions={
+            <Button onClick={goBack}>
+              <Icon name="arrowLeft" /> Go Back
+            </Button>
+          }
+        />
       </div>
     );
   }
@@ -144,31 +141,23 @@ const ImageDetail: React.FC = () => {
   if (isError) {
     return (
       <div className="space-y-6">
-        <div className="flex flex-wrap items-center gap-4">
-          {backButton}
-          <h1 className="font-display text-3xl uppercase tracking-[0.03em] text-paper md:text-4xl">
-            Image Details
-          </h1>
-        </div>
-        <div className="border border-safelight bg-safelight/10 p-10 text-center">
-          <div className="mb-3 text-4xl text-safelight">
-            <Icon name="warning" />
-          </div>
-          <h2 className="mb-2 font-display text-lg uppercase tracking-[0.03em] text-paper">
-            Error Loading Image
-          </h2>
-          <p className="mb-5 font-mono text-xs text-muted">
-            {getErrorMessage(error)}
-          </p>
-          <div className="flex flex-wrap justify-center gap-3">
-            <Button variant="primary" onClick={() => void refetch()}>
-              <Icon name="rotateRight" /> Retry
-            </Button>
-            <Button onClick={goBack}>
-              <Icon name="arrowLeft" /> Go Back
-            </Button>
-          </div>
-        </div>
+        {header}
+        <StatusCard
+          tone="warning"
+          icon="warning"
+          title="Error Loading Image"
+          message={getErrorMessage(error)}
+          actions={
+            <>
+              <Button variant="primary" onClick={() => void refetch()}>
+                <Icon name="rotateRight" /> Retry
+              </Button>
+              <Button onClick={goBack}>
+                <Icon name="arrowLeft" /> Go Back
+              </Button>
+            </>
+          }
+        />
       </div>
     );
   }
@@ -176,26 +165,18 @@ const ImageDetail: React.FC = () => {
   if (!imageData) {
     return (
       <div className="space-y-6">
-        <div className="flex flex-wrap items-center gap-4">
-          {backButton}
-          <h1 className="font-display text-3xl uppercase tracking-[0.03em] text-paper md:text-4xl">
-            Image Details
-          </h1>
-        </div>
-        <div className="border border-gold bg-gold/10 p-10 text-center">
-          <div className="mb-3 text-4xl text-gold">
-            <Icon name="warning" />
-          </div>
-          <h2 className="mb-2 font-display text-lg uppercase tracking-[0.03em] text-paper">
-            Image Not Found
-          </h2>
-          <p className="mb-5 font-mono text-xs text-muted">
-            The requested frame could not be found.
-          </p>
-          <Button onClick={goBack}>
-            <Icon name="arrowLeft" /> Go Back
-          </Button>
-        </div>
+        {header}
+        <StatusCard
+          tone="gold"
+          icon="warning"
+          title="Image Not Found"
+          message="The requested frame could not be found."
+          actions={
+            <Button onClick={goBack}>
+              <Icon name="arrowLeft" /> Go Back
+            </Button>
+          }
+        />
       </div>
     );
   }
@@ -204,19 +185,9 @@ const ImageDetail: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center gap-4">
-        {backButton}
-        <h1 className="font-display text-3xl uppercase tracking-[0.03em] text-paper md:text-4xl">
-          Image Details
-        </h1>
-      </div>
+      {header}
 
-      <div className="relative border border-line bg-panel p-6">
-        <span className="vf-corner vf-tl" />
-        <span className="vf-corner vf-tr" />
-        <span className="vf-corner vf-bl" />
-        <span className="vf-corner vf-br" />
-
+      <Frame className="p-6">
         <div className="group relative">
           <img
             src={imageData.largeImageURL}
@@ -263,7 +234,7 @@ const ImageDetail: React.FC = () => {
               href={imageData.pageURL}
               target="_blank"
               rel="noopener noreferrer"
-              className={`${buttonBase} ${buttonSizes.sm} ${buttonVariants.gold} mt-4`}
+              className={buttonClasses("gold", "sm", "mt-4")}
             >
               <Icon name="arrowRight" /> View on Pixabay
             </a>
@@ -295,9 +266,7 @@ const ImageDetail: React.FC = () => {
                     <Icon name={icon} />
                   </div>
                   <div className="font-mono text-lg text-paper">{value}</div>
-                  <div className="font-mono text-[10px] uppercase tracking-meta text-muted">
-                    {label}
-                  </div>
+                  <MetaLabel as="div">{label}</MetaLabel>
                 </div>
               ))}
             </div>
@@ -336,12 +305,12 @@ const ImageDetail: React.FC = () => {
             <span className="font-display text-sm uppercase tracking-wider text-paper">
               {imageData.user}
             </span>
-            <p className="font-mono text-[10px] uppercase tracking-meta text-muted">
+            <MetaLabel as="p">
               Photographer · Member #{imageData.user_id}
-            </p>
+            </MetaLabel>
           </div>
         </div>
-      </div>
+      </Frame>
     </div>
   );
 };

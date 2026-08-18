@@ -2,8 +2,10 @@ import React, { useRef } from "react";
 import ImageList from "./ImageList";
 import FilterPanel from "./FilterPanel";
 import SearchHistory from "./SearchHistory";
+import StatusCard from "./StatusCard";
 import Button from "./Button";
 import Icon from "./Icon";
+import Spinner from "./Spinner";
 import { useSearch } from "../hooks/useSearch";
 import { TRENDING_SEARCHES } from "../constants/navLinks";
 
@@ -159,30 +161,23 @@ function ImageSearch() {
 
       {loading && results.length === 0 && (
         <div className="flex justify-center py-8">
-          <div className="h-10 w-10 animate-spin rounded-full border-2 border-line border-t-safelight" />
+          <Spinner />
         </div>
       )}
 
       {hasSearched && !loading && !error && results.length === 0 && (
-        <div className="border border-line bg-panel p-10 text-center">
-          <div className="mb-3 text-3xl text-muted">
-            <Icon name="search" />
-          </div>
-          <h2 className="mb-2 font-display text-lg uppercase tracking-[0.03em] text-paper">
-            No results found
-          </h2>
-          <p className="font-mono text-xs text-muted">
-            No images match "{search}". Try different keywords or adjust the
-            filters.
-          </p>
-        </div>
+        <StatusCard
+          icon="search"
+          title="No results found"
+          message={`No images match "${search}". Try different keywords or adjust the filters.`}
+        />
       )}
 
       <ImageList images={results} />
 
       {loadingMore && (
         <div className="flex justify-center py-8">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-line border-t-safelight" />
+          <Spinner size="sm" />
         </div>
       )}
 

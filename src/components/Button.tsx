@@ -1,8 +1,6 @@
 import React from "react";
 import {
-  buttonBase,
-  buttonSizes,
-  buttonVariants,
+  buttonClasses,
   type ButtonSize,
   type ButtonVariant,
 } from "../constants/buttonStyles";
@@ -19,10 +17,7 @@ const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   return (
-    <button
-      className={`${buttonBase} ${buttonSizes[size]} ${buttonVariants[variant]} ${className}`}
-      {...props}
-    />
+    <button className={buttonClasses(variant, size, className)} {...props} />
   );
 };
 

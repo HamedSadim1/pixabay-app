@@ -2,7 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 import Avatar from "./Avatar";
 import Button from "./Button";
 import Icon from "./Icon";
-import { sharePage } from "../utils/share";
+import MetaLabel from "./MetaLabel";
+import { useShareFeedback } from "../hooks/useShareFeedback";
 
 interface Comment {
   name: string;
@@ -15,8 +16,8 @@ function SinglePost() {
   const [isLiked, setIsLiked] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [likesCount, setLikesCount] = useState(42);
-  const [shared, setShared] = useState(false);
   const [commentText, setCommentText] = useState("");
+  const { shared, share } = useShareFeedback();
   const commentsRef = useRef<HTMLElement>(null);
   const commentInputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -58,13 +59,6 @@ function SinglePost() {
     setIsBookmarked(!isBookmarked);
   };
 
-  const handleShare = async () => {
-    if (await sharePage("Hey, I'm new here!")) {
-      setShared(true);
-      window.setTimeout(() => setShared(false), 1500);
-    }
-  };
-
   const scrollToComments = () => {
     commentsRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -95,9 +89,7 @@ function SinglePost() {
             <span className="font-display text-sm uppercase tracking-wider text-paper">
               Sarah
             </span>
-            <p className="font-mono text-[10px] uppercase tracking-meta text-muted">
-              New member • Today at 14:30
-            </p>
+            <MetaLabel as="p">New member • Today at 14:30</MetaLabel>
           </div>
         </div>
 
@@ -139,7 +131,7 @@ function SinglePost() {
             <Button
               size="sm"
               variant={shared ? "goldActive" : "ghost"}
-              onClick={handleShare}
+              onClick={() => void share("Hey, I'm new here!")}
             >
               <Icon name="share" /> {shared ? "Copied" : "Share"}
             </Button>
@@ -177,9 +169,7 @@ function SinglePost() {
                   <span className="font-display text-xs uppercase tracking-wider text-paper">
                     {comment.name}
                   </span>
-                  <span className="font-mono text-[10px] uppercase tracking-meta text-muted">
-                    {comment.time}
-                  </span>
+                  <MetaLabel>{comment.time}</MetaLabel>
                 </div>
                 <p className="text-sm text-muted">{comment.text}</p>
               </div>

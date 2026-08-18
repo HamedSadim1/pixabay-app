@@ -5,11 +5,7 @@ import UserCard from "./UserCard";
 import Frame from "./Frame";
 import SprocketStrip from "./SprocketStrip";
 import Icon from "./Icon";
-import {
-  buttonBase,
-  buttonSizes,
-  buttonVariants,
-} from "../constants/buttonStyles";
+import { buttonClasses } from "../constants/buttonStyles";
 import type { IconName } from "../constants/icons";
 
 const Home: React.FC = () => {
@@ -76,16 +72,10 @@ const Home: React.FC = () => {
           location — all inside one warm, low-light darkroom.
         </p>
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-          <Link
-            to="/search"
-            className={`${buttonBase} ${buttonSizes.md} ${buttonVariants.primary}`}
-          >
+          <Link to="/search" className={buttonClasses("primary")}>
             <Icon name="search" /> Search Images
           </Link>
-          <Link
-            to="/posts"
-            className={`${buttonBase} ${buttonSizes.md} ${buttonVariants.default}`}
-          >
+          <Link to="/posts" className={buttonClasses("default")}>
             <Icon name="pen" /> Explore Posts
           </Link>
         </div>
@@ -130,10 +120,7 @@ const Home: React.FC = () => {
           ))}
         </div>
         <div className="mt-5">
-          <Link
-            to="/posts"
-            className={`${buttonBase} ${buttonSizes.md} ${buttonVariants.default}`}
-          >
+          <Link to="/posts" className={buttonClasses("default")}>
             View All Posts <Icon name="arrowRight" />
           </Link>
         </div>
