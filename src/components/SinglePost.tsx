@@ -1,15 +1,7 @@
 import React, { useState } from "react";
-import {
-  FaHeart,
-  FaComment,
-  FaShare,
-  FaBookmark,
-  FaArrowLeft,
-} from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { FaHeart, FaComment, FaShare, FaBookmark } from "react-icons/fa";
 
 function SinglePost() {
-  const navigate = useNavigate();
   const [isLiked, setIsLiked] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [likesCount, setLikesCount] = useState(42);

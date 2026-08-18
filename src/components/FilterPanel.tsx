@@ -1,5 +1,5 @@
 import React from "react";
-import { ImageType, Orientation, Color } from "../constants/types";
+import type { ImageType, Orientation, Color } from "../constants/types";
 import { FILTER_OPTIONS } from "../constants/ui";
 
 interface FilterPanelProps {
@@ -33,7 +33,9 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ search }) => {
     setMinHeight,
   } = search;
 
-  if (!showFilters) return null;
+  if (!showFilters) {
+    return null;
+  }
 
   return (
     <div className="bg-white/5 rounded-lg p-4 border border-white/10">

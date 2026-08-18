@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { Hit } from "./../models/IPixabay";
+import type { Hit } from "./../models/IPixabay";
 
 interface ImageListProps {
   images: Hit[];

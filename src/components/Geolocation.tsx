@@ -45,7 +45,7 @@ function Geolocation() {
             timeout: 15000,
             maximumAge: 300000, // 5 minutes
           });
-        }
+        },
       );
 
       const data: LocationData = {
@@ -65,7 +65,7 @@ function Geolocation() {
       // Try to get location name using reverse geocoding
       try {
         const response = await fetch(
-          `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${data.latitude}&longitude=${data.longitude}&localityLanguage=en`
+          `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${data.latitude}&longitude=${data.longitude}&localityLanguage=en`,
         );
         const geoData = await response.json();
         if (geoData.city && geoData.countryName) {
@@ -120,12 +120,10 @@ function Geolocation() {
   };
 
   const formatAccuracy = (accuracy: number) => {
-    if (accuracy < 100) return `${Math.round(accuracy)}m`;
+    if (accuracy < 100) {
+      return `${Math.round(accuracy)}m`;
+    }
     return `${(accuracy / 1000).toFixed(1)}km`;
-  };
-
-  const formatTimestamp = (timestamp: number) => {
-    return new Date(timestamp).toLocaleString();
   };
 
   if (loading) {
@@ -152,8 +150,8 @@ function Geolocation() {
               permissionStatus === "granted"
                 ? "bg-green-500/20 border-green-400 text-green-200"
                 : permissionStatus === "denied"
-                ? "bg-red-500/20 border-red-400 text-red-200"
-                : "bg-yellow-500/20 border-yellow-400 text-yellow-200"
+                  ? "bg-red-500/20 border-red-400 text-red-200"
+                  : "bg-yellow-500/20 border-yellow-400 text-yellow-200"
             }`}
           >
             <div className="flex items-center space-x-2">

@@ -51,7 +51,7 @@ function ImageSearch() {
   };
 
   const handleKeyDownInput: React.KeyboardEventHandler<HTMLInputElement> = (
-    e
+    e,
   ) => {
     if (e.key === "Escape") {
       handleClearSearch();

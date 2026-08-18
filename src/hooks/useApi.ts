@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import axios, { AxiosError } from "axios";
+import type { AxiosError } from "axios";
 
 interface ApiError {
   message: string;
@@ -11,15 +11,15 @@ interface UseApiState<T> {
   error: string | null;
 }
 
-interface UseApiReturn<T> extends UseApiState<T> {
-  execute: (...args: any[]) => Promise<void>;
+interface UseApiReturn<T, A extends unknown[]> extends UseApiState<T> {
+  execute: (...args: A) => Promise<void>;
   reset: () => void;
 }
 
-export function useApi<T>(
-  apiCall: (...args: any[]) => Promise<T>,
-  initialData: T | null = null
-): UseApiReturn<T> {
+export function useApi<T, A extends unknown[] = unknown[]>(
+  apiCall: (...args: A) => Promise<T>,
+  initialData: T | null = null,
+): UseApiReturn<T, A> {
   const [state, setState] = useState<UseApiState<T>>({
     data: initialData,
     loading: false,
@@ -27,7 +27,7 @@ export function useApi<T>(
   });
 
   const execute = useCallback(
-    async (...args: any[]) => {
+    async (...args: A) => {
       try {
         setState((prev) => ({ ...prev, loading: true, error: null }));
         const result = await apiCall(...args);
@@ -41,7 +41,7 @@ export function useApi<T>(
         setState((prev) => ({ ...prev, loading: false, error: errorMessage }));
       }
     },
-    [apiCall]
+    [apiCall],
   );
 
   const reset = useCallback(() => {

@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from "react";
+import { type FC, useState } from "react";
 
 interface BlockProps {
   name: string;
@@ -7,17 +7,14 @@ interface BlockProps {
 }
 
 const BlogPost: FC<BlockProps> = ({ name, image, text }) => {
-  const [formattedTime, setFormattedTime] = useState<string>("");
-
-  useEffect(() => {
+  const [formattedTime] = useState<string>(() => {
     const now = new Date();
-    const timeString = now.toLocaleTimeString("en-US", {
+    return now.toLocaleTimeString("en-US", {
       hour: "2-digit",
       minute: "2-digit",
       hour12: false,
     });
-    setFormattedTime(timeString);
-  }, []);
+  });
 
   return (
     <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10 hover:bg-white/10 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl">

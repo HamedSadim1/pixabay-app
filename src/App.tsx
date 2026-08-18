@@ -1,8 +1,7 @@
 import React from "react";
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Home from "./components/Home";
-import BlogPost from "./components/BlogPost";
 import Geolocation from "./components/Geolocation";
 import SinglePost from "./components/SinglePost";
 import UserCard from "./components/UserCard";

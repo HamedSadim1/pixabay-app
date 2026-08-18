@@ -12,7 +12,7 @@ export function getRequiredEnvVar(key: string): string {
 
 export function getOptionalEnvVar(
   key: string,
-  defaultValue: string = ""
+  defaultValue: string = "",
 ): string {
   return import.meta.env[key] || defaultValue;
 }
@@ -24,12 +24,12 @@ export function validateEnvironment(): void {
   const requiredVars = ["VITE_PIXABAY_API_KEY", "VITE_PIXABAY_BASE_URL"];
 
   const missingVars = requiredVars.filter(
-    (varName) => !import.meta.env[varName]
+    (varName) => !import.meta.env[varName],
   );
 
   if (missingVars.length > 0) {
     throw new Error(
-      `Missing required environment variables: ${missingVars.join(", ")}`
+      `Missing required environment variables: ${missingVars.join(", ")}`,
     );
   }
 }

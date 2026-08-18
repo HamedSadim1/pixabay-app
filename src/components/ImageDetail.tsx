@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios, { AxiosError } from "axios";
+import axios, { type AxiosError } from "axios";
 import {
   FaArrowLeft,
   FaDownload,
@@ -10,7 +10,7 @@ import {
   FaCalendar,
   FaExclamationTriangle,
 } from "react-icons/fa";
-import { Hit } from "../models/IPixabay";
+import type { Hit } from "../models/IPixabay";
 
 interface ApiError {
   message: string;
@@ -44,7 +44,7 @@ const ImageDetail: React.FC = () => {
 
         // We gebruiken de search API met ID filter om specifieke image te vinden
         const response = await axios.get(
-          `${baseUrl}?key=${apiKey}&id=${id}&image_type=photo`
+          `${baseUrl}?key=${apiKey}&id=${id}&image_type=photo`,
         );
 
         if (
@@ -81,7 +81,9 @@ const ImageDetail: React.FC = () => {
   };
 
   const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return "0 Bytes";
+    if (bytes === 0) {
+      return "0 Bytes";
+    }
     const k = 1024;
     const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));

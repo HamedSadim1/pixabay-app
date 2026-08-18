@@ -21,7 +21,9 @@ const SearchHistory: React.FC<SearchHistoryProps> = ({ search }) => {
     performSearch,
   } = search;
 
-  if (!showHistory) return null;
+  if (!showHistory) {
+    return null;
+  }
 
   const handleHistoryClick = (query: string) => {
     setSearchQuery(query);
