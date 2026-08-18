@@ -33,7 +33,7 @@ const SearchHistory: React.FC<SearchHistoryProps> = ({ search }) => {
     <div className="mt-5 space-y-5">
       {searchHistory.length > 0 && (
         <div>
-          <div className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-muted">
+          <div className="mb-2 font-mono text-[10px] uppercase tracking-label text-muted">
             Recent Searches
           </div>
           <div className="flex flex-wrap gap-2">
@@ -50,7 +50,7 @@ const SearchHistory: React.FC<SearchHistoryProps> = ({ search }) => {
         </div>
       )}
       <div>
-        <div className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-muted">
+        <div className="mb-2 font-mono text-[10px] uppercase tracking-label text-muted">
           Trending
         </div>
         <div className="flex flex-wrap gap-2">

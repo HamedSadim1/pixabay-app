@@ -36,7 +36,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({ index, title, subtitle }) => (
       </span>
     </div>
     {subtitle && (
-      <p className="mt-2 font-mono text-xs uppercase tracking-[0.15em] text-muted">
+      <p className="mt-2 font-mono text-xs uppercase tracking-meta text-muted">
         {subtitle}
       </p>
     )}

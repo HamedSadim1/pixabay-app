@@ -15,6 +15,10 @@
   --font-sans: "Work Sans", system-ui, -apple-system, sans-serif;
   --font-display: "Oswald", sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  /* Letter-spacing scale (utility labels) */
+  --tracking-meta: 0.15em;
+  --tracking-label: 0.2em;
 }
 
 html {

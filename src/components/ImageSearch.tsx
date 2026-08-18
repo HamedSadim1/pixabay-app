@@ -74,6 +74,7 @@ function ImageSearch() {
               ref={searchInputRef}
               type="text"
               placeholder="Search for images..."
+              aria-label="Search for images"
               value={search}
               onChange={onInputChange}
               onKeyDown={handleKeyDownInput}
@@ -83,6 +84,7 @@ function ImageSearch() {
               <button
                 type="button"
                 onClick={handleClearSearch}
+                aria-label="Clear search"
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted transition-colors hover:text-safelight"
               >
                 <Icon name="xmark" />
@@ -146,7 +148,7 @@ function ImageSearch() {
       )}
 
       {hasSearched && (
-        <p className="font-mono text-xs uppercase tracking-[0.15em] text-muted">
+        <p className="font-mono text-xs uppercase tracking-meta text-muted">
           Found <span className="text-paper">{totalHits.toLocaleString()}</span>{" "}
           images
           {results.length > 0 && ` — ${results.length} loaded`}

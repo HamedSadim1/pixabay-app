@@ -48,6 +48,7 @@ const Avatar: React.FC<AvatarProps> = ({
       {isOnline && (
         <span
           className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-dark bg-gold"
+          role="img"
           aria-label="Online"
         />
       )}

@@ -15,7 +15,7 @@ const Frame: React.FC<FrameProps> = ({ children, className = "", frame }) => {
       <span className="vf-corner vf-bl" />
       <span className="vf-corner vf-br" />
       {frame && (
-        <span className="absolute right-3 top-3 font-mono text-[10px] uppercase tracking-[0.2em] text-gold">
+        <span className="absolute right-3 top-3 font-mono text-[10px] uppercase tracking-label text-gold">
           {frame}
         </span>
       )}

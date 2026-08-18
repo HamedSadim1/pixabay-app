@@ -6,6 +6,7 @@ import {
   useQueryStates,
 } from "nuqs";
 import axios, { type AxiosError } from "axios";
+import { API_ENDPOINTS } from "../config/api";
 import type { Hit } from "./../models/IPixabay";
 import type { Color, ImageType, Orientation } from "../constants/types";
 
@@ -172,14 +173,7 @@ export const useSearch = (): SearchState & SearchActions => {
           setError("");
         }
 
-        const apiKey = import.meta.env.VITE_PIXABAY_API_KEY;
-        const baseUrl = import.meta.env.VITE_PIXABAY_BASE_URL;
-
-        if (!apiKey || !baseUrl) {
-          throw new Error("API configuration missing");
-        }
-
-        let queryString = `${baseUrl}?key=${apiKey}&q=${qEffective}&page=${p}&per_page=20`;
+        let queryString = `${API_ENDPOINTS.PIXABAY_SEARCH}&q=${qEffective}&page=${p}&per_page=20`;
 
         if (imageType !== "all") {
           queryString += `&image_type=${imageType}`;

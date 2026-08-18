@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios, { type AxiosError } from "axios";
+import { API_ENDPOINTS } from "../config/api";
+import {
+  buttonBase,
+  buttonSizes,
+  buttonVariants,
+} from "../constants/buttonStyles";
 import type { Hit } from "../models/IPixabay";
 import Button from "./Button";
 import Icon from "./Icon";
@@ -29,16 +35,9 @@ const ImageDetail: React.FC = () => {
         setLoading(true);
         setError("");
 
-        const apiKey = import.meta.env.VITE_PIXABAY_API_KEY;
-        const baseUrl = import.meta.env.VITE_PIXABAY_BASE_URL;
-
-        if (!apiKey || !baseUrl) {
-          throw new Error("API configuration missing");
-        }
-
-        // We gebruiken de search API met ID filter om specifieke image te vinden
+        // Retrieve the image by ID regardless of type (photo/illustration/vector).
         const response = await axios.get(
-          `${baseUrl}?key=${apiKey}&id=${id}&image_type=photo`,
+          `${API_ENDPOINTS.PIXABAY_SEARCH}&id=${id}`,
         );
 
         if (
@@ -85,13 +84,33 @@ const ImageDetail: React.FC = () => {
   };
 
   const backButton = (
-    <button
-      onClick={() => navigate(-1)}
-      className="inline-flex items-center gap-2 border border-line px-3 py-1.5 font-mono text-xs uppercase tracking-[0.12em] text-muted transition-colors hover:border-safelight hover:text-safelight"
-    >
+    <Button size="sm" onClick={() => navigate(-1)}>
       <Icon name="arrowLeft" /> Back
-    </button>
+    </Button>
   );
+
+  // Cross-origin `download` attributes are ignored by browsers, so fetch the
+  // image as a blob and trigger a real download, falling back to opening the
+  // original in a new tab if the fetch is blocked (e.g. CORS).
+  const handleDownload = async () => {
+    if (!imageData) {
+      return;
+    }
+    try {
+      const response = await fetch(imageData.largeImageURL);
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `pixabay-${imageData.id}.jpg`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      window.open(imageData.largeImageURL, "_blank", "noopener,noreferrer");
+    }
+  };
 
   if (loading) {
     return (
@@ -104,7 +123,7 @@ const ImageDetail: React.FC = () => {
         </div>
         <div className="border border-line bg-panel p-12 text-center">
           <div className="mx-auto h-10 w-10 animate-spin rounded-full border-2 border-line border-t-safelight" />
-          <p className="mt-4 font-mono text-xs uppercase tracking-[0.15em] text-muted">
+          <p className="mt-4 font-mono text-xs uppercase tracking-meta text-muted">
             Developing frame…
           </p>
         </div>
@@ -173,7 +192,7 @@ const ImageDetail: React.FC = () => {
         </h1>
       </div>
 
-      <div className="relative border border-line bg-panel p-5 md:p-8">
+      <div className="relative border border-line bg-panel p-6 md:p-8">
         <span className="vf-corner vf-tl" />
         <span className="vf-corner vf-tr" />
         <span className="vf-corner vf-bl" />
@@ -185,15 +204,14 @@ const ImageDetail: React.FC = () => {
             alt={imageData.tags}
             className="max-h-96 w-full border border-line object-contain"
           />
-          <a
-            href={imageData.largeImageURL}
-            download
-            target="_blank"
-            rel="noopener noreferrer"
-            className="absolute right-3 top-3 border border-safelight bg-safelight px-4 py-2 font-mono text-xs uppercase tracking-[0.12em] text-dark transition-colors hover:border-gold hover:bg-gold"
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={handleDownload}
+            className="absolute right-3 top-3"
           >
             <Icon name="download" /> Download
-          </a>
+          </Button>
         </div>
 
         {/* Image Info */}
@@ -226,7 +244,7 @@ const ImageDetail: React.FC = () => {
               href={imageData.pageURL}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-4 inline-flex items-center gap-2 border border-line px-3 py-1.5 font-mono text-xs uppercase tracking-[0.12em] text-muted transition-colors hover:border-gold hover:text-gold"
+              className={`${buttonBase} ${buttonSizes.sm} ${buttonVariants.gold} mt-4`}
             >
               <Icon name="arrowRight" /> View on Pixabay
             </a>
@@ -259,7 +277,7 @@ const ImageDetail: React.FC = () => {
                     <Icon name={icon} />
                   </div>
                   <div className="font-mono text-lg text-paper">{value}</div>
-                  <div className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted">
+                  <div className="font-mono text-[10px] uppercase tracking-meta text-muted">
                     {label}
                   </div>
                 </div>
@@ -296,7 +314,7 @@ const ImageDetail: React.FC = () => {
             <span className="font-display text-sm uppercase tracking-wider text-paper">
               {imageData.user}
             </span>
-            <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted">
+            <p className="font-mono text-[10px] uppercase tracking-meta text-muted">
               Photographer · Member #{imageData.user_id}
             </p>
           </div>

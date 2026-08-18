@@ -212,7 +212,7 @@ function Geolocation() {
           <h2 className="mt-5 font-display text-xl uppercase tracking-[0.03em] text-paper">
             Finding Your Location
           </h2>
-          <p className="mt-2 font-mono text-xs uppercase tracking-[0.15em] text-muted">
+          <p className="mt-2 font-mono text-xs uppercase tracking-meta text-muted">
             Please allow location access
           </p>
         </div>
@@ -245,19 +245,20 @@ function Geolocation() {
                 Current Location
               </h2>
             </div>
-            <button
+            <Button
+              size="sm"
               onClick={getBrowserLocation}
               disabled={loading}
+              aria-label="Refresh location"
               title="Refresh Location"
-              className="border border-line px-3 py-2 text-muted transition-colors hover:border-safelight hover:text-safelight disabled:opacity-50"
             >
               <Icon name="rotateRight" />
-            </button>
+            </Button>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="border border-line bg-panel-2 p-4">
-              <h3 className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-muted">
+              <h3 className="mb-2 font-mono text-[10px] uppercase tracking-label text-muted">
                 Latitude
               </h3>
               <p className="font-mono text-xl text-safelight">
@@ -265,7 +266,7 @@ function Geolocation() {
               </p>
             </div>
             <div className="border border-line bg-panel-2 p-4">
-              <h3 className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-muted">
+              <h3 className="mb-2 font-mono text-[10px] uppercase tracking-label text-muted">
                 Longitude
               </h3>
               <p className="font-mono text-xl text-safelight">
@@ -274,7 +275,7 @@ function Geolocation() {
             </div>
             {locationName && (
               <div className="border border-line bg-panel-2 p-4 md:col-span-2">
-                <h3 className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-muted">
+                <h3 className="mb-2 font-mono text-[10px] uppercase tracking-label text-muted">
                   Address
                 </h3>
                 <p className="font-mono text-sm text-paper">{locationName}</p>
@@ -288,7 +289,7 @@ function Geolocation() {
             <div className="mt-4 grid gap-4 md:grid-cols-3">
               {details.accuracy !== null && (
                 <div className="border border-line bg-panel-2 p-4">
-                  <h4 className="mb-1 font-mono text-[10px] uppercase tracking-[0.2em] text-muted">
+                  <h4 className="mb-1 font-mono text-[10px] uppercase tracking-label text-muted">
                     Accuracy
                   </h4>
                   <p className="font-mono text-sm text-paper">
@@ -298,7 +299,7 @@ function Geolocation() {
               )}
               {details.altitude !== null && (
                 <div className="border border-line bg-panel-2 p-4">
-                  <h4 className="mb-1 font-mono text-[10px] uppercase tracking-[0.2em] text-muted">
+                  <h4 className="mb-1 font-mono text-[10px] uppercase tracking-label text-muted">
                     Altitude
                   </h4>
                   <p className="font-mono text-sm text-paper">
@@ -308,7 +309,7 @@ function Geolocation() {
               )}
               {details.speed !== null && (
                 <div className="border border-line bg-panel-2 p-4">
-                  <h4 className="mb-1 font-mono text-[10px] uppercase tracking-[0.2em] text-muted">
+                  <h4 className="mb-1 font-mono text-[10px] uppercase tracking-label text-muted">
                     Speed
                   </h4>
                   <p className="font-mono text-sm text-paper">
@@ -320,7 +321,7 @@ function Geolocation() {
           )}
 
           {details.lastUpdated && (
-            <div className="mt-5 border-t border-line pt-4 font-mono text-[10px] uppercase tracking-[0.15em] text-muted">
+            <div className="mt-5 border-t border-line pt-4 font-mono text-[10px] uppercase tracking-meta text-muted">
               Last updated: {details.lastUpdated.toLocaleString()}
             </div>
           )}
@@ -334,7 +335,7 @@ function Geolocation() {
             Location Preview
           </h3>
           <LocationMap latitude={lat} longitude={lon} />
-          <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.15em] text-muted">
+          <p className="mt-3 font-mono text-[10px] uppercase tracking-meta text-muted">
             {formatCoordinate(lat, "lat")} · {formatCoordinate(lon, "lng")}
           </p>
         </div>

@@ -5,7 +5,11 @@ import UserCard from "./UserCard";
 import Frame from "./Frame";
 import SprocketStrip from "./SprocketStrip";
 import Icon from "./Icon";
-import { buttonBase, buttonVariants } from "../constants/buttonStyles";
+import {
+  buttonBase,
+  buttonSizes,
+  buttonVariants,
+} from "../constants/buttonStyles";
 import type { IconName } from "../constants/icons";
 
 const Home: React.FC = () => {
@@ -74,13 +78,13 @@ const Home: React.FC = () => {
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
           <Link
             to="/search"
-            className={`${buttonBase} ${buttonVariants.primary}`}
+            className={`${buttonBase} ${buttonSizes.md} ${buttonVariants.primary}`}
           >
             <Icon name="search" /> Search Images
           </Link>
           <Link
             to="/posts"
-            className={`${buttonBase} ${buttonVariants.default}`}
+            className={`${buttonBase} ${buttonSizes.md} ${buttonVariants.default}`}
           >
             <Icon name="pen" /> Explore Posts
           </Link>
@@ -128,7 +132,7 @@ const Home: React.FC = () => {
         <div className="mt-5">
           <Link
             to="/posts"
-            className={`${buttonBase} ${buttonVariants.default}`}
+            className={`${buttonBase} ${buttonSizes.md} ${buttonVariants.default}`}
           >
             View All Posts <Icon name="arrowRight" />
           </Link>

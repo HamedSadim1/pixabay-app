@@ -1,3 +1,5 @@
+import type { ImageType } from "../constants/types";
+
 export interface Images {
   total: number;
   totalHits: number;
@@ -7,7 +9,7 @@ export interface Images {
 export interface Hit {
   id: number;
   pageURL: string;
-  type: Type;
+  type: ImageType;
   tags: string;
   previewURL: string;
   previewWidth: number;
@@ -27,8 +29,4 @@ export interface Hit {
   user_id: number;
   user: string;
   userImageURL: string;
-}
-
-export enum Type {
-  Photo = "photo",
 }

@@ -28,7 +28,7 @@ const UserCard: React.FC<BlockProps> = ({
               {name}
             </h3>
             {role && (
-              <span className="border border-gold/50 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.15em] text-gold">
+              <span className="border border-gold/50 px-2 py-0.5 font-mono text-[10px] uppercase tracking-meta text-gold">
                 {role}
               </span>
             )}

@@ -14,13 +14,13 @@ const SprocketStrip: React.FC<SprocketStripProps> = ({
       className={`flex items-center gap-4 ${className}`}
       aria-hidden={!label}
     >
-      <span className="sprocket flex-1" />
+      <span className="sprocket flex-1" aria-hidden="true" />
       {label && (
         <span className="whitespace-nowrap font-mono text-[10px] uppercase tracking-[0.25em] text-muted">
           {label}
         </span>
       )}
-      <span className="sprocket flex-1" />
+      <span className="sprocket flex-1" aria-hidden="true" />
     </div>
   );
 };

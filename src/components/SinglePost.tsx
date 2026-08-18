@@ -1,12 +1,43 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import Avatar from "./Avatar";
 import Button from "./Button";
 import Icon from "./Icon";
+import { sharePage } from "../utils/share";
+
+interface Comment {
+  name: string;
+  time: string;
+  avatar: string;
+  text: string;
+}
 
 function SinglePost() {
   const [isLiked, setIsLiked] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [likesCount, setLikesCount] = useState(42);
+  const [shared, setShared] = useState(false);
+  const [commentText, setCommentText] = useState("");
+  const commentsRef = useRef<HTMLElement>(null);
+  const [comments, setComments] = useState<Comment[]>([
+    {
+      name: "John Doe",
+      time: "2 hours ago",
+      avatar: "https://picsum.photos/200/200?random=3",
+      text: "Welcome to the community, Sarah! Looking forward to your posts! 🚀",
+    },
+    {
+      name: "Jane Smith",
+      time: "1 hour ago",
+      avatar: "https://picsum.photos/200/200?random=4",
+      text: "So glad you're here! The community is amazing. 💫",
+    },
+    {
+      name: "Mike Johnson",
+      time: "30 min ago",
+      avatar: "https://picsum.photos/200/200?random=5",
+      text: "Welcome aboard! Don't forget to check out the guidelines. 📚",
+    },
+  ]);
 
   const handleLike = () => {
     setIsLiked(!isLiked);
@@ -15,6 +46,29 @@ function SinglePost() {
 
   const handleBookmark = () => {
     setIsBookmarked(!isBookmarked);
+  };
+
+  const handleShare = async () => {
+    if (await sharePage("Hey, I'm new here!")) {
+      setShared(true);
+      window.setTimeout(() => setShared(false), 1500);
+    }
+  };
+
+  const scrollToComments = () => {
+    commentsRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const handlePostComment = () => {
+    const text = commentText.trim();
+    if (!text) {
+      return;
+    }
+    setComments((prev) => [
+      { name: "You", time: "Just now", avatar: "", text },
+      ...prev,
+    ]);
+    setCommentText("");
   };
 
   return (
@@ -31,7 +85,7 @@ function SinglePost() {
             <span className="font-display text-sm uppercase tracking-wider text-paper">
               Sarah
             </span>
-            <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted">
+            <p className="font-mono text-[10px] uppercase tracking-meta text-muted">
               New member • Today at 14:30
             </p>
           </div>
@@ -57,7 +111,7 @@ function SinglePost() {
           <div className="flex items-center gap-2">
             <button
               onClick={handleLike}
-              className={`inline-flex items-center gap-1.5 border px-3.5 py-2 font-mono text-[10px] uppercase tracking-[0.15em] transition-colors ${
+              className={`inline-flex items-center gap-1.5 border px-3.5 py-2 font-mono text-[10px] uppercase tracking-meta transition-colors ${
                 isLiked
                   ? "border-safelight bg-safelight/10 text-safelight"
                   : "border-line text-muted hover:border-safelight hover:text-safelight"
@@ -65,11 +119,21 @@ function SinglePost() {
             >
               <Icon name="heart" /> {likesCount}
             </button>
-            <button className="inline-flex items-center gap-1.5 border border-line px-3.5 py-2 font-mono text-[10px] uppercase tracking-[0.15em] text-muted transition-colors hover:border-safelight hover:text-safelight">
-              <Icon name="comment" /> 12
+            <button
+              onClick={scrollToComments}
+              className="inline-flex items-center gap-1.5 border border-line px-3.5 py-2 font-mono text-[10px] uppercase tracking-meta text-muted transition-colors hover:border-safelight hover:text-safelight"
+            >
+              <Icon name="comment" /> {comments.length}
             </button>
-            <button className="inline-flex items-center gap-1.5 border border-line px-3.5 py-2 font-mono text-[10px] uppercase tracking-[0.15em] text-muted transition-colors hover:border-safelight hover:text-safelight">
-              <Icon name="share" /> Share
+            <button
+              onClick={handleShare}
+              className={`inline-flex items-center gap-1.5 border border-line px-3.5 py-2 font-mono text-[10px] uppercase tracking-meta transition-colors ${
+                shared
+                  ? "border-gold text-gold"
+                  : "text-muted hover:border-safelight hover:text-safelight"
+              }`}
+            >
+              <Icon name="share" /> {shared ? "Copied" : "Share"}
             </button>
           </div>
           <button
@@ -87,40 +151,28 @@ function SinglePost() {
       </article>
 
       {/* Comments */}
-      <section className="border border-line bg-panel p-6">
+      <section
+        ref={commentsRef}
+        id="comments"
+        className="border border-line bg-panel p-6"
+      >
         <h3 className="mb-5 font-display text-lg uppercase tracking-[0.03em] text-paper">
-          Comments — 3
+          Comments — {comments.length}
         </h3>
 
         <div className="space-y-3">
-          {[
-            {
-              name: "John Doe",
-              time: "2 hours ago",
-              avatar: "https://picsum.photos/200/200?random=3",
-              text: "Welcome to the community, Sarah! Looking forward to your posts! 🚀",
-            },
-            {
-              name: "Jane Smith",
-              time: "1 hour ago",
-              avatar: "https://picsum.photos/200/200?random=4",
-              text: "So glad you're here! The community is amazing. 💫",
-            },
-            {
-              name: "Mike Johnson",
-              time: "30 min ago",
-              avatar: "https://picsum.photos/200/200?random=5",
-              text: "Welcome aboard! Don't forget to check out the guidelines. 📚",
-            },
-          ].map((comment) => (
-            <div key={comment.name} className="flex gap-3">
+          {comments.map((comment, index) => (
+            <div
+              key={`${comment.name}-${comment.time}-${index}`}
+              className="flex gap-3"
+            >
               <Avatar name={comment.name} src={comment.avatar} size="sm" />
               <div className="flex-1 border border-line bg-panel-2 p-3.5">
                 <div className="mb-1 flex items-baseline gap-2">
                   <span className="font-display text-xs uppercase tracking-wider text-paper">
                     {comment.name}
                   </span>
-                  <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted">
+                  <span className="font-mono text-[10px] uppercase tracking-meta text-muted">
                     {comment.time}
                   </span>
                 </div>
@@ -134,11 +186,19 @@ function SinglePost() {
           <Avatar name="You" size="sm" />
           <div className="flex-1">
             <textarea
+              value={commentText}
+              onChange={(e) => setCommentText(e.target.value)}
               placeholder="Write a comment..."
+              aria-label="Write a comment"
               className="w-full resize-none border border-line bg-panel-2 p-3 font-mono text-sm text-paper placeholder-muted focus:border-safelight focus:outline-none"
               rows={3}
             />
-            <Button variant="primary" className="mt-2">
+            <Button
+              variant="primary"
+              className="mt-2"
+              onClick={handlePostComment}
+              disabled={!commentText.trim()}
+            >
               <Icon name="pen" /> Post Comment
             </Button>
           </div>

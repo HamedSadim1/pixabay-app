@@ -41,7 +41,7 @@ const fieldClasses =
   "w-full border border-line bg-panel-2 px-3 py-2.5 font-mono text-sm text-paper placeholder-muted focus:border-safelight focus:outline-none";
 
 const labelClasses =
-  "mb-2 block font-mono text-[10px] uppercase tracking-[0.2em] text-muted";
+  "mb-2 block font-mono text-[10px] uppercase tracking-label text-muted";
 
 const FilterPanel: React.FC<FilterPanelProps> = ({ search }) => {
   const {
@@ -63,11 +63,14 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ search }) => {
   }
 
   return (
-    <div className="mt-5 border border-line bg-panel-2 p-5">
+    <div className="mt-5 border border-line bg-panel-2 p-6">
       <div className="grid gap-4 md:grid-cols-3">
         <div>
-          <label className={labelClasses}>Image Type</label>
+          <label htmlFor="filter-image-type" className={labelClasses}>
+            Image Type
+          </label>
           <select
+            id="filter-image-type"
             value={imageType}
             onChange={(e) => setImageType(e.target.value as ImageType)}
             className={fieldClasses}
@@ -80,8 +83,11 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ search }) => {
           </select>
         </div>
         <div>
-          <label className={labelClasses}>Orientation</label>
+          <label htmlFor="filter-orientation" className={labelClasses}>
+            Orientation
+          </label>
           <select
+            id="filter-orientation"
             value={orientation}
             onChange={(e) => setOrientation(e.target.value as Orientation)}
             className={fieldClasses}
@@ -94,9 +100,12 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ search }) => {
           </select>
         </div>
         <div>
-          <label className={labelClasses}>Min Width</label>
+          <label htmlFor="filter-min-width" className={labelClasses}>
+            Min Width
+          </label>
           <input
             type="number"
+            id="filter-min-width"
             value={minWidth}
             onChange={(e) => setMinWidth(e.target.value)}
             placeholder="e.g. 1920"
@@ -107,8 +116,14 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ search }) => {
 
       {/* Color chips */}
       <div className="mt-4">
-        <label className={labelClasses}>Color</label>
-        <div className="flex flex-wrap gap-2">
+        <span id="filter-color-label" className={labelClasses}>
+          Color
+        </span>
+        <div
+          className="flex flex-wrap gap-2"
+          role="group"
+          aria-labelledby="filter-color-label"
+        >
           {FILTER_OPTIONS.colors.map((option) => {
             const isSelected = color === option.value;
             return (
@@ -123,6 +138,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ search }) => {
                 }`}
               >
                 <span
+                  aria-hidden="true"
                   className={`h-3 w-3 border border-line ${COLOR_SWATCHES[option.value as Color]}`}
                 />
                 {option.label}
@@ -133,9 +149,12 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ search }) => {
       </div>
 
       <div className="mt-4 md:max-w-xs">
-        <label className={labelClasses}>Min Height</label>
+        <label htmlFor="filter-min-height" className={labelClasses}>
+          Min Height
+        </label>
         <input
           type="number"
+          id="filter-min-height"
           value={minHeight}
           onChange={(e) => setMinHeight(e.target.value)}
           placeholder="e.g. 1080"
