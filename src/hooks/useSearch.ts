@@ -1,36 +1,10 @@
-import {
-  useState,
-  useEffect,
-  useCallback,
-  useEffectEvent,
-  useRef,
-} from "react";
-import {
-  parseAsInteger,
-  parseAsString,
-  parseAsStringLiteral,
-  useQueryStates,
-} from "nuqs";
-import axios, { type AxiosError } from "axios";
-import { API_ENDPOINTS } from "../config/api";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { parseAsString, parseAsStringLiteral, useQueryStates } from "nuqs";
+import { searchImages, getErrorMessage } from "../api/pixabay";
 import type { Hit } from "./../models/IPixabay";
 import type { Color, ImageType, Orientation } from "../constants/types";
-
-interface ApiError {
-  message: string;
-}
-
-// Snapshot of the query + filters used by the last executed search. Used to
-// detect when a new "Search" click would change nothing, so the button can
-// be disabled instead of re-fetching (and causing a layout shift).
-interface LastSearch {
-  q: string;
-  imageType: ImageType;
-  orientation: Orientation;
-  color: Color;
-  minWidth: string;
-  minHeight: string;
-}
+import { useDebouncedValue } from "./useDebouncedValue";
 
 // Accepted literal values for the URL-backed filters. These mirror the unions
 // in constants/types.ts so the parsers stay type-safe (a typo here is caught
@@ -64,13 +38,13 @@ const COLORS = [
   "brown",
 ] as const satisfies readonly Color[];
 
-// Debounce for auto-applying filter changes, so typing in the min-width/
-// min-height inputs doesn't fire a request on every keystroke.
+// Debounce for the min-width/min-height inputs, so typing doesn't change the
+// query key (and trigger a request) on every keystroke.
 const FILTER_DEBOUNCE_MS = 300;
 
-// URL-backed search parameters. nuqs keeps the query string in sync with
-// these values, so the URL is the single source of truth — no hand-rolled
-// parsing/serialization of the query string.
+// URL-backed search parameters. nuqs keeps the query string in sync with these
+// values, so the URL is the single source of truth. Pagination is managed by
+// React Query (useInfiniteQuery), so it is intentionally not part of the URL.
 const searchParams = {
   q: parseAsString.withDefault(""),
   type: parseAsStringLiteral(IMAGE_TYPES).withDefault("photo"),
@@ -78,7 +52,6 @@ const searchParams = {
   color: parseAsStringLiteral(COLORS).withDefault("all"),
   minWidth: parseAsString.withDefault(""),
   minHeight: parseAsString.withDefault(""),
-  page: parseAsInteger.withDefault(1),
 };
 
 export interface SearchState {
@@ -86,6 +59,7 @@ export interface SearchState {
   results: Hit[];
   error: string;
   loading: boolean;
+  loadingMore: boolean;
   searchHistory: string[];
   showFilters: boolean;
   totalHits: number;
@@ -96,6 +70,7 @@ export interface SearchState {
   color: Color;
   minWidth: string;
   minHeight: string;
+  hasMore: boolean;
 }
 
 export interface SearchActions {
@@ -106,24 +81,21 @@ export interface SearchActions {
   setColor: (color: Color) => void;
   setMinWidth: (width: string) => void;
   setMinHeight: (height: string) => void;
-  performSearch: (page?: number, append?: boolean, query?: string) => void;
+  performSearch: (query?: string) => void;
   clearSearch: () => void;
   loadMore: () => void;
 }
 
 export const useSearch = (): SearchState & SearchActions => {
   const [
-    { q, type: imageType, orientation, color, minWidth, minHeight, page },
+    { q, type: imageType, orientation, color, minWidth, minHeight },
     setSearchParams,
   ] = useQueryStates(searchParams, { history: "replace" });
 
   // Draft value for the search input. It is only committed to the URL (q)
   // when a search is actually performed, so typing doesn't rewrite the URL.
   const [search, setSearch] = useState<string>(q);
-
-  const [results, setResults] = useState<Hit[]>([]);
-  const [error, setError] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(false);
+  const [showFilters, setShowFilters] = useState<boolean>(false);
   const [searchHistory, setSearchHistory] = useState<string[]>(() => {
     try {
       const history = localStorage.getItem("searchHistory");
@@ -132,237 +104,77 @@ export const useSearch = (): SearchState & SearchActions => {
       return [];
     }
   });
-  const [showFilters, setShowFilters] = useState<boolean>(false);
-  const [totalHits, setTotalHits] = useState<number>(0);
-  const [hasSearched, setHasSearched] = useState<boolean>(false);
-  const [lastSearch, setLastSearch] = useState<LastSearch | null>(null);
-  // Monotonic id so only the latest in-flight request may update state; an
-  // earlier (slower) response is ignored instead of overwriting newer results.
-  const requestIdRef = useRef(0);
-  // Aborts the in-flight request when the hook unmounts or a newer search
-  // supersedes it, so a stale response can't leak into state after navigation.
-  const abortControllerRef = useRef<AbortController | null>(null);
 
-  const saveToHistory = useCallback(
-    (query: string) => {
-      if (!query.trim()) {
-        return;
-      }
-      const newHistory = [
-        query,
-        ...searchHistory.filter((item) => item !== query),
-      ].slice(0, 10);
-      setSearchHistory(newHistory);
+  // Filter text inputs are debounced so the query key only changes once the
+  // user pauses, instead of firing a request per keystroke.
+  const debouncedMinWidth = useDebouncedValue(minWidth, FILTER_DEBOUNCE_MS);
+  const debouncedMinHeight = useDebouncedValue(minHeight, FILTER_DEBOUNCE_MS);
+
+  // The committed query is the query key: when it changes, React Query
+  // fetches (or serves from cache) automatically. Filters are part of the key,
+  // so changing a filter re-runs the search without a manual "Search" click.
+  const committedQuery = {
+    q,
+    type: imageType,
+    orientation,
+    color,
+    minWidth: debouncedMinWidth,
+    minHeight: debouncedMinHeight,
+  };
+
+  const query = useInfiniteQuery({
+    queryKey: ["pixabay", "search", committedQuery],
+    queryFn: ({ pageParam }) =>
+      searchImages({ ...committedQuery, page: pageParam }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage, allPages) => {
+      const loaded = allPages.reduce((sum, page) => sum + page.hits.length, 0);
+      return loaded < lastPage.totalHits ? allPages.length + 1 : undefined;
+    },
+    // No query to run until the user actually commits a search term.
+    enabled: Boolean(q.trim()),
+  });
+
+  // Flatten all loaded pages into a single result list.
+  const results = useMemo(
+    () => query.data?.pages.flatMap((page) => page.hits) ?? [],
+    [query.data],
+  );
+  const totalHits = query.data?.pages[0]?.totalHits ?? 0;
+
+  const saveToHistory = useCallback((term: string) => {
+    if (!term.trim()) {
+      return;
+    }
+    setSearchHistory((prev) => {
+      const next = [term, ...prev.filter((item) => item !== term)].slice(0, 10);
       try {
-        localStorage.setItem("searchHistory", JSON.stringify(newHistory));
+        localStorage.setItem("searchHistory", JSON.stringify(next));
       } catch {
         // Storage can fail (private browsing / quota) — the in-memory history
         // still works, so ignore.
       }
-    },
-    [searchHistory],
-  );
-
-  const performSearch = useCallback(
-    async (p: number = 1, append: boolean = false, query?: string) => {
-      const qEffective = (query ?? search).trim();
-
-      if (!qEffective && p === 1) {
-        requestIdRef.current++;
-        void setSearchParams({ q: "", page: 1 });
-        setResults([]);
-        setTotalHits(0);
-        setHasSearched(false);
-        setLastSearch(null);
-        return;
-      }
-
-      // Remember what this search committed so a later "Search" click with
-      // unchanged query + filters can be treated as a no-op.
-      if (p === 1 && !append) {
-        setLastSearch({
-          q: qEffective,
-          imageType,
-          orientation,
-          color,
-          minWidth,
-          minHeight,
-        });
-      }
-
-      // Commit the effective search to the URL (the source of truth).
-      void setSearchParams({ q: qEffective, page: p });
-
-      abortControllerRef.current?.abort();
-      const controller = new AbortController();
-      abortControllerRef.current = controller;
-
-      const requestId = ++requestIdRef.current;
-
-      try {
-        setLoading(true);
-        if (!append) {
-          setError("");
-        }
-
-        let queryString = `${API_ENDPOINTS.PIXABAY_SEARCH}&q=${encodeURIComponent(qEffective)}&page=${p}&per_page=20`;
-
-        if (imageType !== "all") {
-          queryString += `&image_type=${imageType}`;
-        }
-        if (orientation !== "all") {
-          queryString += `&orientation=${orientation}`;
-        }
-        if (color !== "all") {
-          queryString += `&colors=${color}`;
-        }
-        // Only send positive whole numbers, matching the Pixabay API contract.
-        const width = Math.floor(Number(minWidth));
-        if (Number.isFinite(width) && width > 0) {
-          queryString += `&min_width=${width}`;
-        }
-        const height = Math.floor(Number(minHeight));
-        if (Number.isFinite(height) && height > 0) {
-          queryString += `&min_height=${height}`;
-        }
-
-        const response = await axios.get(queryString, {
-          timeout: 10000,
-          signal: controller.signal,
-        });
-
-        // Ignore the response if a newer search has already started.
-        if (requestId !== requestIdRef.current) {
-          return;
-        }
-
-        if (response.data && Array.isArray(response.data.hits)) {
-          const newResults = append
-            ? [...results, ...response.data.hits]
-            : response.data.hits;
-          setResults(newResults);
-          setTotalHits(response.data.totalHits || 0);
-          setHasSearched(true);
-
-          if (p === 1 && qEffective) {
-            saveToHistory(qEffective);
-          }
-        } else {
-          throw new Error("Invalid API response format");
-        }
-      } catch (err) {
-        if (requestId !== requestIdRef.current) {
-          return;
-        }
-        // The request was cancelled (unmount or superseded) — not a real error.
-        if (axios.isCancel(err)) {
-          return;
-        }
-        const error = err as AxiosError<ApiError>;
-        const errorMessage =
-          error.code === "ECONNABORTED"
-            ? "The request timed out. Please try again."
-            : error.response?.data?.message ||
-              error.message ||
-              "An error occurred while fetching images";
-        setError(errorMessage);
-        if (!append) {
-          setResults([]);
-          setTotalHits(0);
-          // A failed search must not stay "unchanged", or the Search button
-          // would stay disabled and block a retry.
-          setLastSearch(null);
-        }
-      } finally {
-        if (requestId === requestIdRef.current) {
-          setLoading(false);
-        }
-      }
-    },
-    [
-      search,
-      imageType,
-      orientation,
-      color,
-      minWidth,
-      minHeight,
-      results,
-      saveToHistory,
-      setSearchParams,
-    ],
-  );
-
-  // Restore a committed search when the component (re)mounts with a query in
-  // the URL, e.g. after navigating back from an image detail page. The effect
-  // event always reads the latest state, so the effect only runs on mount.
-  const restoreFromURL = useEffectEvent(() => {
-    if (q.trim()) {
-      performSearch(page, false, q);
-    }
-  });
-
-  useEffect(() => {
-    restoreFromURL();
+      return next;
+    });
   }, []);
+
+  // Record a successful search in history exactly once per committed term,
+  // even if React Query later refetches the same key in the background.
+  const lastSavedQueryRef = useRef<string>("");
+  useEffect(() => {
+    if (query.isSuccess && q.trim()) {
+      if (lastSavedQueryRef.current !== q) {
+        lastSavedQueryRef.current = q;
+        saveToHistory(q);
+      }
+    }
+  }, [query.isSuccess, q, saveToHistory]);
 
   // Keep the draft input in sync with the committed URL query when it changes
   // externally (e.g. browser back/forward), so the field never goes stale.
   useEffect(() => {
     setSearch(q);
   }, [q]);
-
-  // Abort any in-flight request when the hook unmounts, so navigating away
-  // mid-search doesn't leave a request that later writes to unmounted state.
-  useEffect(() => {
-    return () => {
-      abortControllerRef.current?.abort();
-    };
-  }, []);
-
-  // Auto-apply filter changes: re-run the current search whenever a filter is
-  // updated, debounced so typing in the min-width/min-height inputs doesn't
-  // fire a request per keystroke. The effect event always reads the latest
-  // state. Comparing against the previous filter values (rather than a
-  // "first run" flag) skips the initial mount AND survives StrictMode's
-  // double-invoked effects, so navigating back never fires a duplicate fetch
-  // that makes the results flicker.
-  const applyFilterSearch = useEffectEvent(() => {
-    if (lastSearch === null) {
-      return;
-    }
-    performSearch(1, false, q);
-  });
-
-  const prevFiltersRef = useRef({
-    imageType,
-    orientation,
-    color,
-    minWidth,
-    minHeight,
-  });
-  useEffect(() => {
-    const prev = prevFiltersRef.current;
-    if (
-      prev.imageType === imageType &&
-      prev.orientation === orientation &&
-      prev.color === color &&
-      prev.minWidth === minWidth &&
-      prev.minHeight === minHeight
-    ) {
-      return;
-    }
-    prevFiltersRef.current = {
-      imageType,
-      orientation,
-      color,
-      minWidth,
-      minHeight,
-    };
-    const timer = setTimeout(() => {
-      applyFilterSearch();
-    }, FILTER_DEBOUNCE_MS);
-    return () => clearTimeout(timer);
-  }, [imageType, orientation, color, minWidth, minHeight]);
 
   const setImageType = (value: ImageType) => {
     void setSearchParams({ type: value });
@@ -384,51 +196,51 @@ export const useSearch = (): SearchState & SearchActions => {
     void setSearchParams({ minHeight: value });
   };
 
+  // Commit a search term to the URL. The fetch itself is handled by React
+  // Query in response to the query-key change, so this just moves state.
+  const performSearch = (queryOverride?: string) => {
+    const qEffective = (queryOverride ?? search).trim();
+    if (!qEffective) {
+      clearSearch();
+      return;
+    }
+    setSearch(qEffective);
+    void setSearchParams({ q: qEffective });
+  };
+
   const clearSearch = () => {
-    requestIdRef.current++;
-    abortControllerRef.current?.abort();
     setSearch("");
-    setError("");
-    setResults([]);
-    setTotalHits(0);
-    setHasSearched(false);
-    setLastSearch(null);
-    void setSearchParams({ q: "", page: 1 });
+    void setSearchParams({ q: "" });
   };
 
   const loadMore = () => {
-    const nextPage = page + 1;
-    void setSearchParams({ page: nextPage });
-    performSearch(nextPage, true, q);
+    if (query.hasNextPage && !query.isFetchingNextPage) {
+      void query.fetchNextPage();
+    }
   };
 
-  // True when the draft query and all filters still match the last executed
-  // search — i.e. clicking "Search" now would re-fetch identical results.
-  const isSearchUnchanged =
-    lastSearch !== null &&
-    lastSearch.q === search.trim() &&
-    lastSearch.imageType === imageType &&
-    lastSearch.orientation === orientation &&
-    lastSearch.color === color &&
-    lastSearch.minWidth === minWidth &&
-    lastSearch.minHeight === minHeight;
+  // True when the draft query still matches the committed URL query — i.e.
+  // clicking "Search" now would re-commit identical state and change nothing.
+  const isSearchUnchanged = search.trim() === q;
 
   return {
     // State
     search,
     results,
-    error,
-    loading,
+    error: query.error ? getErrorMessage(query.error) : "",
+    loading: query.isLoading,
+    loadingMore: query.isFetchingNextPage,
     searchHistory,
     showFilters,
     totalHits,
-    hasSearched,
+    hasSearched: Boolean(query.data),
     isSearchUnchanged,
     imageType,
     orientation,
     color,
     minWidth,
     minHeight,
+    hasMore: Boolean(query.hasNextPage),
     // Actions
     setSearch,
     setShowFilters,

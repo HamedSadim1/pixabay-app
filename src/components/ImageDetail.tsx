@@ -1,21 +1,16 @@
-import React, { useRef, useState, useEffect } from "react";
+import React from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import axios, { type AxiosError } from "axios";
-import { API_ENDPOINTS } from "../config/api";
+import { useQuery } from "@tanstack/react-query";
+import { getImageById, getErrorMessage, NotFoundError } from "../api/pixabay";
 import {
   buttonBase,
   buttonSizes,
   buttonVariants,
 } from "../constants/buttonStyles";
-import type { Hit } from "../models/IPixabay";
 import Avatar from "./Avatar";
 import Button from "./Button";
 import Icon from "./Icon";
 import type { IconName } from "../constants/icons";
-
-interface ApiError {
-  message: string;
-}
 
 const ImageDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -31,80 +26,22 @@ const ImageDetail: React.FC = () => {
       navigate(-1);
     }
   };
-  const [imageData, setImageData] = useState<Hit | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string>("");
-  // Bumping this re-runs the fetch, used by the error state's Retry button.
-  const [reloadKey, setReloadKey] = useState<number>(0);
-  // Monotonic id so only the latest in-flight request may update state. Under
-  // StrictMode the effect runs twice, aborting the first request; without this
-  // guard that aborted request's `finally` would clear `loading` while the
-  // second (real) request is still pending, flashing the "Image Not Found" state.
-  const requestIdRef = useRef(0);
 
-  useEffect(() => {
-    const controller = new AbortController();
-    const requestId = ++requestIdRef.current;
-
-    const fetchImageDetail = async () => {
-      if (!id) {
-        setError("No image ID provided");
-        setLoading(false);
-        return;
-      }
-
-      try {
-        setLoading(true);
-        setError("");
-        // Clear any previously-loaded image so switching IDs never shows a
-        // stale frame while the new one is still loading.
-        setImageData(null);
-
-        // Retrieve the image by ID regardless of type (photo/illustration/vector).
-        const response = await axios.get(
-          `${API_ENDPOINTS.PIXABAY_SEARCH}&id=${id}`,
-          { timeout: 10000, signal: controller.signal },
-        );
-
-        // A newer request (id change, reload, or StrictMode remount) has
-        // started — ignore this stale response.
-        if (requestId !== requestIdRef.current) {
-          return;
-        }
-
-        if (
-          response.data &&
-          Array.isArray(response.data.hits) &&
-          response.data.hits.length > 0
-        ) {
-          setImageData(response.data.hits[0]);
-        } else {
-          throw new Error("Image not found");
-        }
-      } catch (err) {
-        // The request was aborted (navigated away or a new fetch) — not an error.
-        if (axios.isCancel(err) || requestId !== requestIdRef.current) {
-          return;
-        }
-        const error = err as AxiosError<ApiError>;
-        const errorMessage =
-          error.response?.data?.message ||
-          error.message ||
-          "An error occurred while fetching image details";
-        setError(errorMessage);
-      } finally {
-        // Only the latest request may clear the loading state; a superseded
-        // (aborted) request must not blank the spinner for the active one.
-        if (requestId === requestIdRef.current) {
-          setLoading(false);
-        }
-      }
-    };
-
-    fetchImageDetail();
-
-    return () => controller.abort();
-  }, [id, reloadKey]);
+  const {
+    data: imageData,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ["pixabay", "image", id],
+    queryFn: () => getImageById(id as string),
+    enabled: Boolean(id),
+    // "Not found" is a terminal result — retrying won't help. Network errors
+    // get the default two retries before surfacing the manual Retry button.
+    retry: (failureCount, err) =>
+      err instanceof NotFoundError ? false : failureCount < 2,
+  });
 
   const formatNumber = (num: number) => {
     if (num >= 1000000) {
@@ -158,7 +95,7 @@ const ImageDetail: React.FC = () => {
     }
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="space-y-6">
         <div className="flex flex-wrap items-center gap-4">
@@ -177,7 +114,34 @@ const ImageDetail: React.FC = () => {
     );
   }
 
-  if (error) {
+  if (isError && error instanceof NotFoundError) {
+    return (
+      <div className="space-y-6">
+        <div className="flex flex-wrap items-center gap-4">
+          {backButton}
+          <h1 className="font-display text-3xl uppercase tracking-[0.03em] text-paper md:text-4xl">
+            Image Details
+          </h1>
+        </div>
+        <div className="border border-gold bg-gold/10 p-10 text-center">
+          <div className="mb-3 text-4xl text-gold">
+            <Icon name="warning" />
+          </div>
+          <h2 className="mb-2 font-display text-lg uppercase tracking-[0.03em] text-paper">
+            Image Not Found
+          </h2>
+          <p className="mb-5 font-mono text-xs text-muted">
+            The requested frame could not be found.
+          </p>
+          <Button onClick={goBack}>
+            <Icon name="arrowLeft" /> Go Back
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
     return (
       <div className="space-y-6">
         <div className="flex flex-wrap items-center gap-4">
@@ -193,12 +157,11 @@ const ImageDetail: React.FC = () => {
           <h2 className="mb-2 font-display text-lg uppercase tracking-[0.03em] text-paper">
             Error Loading Image
           </h2>
-          <p className="mb-5 font-mono text-xs text-muted">{error}</p>
+          <p className="mb-5 font-mono text-xs text-muted">
+            {getErrorMessage(error)}
+          </p>
           <div className="flex flex-wrap justify-center gap-3">
-            <Button
-              variant="primary"
-              onClick={() => setReloadKey((key) => key + 1)}
-            >
+            <Button variant="primary" onClick={() => void refetch()}>
               <Icon name="rotateRight" /> Retry
             </Button>
             <Button onClick={goBack}>
@@ -237,6 +200,8 @@ const ImageDetail: React.FC = () => {
     );
   }
 
+  const { tags } = imageData;
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center gap-4">
@@ -255,7 +220,7 @@ const ImageDetail: React.FC = () => {
         <div className="group relative">
           <img
             src={imageData.largeImageURL}
-            alt={imageData.tags}
+            alt={tags}
             className="max-h-96 w-full border border-line object-contain"
           />
           <Button
@@ -309,7 +274,6 @@ const ImageDetail: React.FC = () => {
               Statistics
             </h2>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
-              {" "}
               {(
                 [
                   ["heart", formatNumber(imageData.likes), "Likes"],
@@ -346,7 +310,7 @@ const ImageDetail: React.FC = () => {
             Tags
           </h2>
           <div className="flex flex-wrap gap-2">
-            {imageData.tags
+            {tags
               .split(",")
               .map((tag) => tag.trim())
               .filter(Boolean)
