@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import axios, { type AxiosError } from "axios";
 import { API_ENDPOINTS } from "../config/api";
 import {
@@ -19,6 +19,17 @@ interface ApiError {
 const ImageDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // If the page was opened directly (deep link), there is no history entry to
+  // return to, so fall back to the search page instead of doing nothing.
+  const goBack = () => {
+    if (location.key === "default") {
+      navigate("/search");
+    } else {
+      navigate(-1);
+    }
+  };
   const [imageData, setImageData] = useState<Hit | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
@@ -84,7 +95,7 @@ const ImageDetail: React.FC = () => {
   };
 
   const backButton = (
-    <Button size="sm" onClick={() => navigate(-1)}>
+    <Button size="sm" onClick={goBack}>
       <Icon name="arrowLeft" /> Back
     </Button>
   );
@@ -148,7 +159,7 @@ const ImageDetail: React.FC = () => {
             Error Loading Image
           </h3>
           <p className="mb-5 font-mono text-xs text-muted">{error}</p>
-          <Button onClick={() => navigate(-1)}>
+          <Button onClick={goBack}>
             <Icon name="arrowLeft" /> Go Back
           </Button>
         </div>
@@ -175,7 +186,7 @@ const ImageDetail: React.FC = () => {
           <p className="mb-5 font-mono text-xs text-muted">
             The requested frame could not be found.
           </p>
-          <Button onClick={() => navigate(-1)}>
+          <Button onClick={goBack}>
             <Icon name="arrowLeft" /> Go Back
           </Button>
         </div>

@@ -1,5 +1,5 @@
 import React, { lazy, Suspense } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
 import { NuqsAdapter } from "nuqs/adapters/react-router/v7";
 import Navbar from "./components/Navbar";
 import Home from "./components/Home";
@@ -7,6 +7,11 @@ import ImageDetail from "./components/ImageDetail";
 import UserCard from "./components/UserCard";
 import ErrorBoundary from "./components/ErrorBoundary";
 import SprocketStrip from "./components/SprocketStrip";
+import {
+  buttonBase,
+  buttonSizes,
+  buttonVariants,
+} from "./constants/buttonStyles";
 import {
   loadGeolocation,
   loadImageSearch,
@@ -127,6 +132,30 @@ function App() {
                           This is some user content.
                         </p>
                       </UserCard>
+                    </section>
+                  }
+                />
+                <Route
+                  path="*"
+                  element={
+                    <section className="animate-fade-in">
+                      <PageHeader
+                        index="EXH. 00"
+                        title="Not Found"
+                        subtitle="Frame out of range"
+                      />
+                      <div className="border border-line bg-panel p-10 text-center">
+                        <p className="mb-5 font-mono text-xs text-muted">
+                          The page you're looking for is out of the contact
+                          sheet.
+                        </p>
+                        <Link
+                          to="/"
+                          className={`${buttonBase} ${buttonSizes.md} ${buttonVariants.default}`}
+                        >
+                          Back to Home
+                        </Link>
+                      </div>
                     </section>
                   }
                 />

@@ -161,6 +161,21 @@ function ImageSearch() {
         </div>
       )}
 
+      {hasSearched && !loading && !error && results.length === 0 && (
+        <div className="border border-line bg-panel p-10 text-center">
+          <div className="mb-3 text-3xl text-muted">
+            <Icon name="search" />
+          </div>
+          <h3 className="mb-2 font-display text-lg uppercase tracking-[0.03em] text-paper">
+            No results found
+          </h3>
+          <p className="font-mono text-xs text-muted">
+            No images match "{search}". Try different keywords or adjust the
+            filters.
+          </p>
+        </div>
+      )}
+
       <ImageList images={results} />
 
       {/* Load More */}

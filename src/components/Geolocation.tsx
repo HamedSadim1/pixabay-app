@@ -76,6 +76,7 @@ function Geolocation() {
   );
   const [permissionStatus, setPermissionStatus] =
     useState<PermissionState | null>(null);
+  const [permissionDenied, setPermissionDenied] = useState(false);
 
   const getBrowserLocation = async () => {
     if (!navigator.geolocation) {
@@ -86,6 +87,7 @@ function Geolocation() {
 
     setLoading(true);
     setErrorMessage("");
+    setPermissionDenied(false);
 
     try {
       const position = await new Promise<GeolocationPosition>(
@@ -116,6 +118,7 @@ function Geolocation() {
         case error.PERMISSION_DENIED:
           message =
             "Location access denied. Please enable location permissions.";
+          setPermissionDenied(true);
           break;
         case error.POSITION_UNAVAILABLE:
           message = "Location information is unavailable.";
@@ -197,6 +200,19 @@ function Geolocation() {
               </h3>
             </div>
             <p className="mb-5 font-mono text-xs text-muted">{errorMessage}</p>
+            {permissionDenied && (
+              <div className="mb-5 border border-gold bg-gold/10 p-4 text-left">
+                <h4 className="mb-2 font-display text-sm uppercase tracking-[0.03em] text-gold">
+                  Re-enable location
+                </h4>
+                <p className="font-mono text-xs leading-relaxed text-muted">
+                  Your browser is blocking location access and won't re-prompt.
+                  Click the lock/location icon in the address bar and allow
+                  "Location", or open your browser's site settings and enable it
+                  for this site.
+                </p>
+              </div>
+            )}
             <Button onClick={getBrowserLocation} variant="primary">
               <Icon name="rotateRight" /> Try Again
             </Button>

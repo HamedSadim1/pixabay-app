@@ -1,4 +1,10 @@
-import { useState, useEffect, useCallback, useEffectEvent } from "react";
+import {
+  useState,
+  useEffect,
+  useCallback,
+  useEffectEvent,
+  useRef,
+} from "react";
 import {
   parseAsInteger,
   parseAsString,
@@ -57,6 +63,10 @@ const COLORS = [
   "black",
   "brown",
 ] as const satisfies readonly Color[];
+
+// Debounce for auto-applying filter changes, so typing in the min-width/
+// min-height inputs doesn't fire a request on every keystroke.
+const FILTER_DEBOUNCE_MS = 300;
 
 // URL-backed search parameters. nuqs keeps the query string in sync with
 // these values, so the URL is the single source of truth — no hand-rolled
@@ -247,6 +257,30 @@ export const useSearch = (): SearchState & SearchActions => {
   useEffect(() => {
     restoreFromURL();
   }, []);
+
+  // Auto-apply filter changes: re-run the current search whenever a filter is
+  // updated, debounced so typing in the min-width/min-height inputs doesn't
+  // fire a request per keystroke. The effect event always reads the latest
+  // state, and the ref skips the initial mount so we don't double-fetch right
+  // after restoring a query from the URL.
+  const applyFilterSearch = useEffectEvent(() => {
+    if (lastSearch === null) {
+      return;
+    }
+    performSearch(1, false, q);
+  });
+
+  const isFirstFilterRun = useRef(true);
+  useEffect(() => {
+    if (isFirstFilterRun.current) {
+      isFirstFilterRun.current = false;
+      return;
+    }
+    const timer = setTimeout(() => {
+      applyFilterSearch();
+    }, FILTER_DEBOUNCE_MS);
+    return () => clearTimeout(timer);
+  }, [imageType, orientation, color, minWidth, minHeight]);
 
   const setImageType = (value: ImageType) => {
     void setSearchParams({ type: value });
