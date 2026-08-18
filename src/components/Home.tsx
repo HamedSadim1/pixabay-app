@@ -27,21 +27,29 @@ const Home: React.FC = () => {
     },
   ];
 
-  const features: { icon: IconName; title: string; description: string }[] = [
+  const features: {
+    icon: IconName;
+    title: string;
+    description: string;
+    to: string;
+  }[] = [
     {
       icon: "pen",
       title: "Blog Posts",
       description: "Read and share stories from the community.",
+      to: "/posts",
     },
     {
       icon: "search",
       title: "Image Search",
       description: "Query the Pixabay archive by keyword and filter.",
+      to: "/search",
     },
     {
       icon: "location",
       title: "Location",
       description: "Find your position with the geolocation service.",
+      to: "/location",
     },
   ];
 
@@ -82,19 +90,24 @@ const Home: React.FC = () => {
       {/* Features */}
       <section className="grid gap-4 md:grid-cols-3">
         {features.map((feature, index) => (
-          <Frame key={feature.title} frame={`FRAME/0${index + 1}`}>
-            <div className="p-6">
-              <div className="mb-4 flex h-10 w-10 items-center justify-center border border-line text-safelight">
-                <Icon name={feature.icon} />
+          <Link key={feature.title} to={feature.to} className="group block">
+            <Frame
+              frame={`FRAME/0${index + 1}`}
+              className="h-full transition-colors group-hover:border-gold"
+            >
+              <div className="p-6">
+                <div className="mb-4 flex h-10 w-10 items-center justify-center border border-line text-safelight transition-colors group-hover:border-gold group-hover:text-gold">
+                  <Icon name={feature.icon} />
+                </div>
+                <h3 className="mb-1 font-display text-lg uppercase tracking-[0.03em] text-paper">
+                  {feature.title}
+                </h3>
+                <p className="text-sm leading-relaxed text-muted">
+                  {feature.description}
+                </p>
               </div>
-              <h3 className="mb-1 font-display text-lg uppercase tracking-[0.03em] text-paper">
-                {feature.title}
-              </h3>
-              <p className="text-sm leading-relaxed text-muted">
-                {feature.description}
-              </p>
-            </div>
-          </Frame>
+            </Frame>
+          </Link>
         ))}
       </section>
 
