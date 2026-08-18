@@ -91,9 +91,9 @@ function SinglePost() {
           </div>
         </div>
 
-        <h3 className="mb-3 font-display text-2xl uppercase tracking-[0.02em] text-paper">
+        <h2 className="mb-3 font-display text-2xl uppercase tracking-[0.02em] text-paper">
           Hey, I'm new here!
-        </h3>
+        </h2>
         <p className="mb-5 text-sm leading-relaxed text-muted">
           Just joined this amazing community and I'm so excited to be part of
           it! Looking forward to connecting with everyone and sharing some
@@ -107,8 +107,8 @@ function SinglePost() {
           />
         </div>
 
-        <div className="flex items-center justify-between border-t border-line pt-4">
-          <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-y-2 border-t border-line pt-4">
+          <div className="flex flex-wrap items-center gap-2">
             <Button
               size="sm"
               variant={isLiked ? "ghostActive" : "ghost"}
@@ -144,9 +144,9 @@ function SinglePost() {
         id="comments"
         className="border border-line bg-panel p-6"
       >
-        <h3 className="mb-5 font-display text-lg uppercase tracking-[0.03em] text-paper">
+        <h2 className="mb-5 font-display text-lg uppercase tracking-[0.03em] text-paper">
           Comments — {comments.length}
-        </h3>
+        </h2>
 
         <div className="space-y-3">
           {comments.map((comment, index) => (

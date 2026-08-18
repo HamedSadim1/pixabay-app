@@ -1,9 +1,10 @@
 // Share helper: prefers the native Web Share API (mobile), falling back to
 // copying the current URL to the clipboard. Returns true when sharing/copying
 // succeeded so callers can show brief feedback.
-export async function sharePage(title?: string): Promise<boolean> {
-  const url = window.location.href;
-
+export async function sharePage(
+  title?: string,
+  url = window.location.href,
+): Promise<boolean> {
   if (typeof navigator.share === "function") {
     try {
       await navigator.share({ title, url });

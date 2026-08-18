@@ -161,16 +161,30 @@ function Geolocation() {
     };
   }, [lat, lon]);
 
-  // Check permission status.
+  // Check permission status (and clean up the listener on unmount).
   useEffect(() => {
-    if ("permissions" in navigator) {
-      navigator.permissions.query({ name: "geolocation" }).then((result) => {
-        setPermissionStatus(result.state);
-        result.addEventListener("change", () => {
-          setPermissionStatus(result.state);
-        });
-      });
+    if (!("permissions" in navigator)) {
+      return;
     }
+    let cancelled = false;
+    let permissionStatus: PermissionStatus | null = null;
+    const onChange = () => {
+      if (permissionStatus) {
+        setPermissionStatus(permissionStatus.state);
+      }
+    };
+    void navigator.permissions.query({ name: "geolocation" }).then((result) => {
+      if (cancelled) {
+        return;
+      }
+      permissionStatus = result;
+      setPermissionStatus(result.state);
+      result.addEventListener("change", onChange);
+    });
+    return () => {
+      cancelled = true;
+      permissionStatus?.removeEventListener("change", onChange);
+    };
   }, []);
 
   const formatCoordinate = (coord: number, type: "lat" | "lng") => {
@@ -195,17 +209,17 @@ function Geolocation() {
               <span className="text-2xl text-safelight">
                 <Icon name="warning" />
               </span>
-              <h3 className="font-display text-xl uppercase tracking-[0.03em] text-paper">
+              <h2 className="font-display text-xl uppercase tracking-[0.03em] text-paper">
                 Location Error
-              </h3>
+              </h2>
             </div>
             <p className="mb-5 font-mono text-xs text-muted">{errorMessage}</p>
             {permissionDenied && (
               <div className="mb-5 border border-gold bg-gold/10 p-4 text-left">
-                <h4 className="mb-2 font-display text-sm uppercase tracking-[0.03em] text-gold">
+                <h3 className="mb-2 font-display text-sm uppercase tracking-[0.03em] text-gold">
                   Re-enable location
-                </h4>
-                <p className="font-mono text-xs leading-relaxed text-muted">
+                </h3>
+                <p className="font-mono text-xs leading-relaxed text-paper">
                   Your browser is blocking location access and won't re-prompt.
                   Click the lock/location icon in the address bar and allow
                   "Location", or open your browser's site settings and enable it
@@ -347,9 +361,9 @@ function Geolocation() {
       {/* Map Preview */}
       <Frame frame="COORD/02">
         <div className="p-6">
-          <h3 className="mb-4 font-display text-lg uppercase tracking-[0.03em] text-paper">
+          <h2 className="mb-4 font-display text-lg uppercase tracking-[0.03em] text-paper">
             Location Preview
-          </h3>
+          </h2>
           <LocationMap latitude={lat} longitude={lon} />
           <p className="mt-3 font-mono text-[10px] uppercase tracking-meta text-muted">
             {formatCoordinate(lat, "lat")} · {formatCoordinate(lon, "lng")}

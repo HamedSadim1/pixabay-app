@@ -27,7 +27,7 @@ const BlogPost: FC<BlockProps> = ({ name, image, text, frame }) => {
   );
 
   const handleShare = async () => {
-    if (await sharePage(name)) {
+    if (await sharePage(name, `${window.location.origin}/posts`)) {
       setShared(true);
       window.setTimeout(() => setShared(false), 1500);
     }

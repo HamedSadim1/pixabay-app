@@ -109,6 +109,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ search }) => {
             value={minWidth}
             onChange={(e) => setMinWidth(e.target.value)}
             placeholder="e.g. 1920"
+            min="0"
             className={fieldClasses}
           />
         </div>
@@ -158,6 +159,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ search }) => {
           value={minHeight}
           onChange={(e) => setMinHeight(e.target.value)}
           placeholder="e.g. 1080"
+          min="0"
           className={fieldClasses}
         />
       </div>

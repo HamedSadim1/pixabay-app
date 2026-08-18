@@ -103,9 +103,9 @@ const Home: React.FC = () => {
                 <div className="mb-4 flex h-10 w-10 items-center justify-center border border-line text-safelight transition-colors group-hover:border-gold group-hover:text-gold">
                   <Icon name={feature.icon} />
                 </div>
-                <h3 className="mb-1 font-display text-lg uppercase tracking-[0.03em] text-paper">
+                <h2 className="mb-1 font-display text-lg uppercase tracking-[0.03em] text-paper">
                   {feature.title}
-                </h3>
+                </h2>
                 <p className="text-sm leading-relaxed text-muted">
                   {feature.description}
                 </p>

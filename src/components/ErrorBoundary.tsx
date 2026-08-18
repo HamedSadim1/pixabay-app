@@ -40,13 +40,8 @@ class ErrorBoundary extends Component<Props, State> {
             <p className="mb-5 font-mono text-xs text-muted">
               An unexpected error occurred. Please try refreshing the page.
             </p>
-            <Button
-              variant="primary"
-              onClick={() =>
-                this.setState({ hasError: false, error: undefined })
-              }
-            >
-              <Icon name="rotateRight" /> Try Again
+            <Button variant="primary" onClick={() => window.location.reload()}>
+              <Icon name="rotateRight" /> Reload Page
             </Button>
           </div>
         )

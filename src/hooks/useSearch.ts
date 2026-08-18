@@ -183,7 +183,7 @@ export const useSearch = (): SearchState & SearchActions => {
           setError("");
         }
 
-        let queryString = `${API_ENDPOINTS.PIXABAY_SEARCH}&q=${qEffective}&page=${p}&per_page=20`;
+        let queryString = `${API_ENDPOINTS.PIXABAY_SEARCH}&q=${encodeURIComponent(qEffective)}&page=${p}&per_page=20`;
 
         if (imageType !== "all") {
           queryString += `&image_type=${imageType}`;
@@ -194,11 +194,14 @@ export const useSearch = (): SearchState & SearchActions => {
         if (color !== "all") {
           queryString += `&colors=${color}`;
         }
-        if (minWidth) {
-          queryString += `&min_width=${minWidth}`;
+        // Only send positive whole numbers, matching the Pixabay API contract.
+        const width = Math.floor(Number(minWidth));
+        if (Number.isFinite(width) && width > 0) {
+          queryString += `&min_width=${width}`;
         }
-        if (minHeight) {
-          queryString += `&min_height=${minHeight}`;
+        const height = Math.floor(Number(minHeight));
+        if (Number.isFinite(height) && height > 0) {
+          queryString += `&min_height=${height}`;
         }
 
         const response = await axios.get(queryString);
@@ -257,6 +260,12 @@ export const useSearch = (): SearchState & SearchActions => {
   useEffect(() => {
     restoreFromURL();
   }, []);
+
+  // Keep the draft input in sync with the committed URL query when it changes
+  // externally (e.g. browser back/forward), so the field never goes stale.
+  useEffect(() => {
+    setSearch(q);
+  }, [q]);
 
   // Auto-apply filter changes: re-run the current search whenever a filter is
   // updated, debounced so typing in the min-width/min-height inputs doesn't

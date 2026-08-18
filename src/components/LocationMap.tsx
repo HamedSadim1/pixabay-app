@@ -91,7 +91,7 @@ const LocationMap: React.FC<LocationMapProps> = ({ latitude, longitude }) => {
       <MapContainer
         center={position}
         zoom={15}
-        scrollWheelZoom
+        scrollWheelZoom={false}
         className="h-full w-full"
       >
         <TileLayer url={DARK_TILES_URL} attribution={DARK_TILES_ATTRIBUTION} />

@@ -33,9 +33,9 @@ interface PageHeaderProps {
 const PageHeader: React.FC<PageHeaderProps> = ({ index, title, subtitle }) => (
   <header className="mb-8">
     <div className="flex items-baseline gap-3">
-      <h2 className="font-display text-3xl uppercase tracking-[0.03em] text-paper md:text-4xl">
+      <h1 className="font-display text-3xl uppercase tracking-[0.03em] text-paper md:text-4xl">
         {title}
-      </h2>
+      </h1>
       <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-gold">
         {index}
       </span>

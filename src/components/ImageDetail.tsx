@@ -113,7 +113,9 @@ const ImageDetail: React.FC = () => {
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `pixabay-${imageData.id}.jpg`;
+      const extension =
+        imageData.largeImageURL.split("?")[0].split(".").pop() || "jpg";
+      link.download = `pixabay-${imageData.id}.${extension}`;
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -155,9 +157,9 @@ const ImageDetail: React.FC = () => {
           <div className="mb-3 text-4xl text-safelight">
             <Icon name="warning" />
           </div>
-          <h3 className="mb-2 font-display text-lg uppercase tracking-[0.03em] text-paper">
+          <h2 className="mb-2 font-display text-lg uppercase tracking-[0.03em] text-paper">
             Error Loading Image
-          </h3>
+          </h2>
           <p className="mb-5 font-mono text-xs text-muted">{error}</p>
           <Button onClick={goBack}>
             <Icon name="arrowLeft" /> Go Back
@@ -180,9 +182,9 @@ const ImageDetail: React.FC = () => {
           <div className="mb-3 text-4xl text-gold">
             <Icon name="warning" />
           </div>
-          <h3 className="mb-2 font-display text-lg uppercase tracking-[0.03em] text-paper">
+          <h2 className="mb-2 font-display text-lg uppercase tracking-[0.03em] text-paper">
             Image Not Found
-          </h3>
+          </h2>
           <p className="mb-5 font-mono text-xs text-muted">
             The requested frame could not be found.
           </p>
@@ -228,9 +230,9 @@ const ImageDetail: React.FC = () => {
         {/* Image Info */}
         <div className="mt-6 grid gap-6 md:grid-cols-2">
           <div>
-            <h3 className="mb-3 font-display text-lg uppercase tracking-[0.03em] text-paper">
+            <h2 className="mb-3 font-display text-lg uppercase tracking-[0.03em] text-paper">
               Image Information
-            </h3>
+            </h2>
             <dl className="space-y-2">
               {[
                 ["Frame ID", `#${imageData.id}`],
@@ -262,10 +264,10 @@ const ImageDetail: React.FC = () => {
           </div>
 
           <div>
-            <h3 className="mb-3 font-display text-lg uppercase tracking-[0.03em] text-paper">
+            <h2 className="mb-3 font-display text-lg uppercase tracking-[0.03em] text-paper">
               Statistics
-            </h3>
-            <div className="grid grid-cols-3 gap-3">
+            </h2>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
               {" "}
               {(
                 [
@@ -299,9 +301,9 @@ const ImageDetail: React.FC = () => {
 
         {/* Tags */}
         <div className="mt-6">
-          <h3 className="mb-3 font-display text-lg uppercase tracking-[0.03em] text-paper">
+          <h2 className="mb-3 font-display text-lg uppercase tracking-[0.03em] text-paper">
             Tags
-          </h3>
+          </h2>
           <div className="flex flex-wrap gap-2">
             {imageData.tags.split(", ").map((tag, index) => (
               <span

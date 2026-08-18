@@ -166,9 +166,9 @@ function ImageSearch() {
           <div className="mb-3 text-3xl text-muted">
             <Icon name="search" />
           </div>
-          <h3 className="mb-2 font-display text-lg uppercase tracking-[0.03em] text-paper">
+          <h2 className="mb-2 font-display text-lg uppercase tracking-[0.03em] text-paper">
             No results found
-          </h3>
+          </h2>
           <p className="font-mono text-xs text-muted">
             No images match "{search}". Try different keywords or adjust the
             filters.
