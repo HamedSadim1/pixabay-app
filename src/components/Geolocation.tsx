@@ -1,173 +1,142 @@
-import React, { useState, useEffect } from "react";
+import { useEffect, useEffectEvent } from "react";
+import { parseAsFloat, useQueryStates } from "nuqs";
+import Button from "./Button";
+import DataField from "./DataField";
+import Frame from "./Frame";
+import Icon from "./Icon";
+import MetaLabel from "./MetaLabel";
+import Spinner from "./Spinner";
+import LocationMap from "./LocationMap";
+import { useGeolocation } from "@/hooks/useGeolocation";
+import { useReverseGeocode } from "@/hooks/useReverseGeocode";
+import { cn } from "@/utils/cn";
 import {
-  FaMapMarkerAlt,
-  FaSync,
-  FaCheckCircle,
-  FaExclamationTriangle,
-  FaInfoCircle,
-} from "react-icons/fa";
-
-interface LocationData {
-  latitude: number;
-  longitude: number;
-  accuracy: number;
-  timestamp: number;
-  altitude?: number;
-  altitudeAccuracy?: number;
-  heading?: number;
-  speed?: number;
-}
+  formatAccuracy,
+  formatCoordinate,
+  isValidCoordinates,
+} from "@/utils/geo";
 
 function Geolocation() {
-  const [locationData, setLocationData] = useState<LocationData | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(true);
-  const [permissionStatus, setPermissionStatus] =
-    useState<PermissionState | null>(null);
-  const [locationName, setLocationName] = useState<string>("");
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  // Coordinates live in the URL so the location is shareable and is restored
+  // when navigating back. Extras (accuracy/altitude/speed) stay local.
+  const [{ lat, lon }, setCoordinates] = useQueryStates(
+    { lat: parseAsFloat, lon: parseAsFloat },
+    { history: "replace" },
+  );
 
-  const getLocation = async () => {
-    if (!navigator.geolocation) {
-      setErrorMessage("Geolocation is not supported by this browser");
-      setLoading(false);
-      return;
-    }
+  const hasValidCoordinates = isValidCoordinates(lat, lon);
 
-    setLoading(true);
-    setErrorMessage("");
+  const {
+    details,
+    loading,
+    errorMessage,
+    permissionDenied,
+    permissionStatus,
+    getLocation,
+  } = useGeolocation();
 
-    try {
-      const position = await new Promise<GeolocationPosition>(
-        (resolve, reject) => {
-          navigator.geolocation.getCurrentPosition(resolve, reject, {
-            enableHighAccuracy: true,
-            timeout: 15000,
-            maximumAge: 300000, // 5 minutes
-          });
-        },
-      );
+  const { locationName, resolvingAddress } = useReverseGeocode(lat, lon);
 
-      const data: LocationData = {
-        latitude: position.coords.latitude,
-        longitude: position.coords.longitude,
-        accuracy: position.coords.accuracy,
-        timestamp: position.timestamp,
-        altitude: position.coords.altitude || undefined,
-        altitudeAccuracy: position.coords.altitudeAccuracy || undefined,
-        heading: position.coords.heading || undefined,
-        speed: position.coords.speed || undefined,
-      };
-
-      setLocationData(data);
-      setLastUpdated(new Date());
-
-      // Try to get location name using reverse geocoding
-      try {
-        const response = await fetch(
-          `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${data.latitude}&longitude=${data.longitude}&localityLanguage=en`,
-        );
-        const geoData = await response.json();
-        if (geoData.city && geoData.countryName) {
-          setLocationName(`${geoData.city}, ${geoData.countryName}`);
-        } else if (geoData.locality) {
-          setLocationName(geoData.locality);
-        }
-      } catch (geoError) {
-        console.warn("Could not fetch location name:", geoError);
-      }
-    } catch (err) {
-      const error = err as GeolocationPositionError;
-      let message = "Unable to get your location";
-
-      switch (error.code) {
-        case error.PERMISSION_DENIED:
-          message =
-            "Location access denied. Please enable location permissions.";
-          break;
-        case error.POSITION_UNAVAILABLE:
-          message = "Location information is unavailable.";
-          break;
-        case error.TIMEOUT:
-          message = "Location request timed out. Please try again.";
-          break;
-      }
-
-      setErrorMessage(message);
-    } finally {
-      setLoading(false);
+  // Persist a successful browser lookup into the URL (the source of truth).
+  const getBrowserLocation = async () => {
+    const coords = await getLocation();
+    if (coords) {
+      void setCoordinates({ lat: coords.latitude, lon: coords.longitude });
     }
   };
+
+  // On mount, request the browser location only if the URL has no coordinates.
+  const requestInitialLocation = useEffectEvent(() => {
+    if (lat === null || lon === null) {
+      void getBrowserLocation();
+    }
+  });
 
   useEffect(() => {
-    getLocation();
-
-    // Check permission status
-    if ("permissions" in navigator) {
-      navigator.permissions.query({ name: "geolocation" }).then((result) => {
-        setPermissionStatus(result.state);
-        result.addEventListener("change", () => {
-          setPermissionStatus(result.state);
-        });
-      });
-    }
+    requestInitialLocation();
   }, []);
 
-  const formatCoordinate = (coord: number, type: "lat" | "lng") => {
-    const direction =
-      type === "lat" ? (coord >= 0 ? "N" : "S") : coord >= 0 ? "E" : "W";
-    return `${Math.abs(coord).toFixed(6)}° ${direction}`;
-  };
-
-  const formatAccuracy = (accuracy: number) => {
-    if (accuracy < 100) {
-      return `${Math.round(accuracy)}m`;
-    }
-    return `${(accuracy / 1000).toFixed(1)}km`;
-  };
-
-  if (loading) {
+  if (lat !== null && lon !== null && !hasValidCoordinates) {
     return (
-      <div className="max-w-2xl mx-auto space-y-6">
-        <div className="text-center">
-          <div className="relative">
-            <div className="animate-spin rounded-full h-16 w-16 border-4 border-white/20 border-t-white mx-auto mb-4"></div>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <FaMapMarkerAlt className="text-2xl text-white animate-pulse" />
-            </div>
+      <div className="mx-auto max-w-4xl space-y-6">
+        <div className="border border-safelight bg-safelight/10 p-6">
+          <div className="mb-3 flex items-center gap-3">
+            <span className="text-2xl text-safelight">
+              <Icon name="warning" />
+            </span>
+            <h2 className="font-display text-lg uppercase tracking-[0.03em] text-paper">
+              Invalid Location
+            </h2>
           </div>
-          <h2 className="text-2xl font-bold text-white mb-2">
+          <p className="font-mono text-xs text-paper">
+            The coordinates in the URL are out of range. Latitude must be
+            between −90 and 90, and longitude between −180 and 180.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (lat === null || lon === null) {
+    if (errorMessage) {
+      return (
+        <div className="mx-auto max-w-4xl space-y-6">
+          <div className="border border-safelight bg-safelight/10 p-6">
+            <div className="mb-3 flex items-center gap-3">
+              <span className="text-2xl text-safelight">
+                <Icon name="warning" />
+              </span>
+              <h2 className="font-display text-lg uppercase tracking-[0.03em] text-paper">
+                Location Error
+              </h2>
+            </div>
+            <p className="mb-5 font-mono text-xs text-muted">{errorMessage}</p>
+            {permissionDenied && (
+              <div className="mb-5 border border-gold bg-gold/10 p-4 text-left">
+                <h3 className="mb-2 font-display text-sm uppercase tracking-[0.03em] text-gold">
+                  Re-enable location
+                </h3>
+                <p className="font-mono text-xs leading-relaxed text-paper">
+                  Your browser is blocking location access and won't re-prompt.
+                  Click the lock/location icon in the address bar and allow
+                  "Location", or open your browser's site settings and enable it
+                  for this site.
+                </p>
+              </div>
+            )}
+            <Button onClick={getBrowserLocation} variant="primary">
+              <Icon name="rotateRight" /> Try Again
+            </Button>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="mx-auto max-w-2xl space-y-6">
+        <div className="border border-line bg-panel p-10 text-center">
+          <Spinner size="lg" className="mx-auto" />
+          <h2 className="mt-5 font-display text-xl uppercase tracking-[0.03em] text-paper">
             Finding Your Location
           </h2>
-          <p className="text-gray-300">
-            Please allow location access for the best experience
+          <p className="mt-2 font-mono text-xs uppercase tracking-meta text-muted">
+            Please allow location access
           </p>
         </div>
 
         {permissionStatus && (
           <div
-            className={`p-4 rounded-lg border backdrop-blur-sm ${
+            role="status"
+            className={cn(
+              "border p-4 font-mono text-xs uppercase tracking-[0.12em]",
               permissionStatus === "granted"
-                ? "bg-green-500/20 border-green-400 text-green-200"
+                ? "border-gold text-gold"
                 : permissionStatus === "denied"
-                  ? "bg-red-500/20 border-red-400 text-red-200"
-                  : "bg-yellow-500/20 border-yellow-400 text-yellow-200"
-            }`}
+                  ? "border-safelight text-safelight"
+                  : "border-line text-muted",
+            )}
           >
-            <div className="flex items-center space-x-2">
-              {permissionStatus === "granted" ? (
-                <FaCheckCircle />
-              ) : permissionStatus === "denied" ? (
-                <FaExclamationTriangle />
-              ) : (
-                <FaInfoCircle />
-              )}
-              <span className="font-medium">
-                Location Permission:{" "}
-                {permissionStatus.charAt(0).toUpperCase() +
-                  permissionStatus.slice(1)}
-              </span>
-            </div>
+            Location Permission: {permissionStatus}
           </div>
         )}
       </div>
@@ -175,152 +144,94 @@ function Geolocation() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="text-center">
-        <div className="flex items-center justify-center space-x-3 mb-4">
-          <FaMapMarkerAlt className="text-3xl text-purple-400" />
-          <h1 className="text-4xl font-bold text-white">Location Services</h1>
-        </div>
-        <p className="text-gray-300 text-lg">
-          Discover your current location with precision
-        </p>
-      </div>
-
-      {errorMessage ? (
-        <div className="bg-red-500/20 backdrop-blur-lg border border-red-400 text-red-200 p-6 rounded-xl shadow-2xl">
-          <div className="flex items-center space-x-3 mb-4">
-            <FaExclamationTriangle className="text-2xl" />
-            <h3 className="text-xl font-bold">Location Error</h3>
+    <div className="space-y-6">
+      {/* Main Location Card */}
+      <Frame frame="COORD/01">
+        <div className="p-6">
+          <div className="mb-6 flex items-start justify-between gap-4">
+            <div>
+              <h2 className="font-display text-lg uppercase tracking-[0.03em] text-paper">
+                Current Location
+              </h2>
+            </div>
+            <Button
+              size="sm"
+              onClick={getBrowserLocation}
+              disabled={loading}
+              aria-label="Refresh location"
+              title="Refresh Location"
+            >
+              <Icon name="rotateRight" />
+            </Button>
           </div>
-          <p className="mb-4">{errorMessage}</p>
-          <button
-            onClick={getLocation}
-            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center space-x-2"
-          >
-            <FaSync />
-            <span>Try Again</span>
-          </button>
-        </div>
-      ) : locationData ? (
-        <div className="space-y-6">
-          {/* Main Location Card */}
-          <div className="bg-white/10 backdrop-blur-lg rounded-xl p-8 shadow-2xl border border-white/20">
-            <div className="flex justify-between items-start mb-6">
-              <div>
-                <h2 className="text-2xl font-bold text-white mb-2">
-                  Your Current Location
-                </h2>
-                {locationName && (
-                  <p className="text-purple-300 text-lg font-medium">
-                    {locationName}
-                  </p>
-                )}
-              </div>
-              <button
-                onClick={getLocation}
-                disabled={loading}
-                className="bg-white/20 hover:bg-white/30 text-white p-3 rounded-lg transition-all duration-300 hover:scale-105 disabled:opacity-50"
-                title="Refresh Location"
-              >
-                <FaSync className={loading ? "animate-spin" : ""} />
-              </button>
-            </div>
 
-            {/* Coordinates Grid */}
-            <div className="grid md:grid-cols-2 gap-6 mb-6">
-              <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-600">
-                <h3 className="text-lg font-semibold text-white mb-3 flex items-center space-x-2">
-                  <span className="w-2 h-2 bg-green-400 rounded-full"></span>
-                  <span>Latitude</span>
-                </h3>
-                <p className="text-2xl font-mono text-green-300">
-                  {formatCoordinate(locationData.latitude, "lat")}
-                </p>
-                <p className="text-sm text-gray-400 mt-1">
-                  Decimal: {locationData.latitude.toFixed(8)}
-                </p>
-              </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <DataField label="Latitude" valueClassName="text-xl text-safelight">
+              {formatCoordinate(lat, "lat")}
+            </DataField>
+            <DataField
+              label="Longitude"
+              valueClassName="text-xl text-safelight"
+            >
+              {formatCoordinate(lon, "lng")}
+            </DataField>
+            <DataField
+              label="Address"
+              className="md:col-span-2"
+              valueClassName={
+                resolvingAddress || !locationName
+                  ? "text-sm text-muted"
+                  : "text-sm text-paper"
+              }
+            >
+              {resolvingAddress
+                ? "Resolving address…"
+                : locationName || "Address unavailable"}
+            </DataField>
+          </div>
 
-              <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-600">
-                <h3 className="text-lg font-semibold text-white mb-3 flex items-center space-x-2">
-                  <span className="w-2 h-2 bg-blue-400 rounded-full"></span>
-                  <span>Longitude</span>
-                </h3>
-                <p className="text-2xl font-mono text-blue-300">
-                  {formatCoordinate(locationData.longitude, "lng")}
-                </p>
-                <p className="text-sm text-gray-400 mt-1">
-                  Decimal: {locationData.longitude.toFixed(8)}
-                </p>
-              </div>
-            </div>
-
-            {/* Additional Info Grid */}
-            <div className="grid md:grid-cols-3 gap-4">
-              <div className="bg-slate-800/30 rounded-lg p-4 border border-slate-700">
-                <h4 className="text-sm font-medium text-gray-300 mb-1">
-                  Accuracy
-                </h4>
-                <p className="text-lg font-semibold text-white">
-                  ±{formatAccuracy(locationData.accuracy)}
-                </p>
-              </div>
-
-              {locationData.altitude && (
-                <div className="bg-slate-800/30 rounded-lg p-4 border border-slate-700">
-                  <h4 className="text-sm font-medium text-gray-300 mb-1">
-                    Altitude
-                  </h4>
-                  <p className="text-lg font-semibold text-white">
-                    {Math.round(locationData.altitude)}m
-                  </p>
-                </div>
+          {(details.accuracy !== null ||
+            details.altitude !== null ||
+            details.speed !== null) && (
+            <div className="mt-4 grid gap-4 md:grid-cols-3">
+              {details.accuracy !== null && (
+                <DataField label="Accuracy">
+                  ±{formatAccuracy(details.accuracy)}
+                </DataField>
               )}
-
-              {locationData.speed !== null &&
-                locationData.speed !== undefined && (
-                  <div className="bg-slate-800/30 rounded-lg p-4 border border-slate-700">
-                    <h4 className="text-sm font-medium text-gray-300 mb-1">
-                      Speed
-                    </h4>
-                    <p className="text-lg font-semibold text-white">
-                      {(locationData.speed * 3.6).toFixed(1)} km/h
-                    </p>
-                  </div>
-                )}
+              {details.altitude !== null && (
+                <DataField label="Altitude">
+                  {Math.round(details.altitude)}m
+                </DataField>
+              )}
+              {details.speed !== null && (
+                <DataField label="Speed">
+                  {(details.speed * 3.6).toFixed(1)} km/h
+                </DataField>
+              )}
             </div>
+          )}
 
-            {lastUpdated && (
-              <div className="mt-6 pt-4 border-t border-white/10">
-                <p className="text-sm text-gray-400">
-                  Last updated: {lastUpdated.toLocaleString()}
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* Map Placeholder */}
-          <div className="bg-slate-900/50 backdrop-blur-lg rounded-xl p-8 shadow-2xl border border-slate-700">
-            <h3 className="text-xl font-bold text-white mb-4 flex items-center space-x-2">
-              <FaMapMarkerAlt />
-              <span>Location Preview</span>
-            </h3>
-            <div className="bg-slate-800 rounded-lg h-64 flex items-center justify-center border-2 border-dashed border-slate-600">
-              <div className="text-center">
-                <FaMapMarkerAlt className="text-4xl text-gray-400 mx-auto mb-3" />
-                <p className="text-gray-400">
-                  Interactive map would be displayed here
-                </p>
-                <p className="text-sm text-gray-500 mt-1">
-                  Coordinates: {locationData.latitude.toFixed(4)},{" "}
-                  {locationData.longitude.toFixed(4)}
-                </p>
-              </div>
-            </div>
-          </div>
+          {details.lastUpdated && (
+            <MetaLabel as="div" className="mt-5 border-t border-line pt-4">
+              Last updated: {details.lastUpdated.toLocaleString()}
+            </MetaLabel>
+          )}
         </div>
-      ) : null}
+      </Frame>
+
+      {/* Map Preview */}
+      <Frame frame="COORD/02">
+        <div className="p-6">
+          <h2 className="mb-4 font-display text-lg uppercase tracking-[0.03em] text-paper">
+            Location Preview
+          </h2>
+          <LocationMap latitude={lat} longitude={lon} />
+          <MetaLabel as="p" className="mt-3">
+            {formatCoordinate(lat, "lat")} · {formatCoordinate(lon, "lng")}
+          </MetaLabel>
+        </div>
+      </Frame>
     </div>
   );
 }

@@ -1,68 +1,58 @@
-// UI Constants - Colors, spacing, and other design tokens
+// UI constants
 
-export const COLORS = {
-  primary: {
-    500: "purple-500",
-    600: "purple-600",
-    300: "purple-300",
-  },
-  secondary: {
-    800: "slate-800",
-    600: "slate-600",
-  },
-  background: {
-    glass: "white/10",
-    glassHover: "white/20",
-    dark: "slate-800/60",
-  },
-  text: {
-    primary: "white",
-    secondary: "gray-300",
-    muted: "gray-400",
-  },
-} as const;
+import {
+  COLORS,
+  IMAGE_TYPES,
+  ORIENTATIONS,
+  type Color,
+  type ImageType,
+  type Orientation,
+} from "./filters";
 
-export const SPACING = {
-  small: "px-3 py-1",
-  medium: "px-4 py-3",
-  large: "px-6 py-3",
-} as const;
+// Labels are keyed by the full union type, so TypeScript enforces that every
+// filter value (in filters.ts) has a label here.
+const IMAGE_TYPE_LABELS: Record<ImageType, string> = {
+  all: "All",
+  photo: "Photo",
+  illustration: "Illustration",
+  vector: "Vector",
+};
 
-export const BORDER_RADIUS = {
-  small: "rounded-lg",
-  medium: "rounded-xl",
-} as const;
+const ORIENTATION_LABELS: Record<Orientation, string> = {
+  all: "All",
+  horizontal: "Horizontal",
+  vertical: "Vertical",
+};
 
-export const TRANSITIONS = {
-  default: "transition-all duration-300",
-  hover: "hover:scale-105",
-} as const;
+const COLOR_LABELS: Record<Color, string> = {
+  all: "All",
+  grayscale: "Grayscale",
+  transparent: "Transparent",
+  red: "Red",
+  orange: "Orange",
+  yellow: "Yellow",
+  green: "Green",
+  turquoise: "Turquoise",
+  blue: "Blue",
+  lilac: "Lilac",
+  pink: "Pink",
+  white: "White",
+  gray: "Gray",
+  black: "Black",
+  brown: "Brown",
+};
 
 export const FILTER_OPTIONS = {
-  imageTypes: [
-    { value: "all", label: "All" },
-    { value: "photo", label: "Photo" },
-    { value: "illustration", label: "Illustration" },
-    { value: "vector", label: "Vector" },
-  ] as const,
-  orientations: [
-    { value: "all", label: "All" },
-    { value: "horizontal", label: "Horizontal" },
-    { value: "vertical", label: "Vertical" },
-  ] as const,
-  colors: [
-    { value: "all", label: "All" },
-    { value: "grayscale", label: "Grayscale" },
-    { value: "transparent", label: "Transparent" },
-    { value: "red", label: "Red" },
-    { value: "orange", label: "Orange" },
-    { value: "yellow", label: "Yellow" },
-    { value: "green", label: "Green" },
-    { value: "blue", label: "Blue" },
-    { value: "pink", label: "Pink" },
-    { value: "white", label: "White" },
-    { value: "gray", label: "Gray" },
-    { value: "black", label: "Black" },
-    { value: "brown", label: "Brown" },
-  ] as const,
-} as const;
+  imageTypes: IMAGE_TYPES.map((value) => ({
+    value,
+    label: IMAGE_TYPE_LABELS[value],
+  })),
+  orientations: ORIENTATIONS.map((value) => ({
+    value,
+    label: ORIENTATION_LABELS[value],
+  })),
+  colors: COLORS.map((value) => ({
+    value,
+    label: COLOR_LABELS[value],
+  })),
+};

@@ -1,61 +1,84 @@
-import { type FC, useState } from "react";
+import { type FC, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
+import Avatar from "./Avatar";
+import Icon from "./Icon";
+import MetaLabel from "./MetaLabel";
+import { useShareFeedback } from "@/hooks/useShareFeedback";
+import { useToggle } from "@/hooks/useToggle";
+import { cn } from "@/utils/cn";
+import { PATHS } from "@/constants/routes";
 
 interface BlockProps {
   name: string;
   image: string;
   text: string;
+  frame?: string;
 }
 
-const BlogPost: FC<BlockProps> = ({ name, image, text }) => {
-  const [formattedTime] = useState<string>(() => {
-    const now = new Date();
-    return now.toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    });
-  });
+const BlogPost: FC<BlockProps> = ({ name, image, text, frame }) => {
+  const navigate = useNavigate();
+  const [liked, toggleLiked] = useToggle(false);
+  const { shared, share } = useShareFeedback();
+
+  const formattedTime = useMemo(
+    () =>
+      new Date().toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      }),
+    [],
+  );
 
   return (
-    <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10 hover:bg-white/10 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl">
-      <div className="flex items-start space-x-4">
-        <div className="shrink-0">
-          <img
-            alt={`${name} avatar`}
-            src={image}
-            className="w-12 h-12 rounded-full border-2 border-white/20 shadow-lg"
-          />
+    <article className="relative flex gap-4 border border-line bg-panel p-6 transition-colors hover:border-muted">
+      {frame && (
+        <span className="absolute right-3 top-3 font-mono text-[10px] uppercase tracking-label text-gold">
+          {frame}
+        </span>
+      )}
+      <Avatar name={name} src={image} size="md" />
+      <div className="min-w-0 flex-1 pr-14">
+        <div className="mb-1.5 flex flex-wrap items-baseline gap-x-2 gap-y-1">
+          <span className="font-display text-sm uppercase tracking-wider text-paper">
+            {name}
+          </span>
+          <MetaLabel>Today at {formattedTime}</MetaLabel>
         </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center space-x-2 mb-2">
-            <h4 className="text-lg font-semibold text-white hover:text-purple-300 transition-colors cursor-pointer">
-              {name}
-            </h4>
-            <span className="text-sm text-gray-400">•</span>
-            <span className="text-sm text-gray-400">
-              Today at {formattedTime}
-            </span>
-          </div>
-          <p className="text-gray-200 leading-relaxed">{text}</p>
-          <div className="flex items-center space-x-4 mt-4 pt-4 border-t border-white/10">
-            <button className="flex items-center space-x-1 text-gray-400 hover:text-red-400 transition-all duration-300 text-sm hover:scale-105 group">
-              <span className="group-hover:animate-bounce-subtle">❤️</span>
-              <span>Like</span>
-            </button>
-            <button className="flex items-center space-x-1 text-gray-400 hover:text-blue-400 transition-all duration-300 text-sm hover:scale-105 group">
-              <span className="group-hover:animate-pulse-slow">💬</span>
-              <span>Reply</span>
-            </button>
-            <button className="flex items-center space-x-1 text-gray-400 hover:text-green-400 transition-all duration-300 text-sm hover:scale-105 group">
-              <span className="group-hover:rotate-12 transition-transform duration-300">
-                🔗
-              </span>
-              <span>Share</span>
-            </button>
-          </div>
+        <p className="text-sm leading-relaxed text-muted">{text}</p>
+        <div className="mt-3 flex gap-5 border-t border-line pt-3">
+          <button
+            type="button"
+            onClick={toggleLiked}
+            className={cn(
+              "inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-meta transition-colors",
+              liked ? "text-safelight" : "text-muted hover:text-safelight",
+            )}
+          >
+            <Icon name="heart" /> {liked ? "Liked" : "Like"}
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate(PATHS.postsComments)}
+            className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-meta text-muted transition-colors hover:text-safelight"
+          >
+            <Icon name="comment" /> Reply
+          </button>
+          <button
+            type="button"
+            onClick={() =>
+              void share(name, `${window.location.origin}${PATHS.posts}`)
+            }
+            className={cn(
+              "inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-meta transition-colors",
+              shared ? "text-gold" : "text-muted hover:text-safelight",
+            )}
+          >
+            <Icon name="share" /> {shared ? "Copied" : "Share"}
+          </button>
         </div>
       </div>
-    </div>
+    </article>
   );
 };
 

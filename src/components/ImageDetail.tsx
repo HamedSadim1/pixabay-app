@@ -1,317 +1,260 @@
-import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import axios, { type AxiosError } from "axios";
-import {
-  FaArrowLeft,
-  FaDownload,
-  FaHeart,
-  FaEye,
-  FaUser,
-  FaCalendar,
-  FaExclamationTriangle,
-} from "react-icons/fa";
-import type { Hit } from "../models/IPixabay";
+import React from "react";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { getImageById, NotFoundError } from "@/api/pixabay";
+import { getErrorMessage } from "@/utils/error";
+import { PATHS } from "@/constants/routes";
+import { buttonClasses } from "@/constants/buttonStyles";
+import { DOWNLOAD_TIMEOUT_MS } from "@/config/api";
+import { getFileExtension, getImageInfoFields } from "@/utils/format";
 
-interface ApiError {
-  message: string;
-}
+const IMAGE_NOT_FOUND_TITLE = "Image Not Found";
+const IMAGE_NOT_FOUND_MESSAGE = "The requested frame could not be found.";
+import AuthorHeader from "./AuthorHeader";
+import Avatar from "./Avatar";
+import Button from "./Button";
+import Frame from "./Frame";
+import Icon from "./Icon";
+import ImageStats from "./ImageStats";
+import Spinner from "./Spinner";
+import StatusCard from "./StatusCard";
+import TagList from "./TagList";
 
 const ImageDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [imageData, setImageData] = useState<Hit | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string>("");
+  const location = useLocation();
 
-  useEffect(() => {
-    const fetchImageDetail = async () => {
-      if (!id) {
-        setError("No image ID provided");
-        setLoading(false);
-        return;
-      }
-
-      try {
-        setLoading(true);
-        setError("");
-
-        const apiKey = import.meta.env.VITE_PIXABAY_API_KEY;
-        const baseUrl = import.meta.env.VITE_PIXABAY_BASE_URL;
-
-        if (!apiKey || !baseUrl) {
-          throw new Error("API configuration missing");
-        }
-
-        // We gebruiken de search API met ID filter om specifieke image te vinden
-        const response = await axios.get(
-          `${baseUrl}?key=${apiKey}&id=${id}&image_type=photo`,
-        );
-
-        if (
-          response.data &&
-          Array.isArray(response.data.hits) &&
-          response.data.hits.length > 0
-        ) {
-          setImageData(response.data.hits[0]);
-        } else {
-          throw new Error("Image not found");
-        }
-      } catch (err) {
-        const error = err as AxiosError<ApiError>;
-        const errorMessage =
-          error.response?.data?.message ||
-          error.message ||
-          "An error occurred while fetching image details";
-        setError(errorMessage);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchImageDetail();
-  }, [id]);
-
-  const formatNumber = (num: number) => {
-    if (num >= 1000000) {
-      return (num / 1000000).toFixed(1) + "M";
-    } else if (num >= 1000) {
-      return (num / 1000).toFixed(1) + "K";
+  // If the page was opened directly (deep link), there is no history entry to
+  // return to, so fall back to the search page instead of doing nothing.
+  const goBack = () => {
+    if (location.key === "default") {
+      navigate(PATHS.search);
+    } else {
+      navigate(-1);
     }
-    return num.toString();
   };
 
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) {
-      return "0 Bytes";
+  const {
+    data: imageData,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ["pixabay", "image", id],
+    queryFn: () => getImageById(id as string),
+    enabled: Boolean(id),
+    // "Not found" is a terminal result — retrying won't help. Network errors
+    // get the default two retries before surfacing the manual Retry button.
+    retry: (failureCount, err) =>
+      err instanceof NotFoundError ? false : failureCount < 2,
+  });
+
+  const backButton = (
+    <Button size="sm" onClick={goBack}>
+      <Icon name="arrowLeft" /> Back
+    </Button>
+  );
+
+  // Shared page header (back link + title) used by every render state.
+  const header = (
+    <div className="flex flex-wrap items-center gap-4">
+      {backButton}
+      <h1 className="font-display text-3xl uppercase tracking-[0.03em] text-paper md:text-4xl">
+        Image Details
+      </h1>
+    </div>
+  );
+
+  // Cross-origin `download` attributes are ignored by browsers, so fetch the
+  // image as a blob and trigger a real download, falling back to opening the
+  // original in a new tab if the fetch is blocked (e.g. CORS).
+  const handleDownload = async () => {
+    if (!imageData) {
+      return;
     }
-    const k = 1024;
-    const sizes = ["Bytes", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+    try {
+      const response = await fetch(imageData.largeImageURL, {
+        signal: AbortSignal.timeout(DOWNLOAD_TIMEOUT_MS),
+      });
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      const extension = getFileExtension(imageData.largeImageURL);
+      link.download = `pixabay-${imageData.id}.${extension}`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      window.open(imageData.largeImageURL, "_blank", "noopener,noreferrer");
+    }
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
-      <div className="max-w-6xl mx-auto space-y-6">
-        <div className="flex items-center space-x-4">
-          <button
-            onClick={() => navigate(-1)}
-            className="bg-white/10 backdrop-blur-md hover:bg-white/20 text-white px-4 py-2 rounded-lg transition-all duration-300 flex items-center space-x-2"
-          >
-            <FaArrowLeft />
-            <span>Back</span>
-          </button>
-          <h1 className="text-2xl font-bold text-white">Image Details</h1>
-        </div>
-
-        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-2xl border border-white/20">
-          <div className="flex justify-center items-center py-12">
-            <div className="animate-spin rounded-full h-16 w-16 border-4 border-white/20 border-t-white"></div>
-          </div>
-          <p className="text-center text-gray-300 mt-4">
-            Loading image details...
+      <div className="space-y-6">
+        {header}
+        <div className="border border-line bg-panel p-12 text-center">
+          <Spinner className="mx-auto" />
+          <p className="mt-4 font-mono text-xs uppercase tracking-meta text-muted">
+            Developing frame…
           </p>
         </div>
       </div>
     );
   }
 
-  if (error) {
+  if (isError && error instanceof NotFoundError) {
     return (
-      <div className="max-w-6xl mx-auto space-y-6">
-        <div className="flex items-center space-x-4">
-          <button
-            onClick={() => navigate(-1)}
-            className="bg-white/10 backdrop-blur-md hover:bg-white/20 text-white px-4 py-2 rounded-lg transition-all duration-300 flex items-center space-x-2"
-          >
-            <FaArrowLeft />
-            <span>Back</span>
-          </button>
-          <h1 className="text-2xl font-bold text-white">Image Details</h1>
-        </div>
+      <div className="space-y-6">
+        {header}
+        <StatusCard
+          tone="gold"
+          icon="warning"
+          title={IMAGE_NOT_FOUND_TITLE}
+          message={IMAGE_NOT_FOUND_MESSAGE}
+          actions={
+            <Button onClick={goBack}>
+              <Icon name="arrowLeft" /> Go Back
+            </Button>
+          }
+        />
+      </div>
+    );
+  }
 
-        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-2xl border border-white/20">
-          <div className="text-center py-12">
-            <FaExclamationTriangle className="text-red-400 text-6xl mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-white mb-2">
-              Error Loading Image
-            </h3>
-            <p className="text-gray-300 mb-4">{error}</p>
-            <button
-              onClick={() => navigate(-1)}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg transition-colors"
-            >
-              Go Back
-            </button>
-          </div>
-        </div>
+  if (isError) {
+    return (
+      <div className="space-y-6">
+        {header}
+        <StatusCard
+          tone="warning"
+          icon="warning"
+          title="Error Loading Image"
+          message={getErrorMessage(error)}
+          actions={
+            <>
+              <Button variant="primary" onClick={() => void refetch()}>
+                <Icon name="rotateRight" /> Retry
+              </Button>
+              <Button onClick={goBack}>
+                <Icon name="arrowLeft" /> Go Back
+              </Button>
+            </>
+          }
+        />
       </div>
     );
   }
 
   if (!imageData) {
     return (
-      <div className="max-w-6xl mx-auto space-y-6">
-        <div className="flex items-center space-x-4">
-          <button
-            onClick={() => navigate(-1)}
-            className="bg-white/10 backdrop-blur-md hover:bg-white/20 text-white px-4 py-2 rounded-lg transition-all duration-300 flex items-center space-x-2"
-          >
-            <FaArrowLeft />
-            <span>Back</span>
-          </button>
-          <h1 className="text-2xl font-bold text-white">Image Details</h1>
-        </div>
-
-        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-2xl border border-white/20">
-          <div className="text-center py-12">
-            <FaExclamationTriangle className="text-yellow-400 text-6xl mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-white mb-2">
-              Image Not Found
-            </h3>
-            <p className="text-gray-300 mb-4">
-              The requested image could not be found.
-            </p>
-            <button
-              onClick={() => navigate(-1)}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg transition-colors"
-            >
-              Go Back
-            </button>
-          </div>
-        </div>
+      <div className="space-y-6">
+        {header}
+        <StatusCard
+          tone="gold"
+          icon="warning"
+          title={IMAGE_NOT_FOUND_TITLE}
+          message={IMAGE_NOT_FOUND_MESSAGE}
+          actions={
+            <Button onClick={goBack}>
+              <Icon name="arrowLeft" /> Go Back
+            </Button>
+          }
+        />
       </div>
     );
   }
 
-  return (
-    <div className="max-w-6xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="flex items-center space-x-4">
-        <button
-          onClick={() => navigate(-1)}
-          className="bg-white/10 backdrop-blur-md hover:bg-white/20 text-white px-4 py-2 rounded-lg transition-all duration-300 flex items-center space-x-2"
-        >
-          <FaArrowLeft />
-          <span>Back</span>
-        </button>
-        <h1 className="text-2xl font-bold text-white">Image Details</h1>
-      </div>
+  const { tags } = imageData;
 
-      {/* Main Image */}
-      <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-2xl border border-white/20">
-        <div className="relative group">
+  return (
+    <div className="space-y-6">
+      {header}
+
+      <Frame className="p-6">
+        <div className="group relative">
           <img
             src={imageData.largeImageURL}
-            alt={imageData.tags}
-            className="w-full max-h-96 object-contain rounded-xl shadow-2xl"
+            alt={tags}
+            className="max-h-96 w-full border border-line object-contain"
           />
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 rounded-xl flex items-center justify-center opacity-0 group-hover:opacity-100">
-            <a
-              href={imageData.largeImageURL}
-              download
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-white/20 hover:bg-white/30 text-white px-6 py-3 rounded-lg transition-all duration-300 flex items-center space-x-2 backdrop-blur-sm"
-            >
-              <FaDownload />
-              <span>Download</span>
-            </a>
-          </div>
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={handleDownload}
+            className="absolute right-3 top-3"
+          >
+            <Icon name="download" /> Download
+          </Button>
         </div>
 
         {/* Image Info */}
-        <div className="mt-6 grid md:grid-cols-2 gap-6">
-          <div className="space-y-4">
-            <h3 className="text-xl font-semibold text-white">
+        <div className="mt-6 grid gap-6 md:grid-cols-2">
+          <div>
+            <h2 className="mb-3 font-display text-lg uppercase tracking-[0.03em] text-paper">
               Image Information
-            </h3>
-            <div className="space-y-3">
-              <div className="flex justify-between items-center py-2 border-b border-white/10">
-                <span className="text-gray-300">Dimensions</span>
-                <span className="text-white font-medium">
-                  {imageData.imageWidth} × {imageData.imageHeight}
-                </span>
-              </div>
-              <div className="flex justify-between items-center py-2 border-b border-white/10">
-                <span className="text-gray-300">File Size</span>
-                <span className="text-white font-medium">
-                  {formatFileSize(imageData.imageSize)}
-                </span>
-              </div>
-              <div className="flex justify-between items-center py-2 border-b border-white/10">
-                <span className="text-gray-300">Type</span>
-                <span className="text-white font-medium capitalize">
-                  {imageData.type}
-                </span>
-              </div>
-            </div>
+            </h2>
+            <dl className="space-y-2">
+              {getImageInfoFields(imageData).map(([label, value]) => (
+                <div
+                  key={label}
+                  className="flex justify-between border-b border-line pb-2 font-mono text-xs"
+                >
+                  <dt className="text-muted">{label}</dt>
+                  <dd className="text-paper">{value}</dd>
+                </div>
+              ))}
+            </dl>
+
+            <a
+              href={imageData.pageURL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={buttonClasses("gold", "sm", "mt-4")}
+            >
+              <Icon name="arrowRight" /> View on Pixabay
+            </a>
           </div>
 
-          <div className="space-y-4">
-            <h3 className="text-xl font-semibold text-white">Statistics</h3>
-            <div className="grid grid-cols-3 gap-4">
-              <div className="bg-slate-800/50 rounded-lg p-4 text-center border border-slate-600">
-                <FaHeart className="text-red-400 text-2xl mx-auto mb-2" />
-                <div className="text-2xl font-bold text-white">
-                  {formatNumber(imageData.likes)}
-                </div>
-                <div className="text-sm text-gray-400">Likes</div>
-              </div>
-              <div className="bg-slate-800/50 rounded-lg p-4 text-center border border-slate-600">
-                <FaEye className="text-blue-400 text-2xl mx-auto mb-2" />
-                <div className="text-2xl font-bold text-white">
-                  {formatNumber(imageData.views)}
-                </div>
-                <div className="text-sm text-gray-400">Views</div>
-              </div>
-              <div className="bg-slate-800/50 rounded-lg p-4 text-center border border-slate-600">
-                <FaDownload className="text-green-400 text-2xl mx-auto mb-2" />
-                <div className="text-2xl font-bold text-white">
-                  {formatNumber(imageData.downloads)}
-                </div>
-                <div className="text-sm text-gray-400">Downloads</div>
-              </div>
-            </div>
+          <div>
+            <h2 className="mb-3 font-display text-lg uppercase tracking-[0.03em] text-paper">
+              Statistics
+            </h2>
+            <ImageStats
+              likes={imageData.likes}
+              views={imageData.views}
+              downloads={imageData.downloads}
+              comments={imageData.comments}
+              collections={imageData.collections}
+            />
           </div>
         </div>
 
         {/* Tags */}
         <div className="mt-6">
-          <h3 className="text-xl font-semibold text-white mb-3">Tags</h3>
-          <div className="flex flex-wrap gap-2">
-            {imageData.tags.split(", ").map((tag, index) => (
-              <span
-                key={index}
-                className="bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full text-sm border border-purple-500/30"
-              >
-                {tag.trim()}
-              </span>
-            ))}
-          </div>
+          <h2 className="mb-3 font-display text-lg uppercase tracking-[0.03em] text-paper">
+            Tags
+          </h2>
+          <TagList tags={tags} />
         </div>
 
-        {/* Photographer Info */}
-        <div className="mt-6 pt-6 border-t border-white/20">
-          <div className="flex items-center space-x-4">
-            <img
-              src={imageData.userImageURL}
-              alt={imageData.user}
-              className="w-12 h-12 rounded-full border-2 border-white/20"
-            />
-            <div>
-              <div className="flex items-center space-x-2">
-                <FaUser className="text-gray-400" />
-                <span className="text-white font-medium">{imageData.user}</span>
-              </div>
-              <div className="flex items-center space-x-2 text-sm text-gray-400">
-                <FaCalendar />
-                <span>Photographer</span>
-              </div>
-            </div>
-          </div>
+        {/* Photographer */}
+        <div className="mt-6 flex items-center gap-3 border-t border-line pt-5">
+          <Avatar
+            name={imageData.user}
+            src={imageData.userImageURL}
+            size="md"
+          />
+          <AuthorHeader
+            name={imageData.user}
+            caption={`Photographer · Member #${imageData.user_id}`}
+          />
         </div>
-      </div>
+      </Frame>
     </div>
   );
 };

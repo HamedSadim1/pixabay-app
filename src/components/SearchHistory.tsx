@@ -1,5 +1,6 @@
 import React from "react";
-import { FaHistory, FaFire } from "react-icons/fa";
+
+const MAX_VISIBLE_HISTORY = 5;
 
 interface SearchHistoryProps {
   search: {
@@ -8,7 +9,7 @@ interface SearchHistoryProps {
     trendingSearches: string[];
     searchQuery: string;
     setSearchQuery: (query: string) => void;
-    performSearch: () => void;
+    performSearch: (query?: string) => void;
   };
 }
 
@@ -27,23 +28,22 @@ const SearchHistory: React.FC<SearchHistoryProps> = ({ search }) => {
 
   const handleHistoryClick = (query: string) => {
     setSearchQuery(query);
-    performSearch();
+    performSearch(query);
   };
 
   return (
-    <div className="space-y-4">
+    <div className="mt-5 space-y-5">
       {searchHistory.length > 0 && (
         <div>
-          <div className="flex items-center space-x-2 mb-2">
-            <FaHistory className="text-gray-400" />
-            <span className="text-gray-300 text-sm">Recent searches</span>
+          <div className="mb-2 font-mono text-[10px] uppercase tracking-label text-muted">
+            Recent Searches
           </div>
           <div className="flex flex-wrap gap-2">
-            {searchHistory.slice(0, 5).map((query, index) => (
+            {searchHistory.slice(0, MAX_VISIBLE_HISTORY).map((query, index) => (
               <button
                 key={index}
                 onClick={() => handleHistoryClick(query)}
-                className="px-3 py-1 bg-white/10 hover:bg-white/20 text-gray-300 text-sm rounded-full transition-colors"
+                className="border border-line px-3 py-1.5 font-mono text-xs text-muted transition-colors hover:border-safelight hover:text-paper"
               >
                 {query}
               </button>
@@ -52,16 +52,15 @@ const SearchHistory: React.FC<SearchHistoryProps> = ({ search }) => {
         </div>
       )}
       <div>
-        <div className="flex items-center space-x-2 mb-2">
-          <FaFire className="text-gray-400" />
-          <span className="text-gray-300 text-sm">Trending searches</span>
+        <div className="mb-2 font-mono text-[10px] uppercase tracking-label text-muted">
+          Trending
         </div>
         <div className="flex flex-wrap gap-2">
           {trendingSearches.map((query, index) => (
             <button
               key={index}
               onClick={() => handleHistoryClick(query)}
-              className="px-3 py-1 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 text-sm rounded-full border border-purple-500/30 transition-colors"
+              className="border border-safelight/40 px-3 py-1.5 font-mono text-xs text-safelight transition-colors hover:border-safelight hover:bg-safelight hover:text-dark"
             >
               {query}
             </button>

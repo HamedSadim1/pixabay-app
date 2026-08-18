@@ -1,87 +1,167 @@
-import React from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import React, { lazy, Suspense } from "react";
+import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import { NuqsAdapter } from "nuqs/adapters/react-router/v7";
 import Navbar from "./components/Navbar";
 import Home from "./components/Home";
-import Geolocation from "./components/Geolocation";
-import SinglePost from "./components/SinglePost";
-import UserCard from "./components/UserCard";
-import ImageSearch from "./components/ImageSearch";
 import ImageDetail from "./components/ImageDetail";
+import UserCard from "./components/UserCard";
 import ErrorBoundary from "./components/ErrorBoundary";
+import SprocketStrip from "./components/SprocketStrip";
+import Spinner from "./components/Spinner";
+import { buttonClasses } from "./constants/buttonStyles";
+import { PATHS } from "./constants/routes";
+import {
+  loadGeolocation,
+  loadImageSearch,
+  loadSinglePost,
+} from "./constants/routeLoaders";
+
+// Heavy routes are lazy-loaded so their dependencies (Leaflet, the search UI,
+// the post list) only download when the route is visited.
+const Geolocation = lazy(loadGeolocation);
+const ImageSearch = lazy(loadImageSearch);
+const SinglePost = lazy(loadSinglePost);
+
+interface PageHeaderProps {
+  index: string;
+  title: string;
+  subtitle?: string;
+}
+
+const PageHeader: React.FC<PageHeaderProps> = ({ index, title, subtitle }) => (
+  <header className="mb-8">
+    <div className="flex items-baseline gap-3">
+      <h1 className="font-display text-3xl uppercase tracking-[0.03em] text-paper md:text-4xl">
+        {title}
+      </h1>
+      <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-gold">
+        {index}
+      </span>
+    </div>
+    {subtitle && (
+      <p className="mt-2 font-mono text-xs uppercase tracking-meta text-muted">
+        {subtitle}
+      </p>
+    )}
+    <SprocketStrip className="mt-4" />
+  </header>
+);
+
+const RouteFallback: React.FC = () => (
+  <div className="flex justify-center py-16">
+    <Spinner />
+  </div>
+);
 
 function App() {
   return (
     <BrowserRouter>
-      <ErrorBoundary>
-        <div className="min-h-screen">
-          <Navbar />
-          <div className="container mx-auto p-4">
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route
-                path="/search"
-                element={
-                  <section className=" backdrop-blur-lg rounded-xl p-6 shadow-2xl border border-white/20 animate-fade-in">
-                    <h2 className="text-3xl font-bold mb-6 text-white flex items-center space-x-2">
-                      <span>🔍</span>
-                      <span>Image Search</span>
-                    </h2>
-                    <ImageSearch />
-                  </section>
-                }
-              />
-              <Route
-                path="/posts"
-                element={
-                  <section className="backdrop-blur-lg rounded-xl p-6 shadow-2xl border border-white/20 animate-fade-in">
-                    <h2 className="text-3xl font-bold mb-6 text-white flex items-center space-x-2">
-                      <span>📝</span>
-                      <span>Blog Posts</span>
-                    </h2>
-                    <SinglePost />
-                  </section>
-                }
-              />
-              <Route
-                path="/location"
-                element={
-                  <section className=" backdrop-blur-lg rounded-xl p-6 shadow-2xl border border-white/20 animate-fade-in">
-                    <h2 className="text-3xl font-bold mb-6 text-white flex items-center space-x-2">
-                      <span>📍</span>
-                      <span>Your Location</span>
-                    </h2>
-                    <Geolocation />
-                  </section>
-                }
-              />
-              <Route
-                path="/image/:id"
-                element={
-                  <section className="backdrop-blur-lg rounded-xl p-6 shadow-2xl border border-white/20 animate-fade-in">
-                    <ImageDetail />
-                  </section>
-                }
-              />
-              <Route
-                path="/profile"
-                element={
-                  <section className="backdrop-blur-lg rounded-xl p-6 shadow-2xl border border-white/20 animate-fade-in">
-                    <h2 className="text-3xl font-bold mb-6 text-white flex items-center space-x-2">
-                      <span>👤</span>
-                      <span>User Profile</span>
-                    </h2>
-                    <UserCard>
-                      <p className="text-gray-200">
-                        This is some user content.
-                      </p>
-                    </UserCard>
-                  </section>
-                }
-              />
-            </Routes>
+      <NuqsAdapter>
+        <ErrorBoundary>
+          <div className="min-h-screen bg-dark">
+            <Navbar />
+            <main className="mx-auto max-w-6xl px-4 py-8 md:py-10">
+              <Routes>
+                <Route path={PATHS.home} element={<Home />} />
+                <Route
+                  path={PATHS.search}
+                  element={
+                    <section className="animate-fade-in">
+                      <PageHeader
+                        index="EXH. 02"
+                        title="Image Search"
+                        subtitle="Query the Pixabay archive"
+                      />
+                      <Suspense fallback={<RouteFallback />}>
+                        <ImageSearch />
+                      </Suspense>
+                    </section>
+                  }
+                />
+                <Route
+                  path={PATHS.posts}
+                  element={
+                    <section className="animate-fade-in">
+                      <PageHeader
+                        index="EXH. 03"
+                        title="Blog Posts"
+                        subtitle="Community contact sheet"
+                      />
+                      <Suspense fallback={<RouteFallback />}>
+                        <SinglePost />
+                      </Suspense>
+                    </section>
+                  }
+                />
+                <Route
+                  path={PATHS.location}
+                  element={
+                    <section className="animate-fade-in">
+                      <PageHeader
+                        index="EXH. 04"
+                        title="Location"
+                        subtitle="Geolocation darkroom"
+                      />
+                      <Suspense fallback={<RouteFallback />}>
+                        <Geolocation />
+                      </Suspense>
+                    </section>
+                  }
+                />
+                <Route
+                  path={PATHS.image(":id")}
+                  element={
+                    <section className="animate-fade-in">
+                      <ImageDetail />
+                    </section>
+                  }
+                />
+                <Route
+                  path={PATHS.profile}
+                  element={
+                    <section className="animate-fade-in">
+                      <PageHeader
+                        index="EXH. 05"
+                        title="Profile"
+                        subtitle="Member record"
+                      />
+                      <UserCard>
+                        <p className="text-sm leading-relaxed text-muted">
+                          This is some user content.
+                        </p>
+                      </UserCard>
+                    </section>
+                  }
+                />
+                <Route
+                  path="*"
+                  element={
+                    <section className="animate-fade-in">
+                      <PageHeader
+                        index="EXH. 00"
+                        title="Not Found"
+                        subtitle="Frame out of range"
+                      />
+                      <div className="border border-line bg-panel p-10 text-center">
+                        <p className="mb-5 font-mono text-xs text-muted">
+                          The page you're looking for is out of the contact
+                          sheet.
+                        </p>
+                        <Link
+                          to={PATHS.home}
+                          className={buttonClasses("default")}
+                        >
+                          Back to Home
+                        </Link>
+                      </div>
+                    </section>
+                  }
+                />
+              </Routes>
+            </main>
           </div>
-        </div>
-      </ErrorBoundary>
+        </ErrorBoundary>
+      </NuqsAdapter>
     </BrowserRouter>
   );
 }

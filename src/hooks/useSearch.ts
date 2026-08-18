@@ -1,28 +1,54 @@
-import { useState, useEffect, useCallback, useEffectEvent } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import axios, { type AxiosError } from "axios";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { parseAsString, parseAsStringLiteral, useQueryStates } from "nuqs";
+import { searchImages, type SearchQuery } from "@/api/pixabay";
+import { getErrorMessage } from "@/utils/error";
 import type { Hit } from "./../models/IPixabay";
-import type { ImageType, Orientation, Color } from "../constants/types";
+import {
+  COLORS,
+  IMAGE_TYPES,
+  ORIENTATIONS,
+  type Color,
+  type ImageType,
+  type Orientation,
+} from "@/constants/filters";
+import { useDebouncedValue } from "./useDebouncedValue";
 
-interface ApiError {
-  message: string;
-}
+// Debounce for the min-width/min-height inputs, so typing doesn't change the
+// query key (and trigger a request) on every keystroke.
+const FILTER_DEBOUNCE_MS = 300;
+const SEARCH_HISTORY_KEY = "searchHistory";
+const MAX_HISTORY_ITEMS = 10;
+
+// URL-backed search parameters. nuqs keeps the query string in sync with these
+// values, so the URL is the single source of truth. Pagination is managed by
+// React Query (useInfiniteQuery), so it is intentionally not part of the URL.
+const searchParams = {
+  q: parseAsString.withDefault(""),
+  type: parseAsStringLiteral(IMAGE_TYPES).withDefault("photo"),
+  orientation: parseAsStringLiteral(ORIENTATIONS).withDefault("all"),
+  color: parseAsStringLiteral(COLORS).withDefault("all"),
+  minWidth: parseAsString.withDefault(""),
+  minHeight: parseAsString.withDefault(""),
+};
 
 export interface SearchState {
   search: string;
   results: Hit[];
   error: string;
   loading: boolean;
+  loadingMore: boolean;
   searchHistory: string[];
   showFilters: boolean;
-  currentPage: number;
   totalHits: number;
   hasSearched: boolean;
+  isSearchUnchanged: boolean;
   imageType: ImageType;
   orientation: Orientation;
   color: Color;
   minWidth: string;
   minHeight: string;
+  hasMore: boolean;
 }
 
 export interface SearchActions {
@@ -33,286 +59,188 @@ export interface SearchActions {
   setColor: (color: Color) => void;
   setMinWidth: (width: string) => void;
   setMinHeight: (height: string) => void;
-  performSearch: (page?: number, append?: boolean) => void;
+  performSearch: (query?: string) => void;
   clearSearch: () => void;
   loadMore: () => void;
-  searchFromHistory: (query: string) => void;
 }
 
 export const useSearch = (): SearchState & SearchActions => {
-  const navigate = useNavigate();
-  const location = useLocation();
+  const [
+    { q, type: imageType, orientation, color, minWidth, minHeight },
+    setSearchParams,
+  ] = useQueryStates(searchParams, { history: "replace" });
 
-  const [search, setSearch] = useState<string>("");
-  const [results, setResults] = useState<Hit[]>([]);
-  const [error, setError] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(false);
-  const [searchHistory, setSearchHistory] = useState<string[]>(() => {
-    const history = localStorage.getItem("searchHistory");
-    return history ? (JSON.parse(history) as string[]) : [];
-  });
+  // Draft value for the search input. It is only committed to the URL (q)
+  // when a search is actually performed, so typing doesn't rewrite the URL.
+  const [search, setSearch] = useState<string>(q);
   const [showFilters, setShowFilters] = useState<boolean>(false);
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [totalHits, setTotalHits] = useState<number>(0);
-  const [hasSearched, setHasSearched] = useState<boolean>(false);
+  const [searchHistory, setSearchHistory] = useState<string[]>(() => {
+    try {
+      const history = localStorage.getItem(SEARCH_HISTORY_KEY);
+      return history ? (JSON.parse(history) as string[]) : [];
+    } catch {
+      return [];
+    }
+  });
 
-  // Filter states
-  const [imageType, setImageType] = useState<ImageType>("photo");
-  const [orientation, setOrientation] = useState<Orientation>("all");
-  const [color, setColor] = useState<Color>("all");
-  const [minWidth, setMinWidth] = useState<string>("");
-  const [minHeight, setMinHeight] = useState<string>("");
+  // Filter text inputs are debounced so the query key only changes once the
+  // user pauses, instead of firing a request per keystroke.
+  const debouncedMinWidth = useDebouncedValue(minWidth, FILTER_DEBOUNCE_MS);
+  const debouncedMinHeight = useDebouncedValue(minHeight, FILTER_DEBOUNCE_MS);
 
-  // Save search history to localStorage
-  const saveToHistory = useCallback(
-    (query: string) => {
-      if (!query.trim()) {
-        return;
-      }
-      const newHistory = [
-        query,
-        ...searchHistory.filter((item) => item !== query),
-      ].slice(0, 10);
-      setSearchHistory(newHistory);
-      localStorage.setItem("searchHistory", JSON.stringify(newHistory));
+  // Normalize the filter values into the shape the API actually uses, omitting
+  // no-op values ("all" / empty). This object is both the query key and the
+  // request payload, so the devtools key shows only the filters that apply.
+  const searchQuery = useMemo(() => {
+    const params: Omit<SearchQuery, "page"> = { q };
+    if (imageType !== "all") {
+      params.type = imageType;
+    }
+    if (orientation !== "all") {
+      params.orientation = orientation;
+    }
+    if (color !== "all") {
+      params.color = color;
+    }
+    // Only send positive whole numbers, matching the Pixabay API contract.
+    const width = Math.floor(Number(debouncedMinWidth));
+    if (Number.isFinite(width) && width > 0) {
+      params.minWidth = width;
+    }
+    const height = Math.floor(Number(debouncedMinHeight));
+    if (Number.isFinite(height) && height > 0) {
+      params.minHeight = height;
+    }
+    return params;
+  }, [q, imageType, orientation, color, debouncedMinWidth, debouncedMinHeight]);
+
+  const query = useInfiniteQuery({
+    queryKey: ["pixabay", "search", searchQuery],
+    queryFn: ({ pageParam }) =>
+      searchImages({ ...searchQuery, page: pageParam }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage, allPages) => {
+      const loaded = allPages.reduce((sum, page) => sum + page.hits.length, 0);
+      return loaded < lastPage.totalHits ? allPages.length + 1 : undefined;
     },
-    [searchHistory],
+    // No query to run until the user actually commits a search term.
+    enabled: Boolean(q.trim()),
+  });
+
+  // Flatten all loaded pages into a single result list.
+  const results = useMemo(
+    () => query.data?.pages.flatMap((page) => page.hits) ?? [],
+    [query.data],
   );
+  const totalHits = query.data?.pages[0]?.totalHits ?? 0;
 
-  // Update URL with current search parameters
-  const updateURL = useCallback(
-    (query: string, page: number = 1) => {
-      const params = new URLSearchParams();
-      if (query.trim()) {
-        params.set("q", query);
-      }
-      if (imageType !== "photo") {
-        params.set("type", imageType);
-      }
-      if (orientation !== "all") {
-        params.set("orientation", orientation);
-      }
-      if (color !== "all") {
-        params.set("color", color);
-      }
-      if (minWidth) {
-        params.set("minWidth", minWidth);
-      }
-      if (minHeight) {
-        params.set("minHeight", minHeight);
-      }
-      if (page > 1) {
-        params.set("page", page.toString());
-      }
-
-      const newURL = params.toString()
-        ? `/search?${params.toString()}`
-        : "/search";
-      navigate(newURL, { replace: true });
-    },
-    [imageType, orientation, color, minWidth, minHeight, navigate],
-  );
-
-  const performSearch = useCallback(
-    async (page: number = 1, append: boolean = false) => {
-      if (!search.trim() && page === 1) {
-        setResults([]);
-        setTotalHits(0);
-        setHasSearched(false);
-        return;
-      }
-
+  const saveToHistory = useCallback((term: string) => {
+    if (!term.trim()) {
+      return;
+    }
+    setSearchHistory((prev) => {
+      const next = [term, ...prev.filter((item) => item !== term)].slice(
+        0,
+        MAX_HISTORY_ITEMS,
+      );
       try {
-        setLoading(true);
-        if (!append) {
-          setError("");
-        }
-
-        const apiKey = import.meta.env.VITE_PIXABAY_API_KEY;
-        const baseUrl = import.meta.env.VITE_PIXABAY_BASE_URL;
-
-        if (!apiKey || !baseUrl) {
-          throw new Error("API configuration missing");
-        }
-
-        let queryString = `${baseUrl}?key=${apiKey}&q=${search}&page=${page}&per_page=20`;
-
-        // Add filters
-        if (imageType !== "all") {
-          queryString += `&image_type=${imageType}`;
-        }
-        if (orientation !== "all") {
-          queryString += `&orientation=${orientation}`;
-        }
-        if (color !== "all") {
-          queryString += `&colors=${color}`;
-        }
-        if (minWidth) {
-          queryString += `&min_width=${minWidth}`;
-        }
-        if (minHeight) {
-          queryString += `&min_height=${minHeight}`;
-        }
-
-        const response = await axios.get(queryString);
-
-        if (response.data && Array.isArray(response.data.hits)) {
-          const newResults = append
-            ? [...results, ...response.data.hits]
-            : response.data.hits;
-          setResults(newResults);
-          setTotalHits(response.data.totalHits || 0);
-          setHasSearched(true);
-
-          if (page === 1 && search.trim()) {
-            saveToHistory(search);
-            updateURL(search, page);
-          }
-        } else {
-          throw new Error("Invalid API response format");
-        }
-      } catch (err) {
-        const error = err as AxiosError<ApiError>;
-        const errorMessage =
-          error.response?.data?.message ||
-          error.message ||
-          "An error occurred while fetching images";
-        setError(errorMessage);
-        if (!append) {
-          setResults([]);
-          setTotalHits(0);
-        }
-      } finally {
-        setLoading(false);
+        localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(next));
+      } catch {
+        // Storage can fail (private browsing / quota) — the in-memory history
+        // still works, so ignore.
       }
-    },
-    [
-      search,
-      imageType,
-      orientation,
-      color,
-      minWidth,
-      minHeight,
-      results,
-      saveToHistory,
-      updateURL,
-    ],
-  );
+      return next;
+    });
+  }, []);
 
-  // Parse URL parameters on component mount and URL changes. The URL is the
-  // source of truth; the effect event always reads the latest state, so the
-  // effect only needs to re-run when the URL changes.
-  const syncStateFromURL = useEffectEvent(() => {
-    const urlParams = new URLSearchParams(location.search);
-    const query = urlParams.get("q") || "";
-    const type = (urlParams.get("type") as ImageType) || "photo";
-    const orient = (urlParams.get("orientation") as Orientation) || "all";
-    const col = (urlParams.get("color") as Color) || "all";
-    const width = urlParams.get("minWidth") || "";
-    const height = urlParams.get("minHeight") || "";
-    const page = parseInt(urlParams.get("page") || "1");
-
-    // Only update state if URL params are different from current state
-    let stateChanged = false;
-    if (query !== search) {
-      setSearch(query);
-      stateChanged = true;
-    }
-    if (type !== imageType) {
-      setImageType(type);
-      stateChanged = true;
-    }
-    if (orient !== orientation) {
-      setOrientation(orient);
-      stateChanged = true;
-    }
-    if (col !== color) {
-      setColor(col);
-      stateChanged = true;
-    }
-    if (width !== minWidth) {
-      setMinWidth(width);
-      stateChanged = true;
-    }
-    if (height !== minHeight) {
-      setMinHeight(height);
-      stateChanged = true;
-    }
-    if (page !== currentPage) {
-      setCurrentPage(page);
-      stateChanged = true;
-    }
-
-    // If there's a query in URL and state changed, perform search
-    if (query.trim() && stateChanged) {
-      performSearch(page, false);
-    } else if (!query.trim()) {
-      setResults([]);
-      setTotalHits(0);
-      setHasSearched(false);
-    }
-  });
-
+  // Record a successful search in history exactly once per committed term,
+  // even if React Query later refetches the same key in the background.
+  const lastSavedQueryRef = useRef<string>("");
   useEffect(() => {
-    syncStateFromURL();
-  }, [location.search]);
-
-  // Trigger search when URL parameters change (but not from user input).
-  // Same pattern: the effect event keeps the comparison against the latest
-  // search/page state without forcing the effect to re-run while typing.
-  const triggerSearchFromURL = useEffectEvent(() => {
-    const urlParams = new URLSearchParams(location.search);
-    const query = urlParams.get("q") || "";
-    const page = parseInt(urlParams.get("page") || "1");
-
-    // Only search if there's a query and we're not already on the right page
-    if (query.trim() && (query !== search || page !== currentPage)) {
-      performSearch(page, false);
+    if (query.isSuccess && q.trim()) {
+      if (lastSavedQueryRef.current !== q) {
+        lastSavedQueryRef.current = q;
+        saveToHistory(q);
+      }
     }
-  });
+  }, [query.isSuccess, q, saveToHistory]);
 
-  useEffect(() => {
-    triggerSearchFromURL();
-  }, [location.search]);
+  // Keep the draft input in sync with the committed URL query when it changes
+  // externally (e.g. browser back/forward), so the field never goes stale.
+  // Using render-time state adjustment instead of an effect avoids cascading
+  // renders (see https://react.dev/reference/react/useState#storing-information-
+  // from-previous-renders).
+  const [prevQ, setPrevQ] = useState(q);
+  if (prevQ !== q) {
+    setPrevQ(q);
+    setSearch(q);
+  }
+
+  const setImageType = (value: ImageType) => {
+    void setSearchParams({ type: value });
+  };
+
+  const setOrientation = (value: Orientation) => {
+    void setSearchParams({ orientation: value });
+  };
+
+  const setColor = (value: Color) => {
+    void setSearchParams({ color: value });
+  };
+
+  const setMinWidth = (value: string) => {
+    void setSearchParams({ minWidth: value });
+  };
+
+  const setMinHeight = (value: string) => {
+    void setSearchParams({ minHeight: value });
+  };
+
+  // Commit a search term to the URL. The fetch itself is handled by React
+  // Query in response to the query-key change, so this just moves state.
+  const performSearch = (queryOverride?: string) => {
+    const qEffective = (queryOverride ?? search).trim();
+    if (!qEffective) {
+      clearSearch();
+      return;
+    }
+    setSearch(qEffective);
+    void setSearchParams({ q: qEffective });
+  };
 
   const clearSearch = () => {
     setSearch("");
-    setResults([]);
-    setTotalHits(0);
-    setHasSearched(false);
-    setCurrentPage(1);
-    navigate("/search", { replace: true });
+    void setSearchParams({ q: "" });
   };
 
   const loadMore = () => {
-    const nextPage = currentPage + 1;
-    setCurrentPage(nextPage);
-    updateURL(search, nextPage);
-    performSearch(nextPage, true);
+    if (query.hasNextPage && !query.isFetchingNextPage) {
+      void query.fetchNextPage();
+    }
   };
 
-  const searchFromHistory = (query: string) => {
-    setSearch(query);
-    updateURL(query, 1);
-    performSearch(1, false);
-  };
+  // True when the draft query still matches the committed URL query — i.e.
+  // clicking "Search" now would re-commit identical state and change nothing.
+  const isSearchUnchanged = search.trim() === q;
 
   return {
     // State
     search,
     results,
-    error,
-    loading,
+    error: query.error ? getErrorMessage(query.error) : "",
+    loading: query.isLoading,
+    loadingMore: query.isFetchingNextPage,
     searchHistory,
     showFilters,
-    currentPage,
     totalHits,
-    hasSearched,
+    hasSearched: Boolean(query.data),
+    isSearchUnchanged,
     imageType,
     orientation,
     color,
     minWidth,
     minHeight,
+    hasMore: Boolean(query.hasNextPage),
     // Actions
     setSearch,
     setShowFilters,
@@ -324,6 +252,5 @@ export const useSearch = (): SearchState & SearchActions => {
     performSearch,
     clearSearch,
     loadMore,
-    searchFromHistory,
   };
 };
