@@ -1,11 +1,8 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { parseAsString, parseAsStringLiteral, useQueryStates } from "nuqs";
-import {
-  searchImages,
-  getErrorMessage,
-  type SearchQuery,
-} from "../api/pixabay";
+import { searchImages, type SearchQuery } from "../api/pixabay";
+import { getErrorMessage } from "../utils/error";
 import type { Hit } from "./../models/IPixabay";
 import {
   COLORS,

@@ -1,4 +1,5 @@
 import React from "react";
+import { getInitials } from "../utils/format";
 
 interface AvatarProps {
   name: string;
@@ -12,15 +13,6 @@ const SIZE_CLASSES = {
   sm: "h-8 w-8 text-xs",
   md: "h-11 w-11 text-sm",
   lg: "h-16 w-16 text-lg",
-};
-
-const getInitials = (name: string) => {
-  return name
-    .split(" ")
-    .map((part) => part[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
 };
 
 const Avatar: React.FC<AvatarProps> = ({

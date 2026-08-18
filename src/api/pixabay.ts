@@ -20,10 +20,6 @@ export interface SearchQuery {
   page: number;
 }
 
-interface ApiError {
-  message: string;
-}
-
 // Thrown when the API responds but the requested resource does not exist, so
 // the UI can render a distinct "not found" state instead of a generic error.
 export class NotFoundError extends Error {
@@ -31,27 +27,6 @@ export class NotFoundError extends Error {
     super(message);
     this.name = "NotFoundError";
   }
-}
-
-/**
- * Turns any thrown value into a user-facing error message. Maps axios timeout
- * and server errors to friendly text so callers don't render raw stack traces.
- */
-export function getErrorMessage(err: unknown): string {
-  if (axios.isAxiosError<ApiError>(err)) {
-    if (err.code === "ECONNABORTED") {
-      return "The request timed out. Please try again.";
-    }
-    return (
-      err.response?.data?.message ||
-      err.message ||
-      "An error occurred while fetching images"
-    );
-  }
-  if (err instanceof Error) {
-    return err.message;
-  }
-  return "An unexpected error occurred";
 }
 
 export async function searchImages(params: SearchQuery): Promise<Images> {

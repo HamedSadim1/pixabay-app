@@ -1,10 +1,11 @@
 import React from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { getImageById, getErrorMessage, NotFoundError } from "../api/pixabay";
+import { getImageById, NotFoundError } from "../api/pixabay";
+import { getErrorMessage } from "../utils/error";
 import { PATHS } from "../constants/routes";
 import { buttonClasses } from "../constants/buttonStyles";
-import { formatFileSize } from "../utils/format";
+import { getFileExtension, getImageInfoFields } from "../utils/format";
 import AuthorHeader from "./AuthorHeader";
 import Avatar from "./Avatar";
 import Button from "./Button";
@@ -80,8 +81,7 @@ const ImageDetail: React.FC = () => {
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      const extension =
-        imageData.largeImageURL.split("?")[0].split(".").pop() || "jpg";
+      const extension = getFileExtension(imageData.largeImageURL);
       link.download = `pixabay-${imageData.id}.${extension}`;
       document.body.appendChild(link);
       link.click();
@@ -198,15 +198,7 @@ const ImageDetail: React.FC = () => {
               Image Information
             </h2>
             <dl className="space-y-2">
-              {[
-                ["Frame ID", `#${imageData.id}`],
-                [
-                  "Dimensions",
-                  `${imageData.imageWidth} × ${imageData.imageHeight}`,
-                ],
-                ["File Size", formatFileSize(imageData.imageSize)],
-                ["Type", imageData.type],
-              ].map(([label, value]) => (
+              {getImageInfoFields(imageData).map(([label, value]) => (
                 <div
                   key={label}
                   className="flex justify-between border-b border-line pb-2 font-mono text-xs"
