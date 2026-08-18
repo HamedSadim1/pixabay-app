@@ -10,15 +10,15 @@ import { getFileExtension, getImageInfoFields } from "@/utils/format";
 
 const IMAGE_NOT_FOUND_TITLE = "Image Not Found";
 const IMAGE_NOT_FOUND_MESSAGE = "The requested frame could not be found.";
-import AuthorHeader from "./AuthorHeader";
-import Avatar from "./Avatar";
-import Button from "./Button";
-import Frame from "./Frame";
-import Icon from "./Icon";
-import ImageStats from "./ImageStats";
-import Spinner from "./Spinner";
-import StatusCard from "./StatusCard";
-import TagList from "./TagList";
+import AuthorHeader from "@/components/blog/AuthorHeader";
+import Avatar from "@/components/ui/Avatar";
+import Button from "@/components/ui/Button";
+import Frame from "@/components/ui/Frame";
+import Icon from "@/components/ui/Icon";
+import ImageStats from "@/components/image/ImageStats";
+import Spinner from "@/components/ui/Spinner";
+import StatusCard from "@/components/ui/StatusCard";
+import TagList from "@/components/image/TagList";
 
 const ImageDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();

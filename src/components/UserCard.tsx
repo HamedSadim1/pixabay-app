@@ -1,7 +1,7 @@
 import React from "react";
-import Avatar from "./Avatar";
-import Button from "./Button";
-import Icon from "./Icon";
+import Avatar from "@/components/ui/Avatar";
+import Button from "@/components/ui/Button";
+import Icon from "@/components/ui/Icon";
 import { useToggle } from "@/hooks/useToggle";
 
 interface BlockProps {

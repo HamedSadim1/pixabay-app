@@ -5,7 +5,7 @@ import { NAV_LINKS } from "@/constants/navLinks";
 import { routePreloaders } from "@/constants/routeLoaders";
 import { PATHS } from "@/constants/routes";
 import { cn } from "@/utils/cn";
-import Icon from "./Icon";
+import Icon from "@/components/ui/Icon";
 
 const Navbar: React.FC = () => {
   const location = useLocation();

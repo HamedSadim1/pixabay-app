@@ -1,7 +1,7 @@
 // Chunk loaders for the lazy routes. Defined once so they can be reused by
 // `React.lazy` (in App) and by hover/focus preloading (in the navbar).
-export const loadImageSearch = () => import("../components/ImageSearch");
-export const loadSinglePost = () => import("../components/SinglePost");
+export const loadImageSearch = () => import("../components/image/ImageSearch");
+export const loadSinglePost = () => import("../components/blog/SinglePost");
 export const loadGeolocation = () => import("../components/Geolocation");
 
 import { PATHS } from "./routes";

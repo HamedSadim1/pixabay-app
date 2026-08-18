@@ -1,5 +1,5 @@
 import React from "react";
-import MetaLabel from "./MetaLabel";
+import MetaLabel from "@/components/ui/MetaLabel";
 
 interface AuthorHeaderProps {
   name: string;

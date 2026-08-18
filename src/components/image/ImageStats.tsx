@@ -1,6 +1,6 @@
 import React from "react";
-import Icon from "./Icon";
-import MetaLabel from "./MetaLabel";
+import Icon from "@/components/ui/Icon";
+import MetaLabel from "@/components/ui/MetaLabel";
 import { getImageStatsFields } from "@/utils/format";
 
 interface ImageStatsProps {

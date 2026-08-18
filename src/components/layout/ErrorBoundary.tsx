@@ -1,7 +1,7 @@
 import React, { Component, type ErrorInfo, type ReactNode } from "react";
-import Button from "./Button";
-import Icon from "./Icon";
-import StatusCard from "./StatusCard";
+import Button from "@/components/ui/Button";
+import Icon from "@/components/ui/Icon";
+import StatusCard from "@/components/ui/StatusCard";
 
 interface Props {
   children: ReactNode;

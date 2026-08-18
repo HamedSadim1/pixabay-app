@@ -1,5 +1,5 @@
 import React from "react";
-import Icon from "./Icon";
+import Icon from "@/components/ui/Icon";
 import type { IconName } from "@/constants/icons";
 import { cn } from "@/utils/cn";
 

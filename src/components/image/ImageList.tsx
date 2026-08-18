@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import Icon from "./Icon";
-import type { Hit } from "./../models/IPixabay";
+import Icon from "@/components/ui/Icon";
+import type { Hit } from "@/models/IPixabay";
 import { PATHS } from "@/constants/routes";
 
 interface ImageListProps {

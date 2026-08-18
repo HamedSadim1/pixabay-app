@@ -1,11 +1,11 @@
 import React, { useRef } from "react";
-import ImageList from "./ImageList";
-import FilterPanel from "./FilterPanel";
-import SearchHistory from "./SearchHistory";
-import StatusCard from "./StatusCard";
-import Button from "./Button";
-import Icon from "./Icon";
-import Spinner from "./Spinner";
+import ImageList from "@/components/image/ImageList";
+import FilterPanel from "@/components/image/FilterPanel";
+import SearchHistory from "@/components/image/SearchHistory";
+import StatusCard from "@/components/ui/StatusCard";
+import Button from "@/components/ui/Button";
+import Icon from "@/components/ui/Icon";
+import Spinner from "@/components/ui/Spinner";
 import { useSearch } from "@/hooks/useSearch";
 import { PER_PAGE } from "@/api/pixabay";
 import { TRENDING_SEARCHES } from "@/constants/navLinks";

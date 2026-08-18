@@ -1,13 +1,13 @@
 import React, { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
 import { NuqsAdapter } from "nuqs/adapters/react-router/v7";
-import Navbar from "./components/Navbar";
-import Home from "./components/Home";
-import ImageDetail from "./components/ImageDetail";
-import UserCard from "./components/UserCard";
-import ErrorBoundary from "./components/ErrorBoundary";
-import SprocketStrip from "./components/SprocketStrip";
-import Spinner from "./components/Spinner";
+import Navbar from "@/components/layout/Navbar";
+import Home from "@/components/Home";
+import ImageDetail from "@/components/image/ImageDetail";
+import UserCard from "@/components/UserCard";
+import ErrorBoundary from "@/components/layout/ErrorBoundary";
+import SprocketStrip from "@/components/layout/SprocketStrip";
+import Spinner from "@/components/ui/Spinner";
 import { buttonClasses } from "./constants/buttonStyles";
 import { PATHS } from "./constants/routes";
 import {

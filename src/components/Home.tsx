@@ -1,10 +1,10 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import BlogPost from "./BlogPost";
-import UserCard from "./UserCard";
-import Frame from "./Frame";
-import SprocketStrip from "./SprocketStrip";
-import Icon from "./Icon";
+import BlogPost from "@/components/blog/BlogPost";
+import UserCard from "@/components/UserCard";
+import Frame from "@/components/ui/Frame";
+import SprocketStrip from "@/components/layout/SprocketStrip";
+import Icon from "@/components/ui/Icon";
 import { buttonClasses } from "@/constants/buttonStyles";
 import { FEATURED_POSTS, FEATURES } from "@/constants/mockData";
 import { PATHS } from "@/constants/routes";

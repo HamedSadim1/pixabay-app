@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
-import AuthorHeader from "./AuthorHeader";
-import Avatar from "./Avatar";
-import Button from "./Button";
-import Icon from "./Icon";
-import MetaLabel from "./MetaLabel";
+import AuthorHeader from "@/components/blog/AuthorHeader";
+import Avatar from "@/components/ui/Avatar";
+import Button from "@/components/ui/Button";
+import Icon from "@/components/ui/Icon";
+import MetaLabel from "@/components/ui/MetaLabel";
 import { useShareFeedback } from "@/hooks/useShareFeedback";
 import { useToggle } from "@/hooks/useToggle";
 import { INITIAL_COMMENTS, type Comment } from "@/constants/mockData";

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { MapContainer, Marker, TileLayer, useMap } from "react-leaflet";
 import L, { type LatLngTuple } from "leaflet";
-import Icon from "./Icon";
+import Icon from "@/components/ui/Icon";
 
 interface LocationMapProps {
   latitude: number;

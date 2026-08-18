@@ -1,8 +1,8 @@
 import { type FC, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import Avatar from "./Avatar";
-import Icon from "./Icon";
-import MetaLabel from "./MetaLabel";
+import Avatar from "@/components/ui/Avatar";
+import Icon from "@/components/ui/Icon";
+import MetaLabel from "@/components/ui/MetaLabel";
 import { useShareFeedback } from "@/hooks/useShareFeedback";
 import { useToggle } from "@/hooks/useToggle";
 import { cn } from "@/utils/cn";
