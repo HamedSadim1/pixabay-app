@@ -35,6 +35,7 @@ async function fetchAddress(
   try {
     const response = await fetch(
       `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=jsonv2&addressdetails=1&accept-language=en`,
+      { signal: AbortSignal.timeout(10000) },
     );
     const geoData = (await response.json()) as NominatimResponse;
     const address = geoData.address;
@@ -63,6 +64,14 @@ function Geolocation() {
     { history: "replace" },
   );
 
+  const hasValidCoordinates =
+    lat !== null &&
+    lon !== null &&
+    lat >= -90 &&
+    lat <= 90 &&
+    lon >= -180 &&
+    lon <= 180;
+
   const [details, setDetails] = useState<LocationDetails>({
     accuracy: null,
     altitude: null,
@@ -70,6 +79,9 @@ function Geolocation() {
     lastUpdated: null,
   });
   const [locationName, setLocationName] = useState<string>("");
+  const [resolvingAddress, setResolvingAddress] = useState<boolean>(
+    () => hasValidCoordinates,
+  );
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(
     () => lat === null || lon === null,
@@ -148,11 +160,15 @@ function Geolocation() {
   // Reverse geocode whenever the coordinates change (geolocation or restore).
   useEffect(() => {
     if (lat === null || lon === null) {
+      setResolvingAddress(false);
       return;
     }
     let cancelled = false;
+    setResolvingAddress(true);
+    setLocationName("");
     void fetchAddress(lat, lon).then((address) => {
       if (!cancelled) {
+        setResolvingAddress(false);
         setLocationName(address);
       }
     });
@@ -199,6 +215,27 @@ function Geolocation() {
     }
     return `${(accuracy / 1000).toFixed(1)}km`;
   };
+
+  if (lat !== null && lon !== null && !hasValidCoordinates) {
+    return (
+      <div className="mx-auto max-w-4xl space-y-6">
+        <div className="border border-safelight bg-safelight/10 p-6">
+          <div className="mb-3 flex items-center gap-3">
+            <span className="text-2xl text-safelight">
+              <Icon name="warning" />
+            </span>
+            <h2 className="font-display text-xl uppercase tracking-[0.03em] text-paper">
+              Invalid Location
+            </h2>
+          </div>
+          <p className="font-mono text-xs text-paper">
+            The coordinates in the URL are out of range. Latitude must be
+            between −90 and 90, and longitude between −180 and 180.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   if (lat === null || lon === null) {
     if (errorMessage) {
@@ -303,14 +340,22 @@ function Geolocation() {
                 {formatCoordinate(lon, "lng")}
               </p>
             </div>
-            {locationName && (
-              <div className="border border-line bg-panel-2 p-4 md:col-span-2">
-                <h3 className="mb-2 font-mono text-[10px] uppercase tracking-label text-muted">
-                  Address
-                </h3>
+            <div className="border border-line bg-panel-2 p-4 md:col-span-2">
+              <h3 className="mb-2 font-mono text-[10px] uppercase tracking-label text-muted">
+                Address
+              </h3>
+              {resolvingAddress ? (
+                <p className="font-mono text-sm text-muted">
+                  Resolving address…
+                </p>
+              ) : locationName ? (
                 <p className="font-mono text-sm text-paper">{locationName}</p>
-              </div>
-            )}
+              ) : (
+                <p className="font-mono text-sm text-muted">
+                  Address unavailable
+                </p>
+              )}
+            </div>
           </div>
 
           {(details.accuracy !== null ||

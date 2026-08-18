@@ -60,6 +60,7 @@ function FullscreenController({ isFullscreen }: { isFullscreen: boolean }) {
 
 const LocationMap: React.FC<LocationMapProps> = ({ latitude, longitude }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [tilesFailed, setTilesFailed] = useState(false);
   const position: LatLngTuple = [latitude, longitude];
 
   // Lock body scroll while fullscreen and close on Escape.
@@ -94,11 +95,22 @@ const LocationMap: React.FC<LocationMapProps> = ({ latitude, longitude }) => {
         scrollWheelZoom={false}
         className="h-full w-full"
       >
-        <TileLayer url={DARK_TILES_URL} attribution={DARK_TILES_ATTRIBUTION} />
+        <TileLayer
+          url={DARK_TILES_URL}
+          attribution={DARK_TILES_ATTRIBUTION}
+          eventHandlers={{ tileerror: () => setTilesFailed(true) }}
+        />
         <Marker position={position} icon={markerIcon} />
         <RecenterMap latitude={latitude} longitude={longitude} />
         <FullscreenController isFullscreen={isFullscreen} />
       </MapContainer>
+      {tilesFailed && (
+        <div className="pointer-events-none absolute inset-0 z-[500] flex items-center justify-center bg-dark/60">
+          <p className="border border-safelight bg-panel px-3 py-2 font-mono text-[10px] uppercase tracking-meta text-safelight">
+            Map tiles unavailable
+          </p>
+        </div>
+      )}
       <button
         type="button"
         onClick={() => setIsFullscreen((prev) => !prev)}

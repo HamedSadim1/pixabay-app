@@ -125,13 +125,20 @@ export const useSearch = (): SearchState & SearchActions => {
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [searchHistory, setSearchHistory] = useState<string[]>(() => {
-    const history = localStorage.getItem("searchHistory");
-    return history ? (JSON.parse(history) as string[]) : [];
+    try {
+      const history = localStorage.getItem("searchHistory");
+      return history ? (JSON.parse(history) as string[]) : [];
+    } catch {
+      return [];
+    }
   });
   const [showFilters, setShowFilters] = useState<boolean>(false);
   const [totalHits, setTotalHits] = useState<number>(0);
   const [hasSearched, setHasSearched] = useState<boolean>(false);
   const [lastSearch, setLastSearch] = useState<LastSearch | null>(null);
+  // Monotonic id so only the latest in-flight request may update state; an
+  // earlier (slower) response is ignored instead of overwriting newer results.
+  const requestIdRef = useRef(0);
 
   const saveToHistory = useCallback(
     (query: string) => {
@@ -143,7 +150,12 @@ export const useSearch = (): SearchState & SearchActions => {
         ...searchHistory.filter((item) => item !== query),
       ].slice(0, 10);
       setSearchHistory(newHistory);
-      localStorage.setItem("searchHistory", JSON.stringify(newHistory));
+      try {
+        localStorage.setItem("searchHistory", JSON.stringify(newHistory));
+      } catch {
+        // Storage can fail (private browsing / quota) — the in-memory history
+        // still works, so ignore.
+      }
     },
     [searchHistory],
   );
@@ -153,6 +165,7 @@ export const useSearch = (): SearchState & SearchActions => {
       const qEffective = (query ?? search).trim();
 
       if (!qEffective && p === 1) {
+        requestIdRef.current++;
         void setSearchParams({ q: "", page: 1 });
         setResults([]);
         setTotalHits(0);
@@ -176,6 +189,8 @@ export const useSearch = (): SearchState & SearchActions => {
 
       // Commit the effective search to the URL (the source of truth).
       void setSearchParams({ q: qEffective, page: p });
+
+      const requestId = ++requestIdRef.current;
 
       try {
         setLoading(true);
@@ -204,7 +219,12 @@ export const useSearch = (): SearchState & SearchActions => {
           queryString += `&min_height=${height}`;
         }
 
-        const response = await axios.get(queryString);
+        const response = await axios.get(queryString, { timeout: 10000 });
+
+        // Ignore the response if a newer search has already started.
+        if (requestId !== requestIdRef.current) {
+          return;
+        }
 
         if (response.data && Array.isArray(response.data.hits)) {
           const newResults = append
@@ -221,18 +241,25 @@ export const useSearch = (): SearchState & SearchActions => {
           throw new Error("Invalid API response format");
         }
       } catch (err) {
+        if (requestId !== requestIdRef.current) {
+          return;
+        }
         const error = err as AxiosError<ApiError>;
         const errorMessage =
-          error.response?.data?.message ||
-          error.message ||
-          "An error occurred while fetching images";
+          error.code === "ECONNABORTED"
+            ? "The request timed out. Please try again."
+            : error.response?.data?.message ||
+              error.message ||
+              "An error occurred while fetching images";
         setError(errorMessage);
         if (!append) {
           setResults([]);
           setTotalHits(0);
         }
       } finally {
-        setLoading(false);
+        if (requestId === requestIdRef.current) {
+          setLoading(false);
+        }
       }
     },
     [
@@ -312,6 +339,7 @@ export const useSearch = (): SearchState & SearchActions => {
   };
 
   const clearSearch = () => {
+    requestIdRef.current++;
     setSearch("");
     setResults([]);
     setTotalHits(0);

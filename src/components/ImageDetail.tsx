@@ -8,6 +8,7 @@ import {
   buttonVariants,
 } from "../constants/buttonStyles";
 import type { Hit } from "../models/IPixabay";
+import Avatar from "./Avatar";
 import Button from "./Button";
 import Icon from "./Icon";
 import type { IconName } from "../constants/icons";
@@ -49,6 +50,7 @@ const ImageDetail: React.FC = () => {
         // Retrieve the image by ID regardless of type (photo/illustration/vector).
         const response = await axios.get(
           `${API_ENDPOINTS.PIXABAY_SEARCH}&id=${id}`,
+          { timeout: 10000 },
         );
 
         if (
@@ -108,7 +110,9 @@ const ImageDetail: React.FC = () => {
       return;
     }
     try {
-      const response = await fetch(imageData.largeImageURL);
+      const response = await fetch(imageData.largeImageURL, {
+        signal: AbortSignal.timeout(15000),
+      });
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
@@ -305,23 +309,27 @@ const ImageDetail: React.FC = () => {
             Tags
           </h2>
           <div className="flex flex-wrap gap-2">
-            {imageData.tags.split(", ").map((tag, index) => (
-              <span
-                key={index}
-                className="border border-line px-2.5 py-1 font-mono text-[10px] uppercase tracking-widest text-muted"
-              >
-                {tag.trim()}
-              </span>
-            ))}
+            {imageData.tags
+              .split(",")
+              .map((tag) => tag.trim())
+              .filter(Boolean)
+              .map((tag, index) => (
+                <span
+                  key={index}
+                  className="border border-line px-2.5 py-1 font-mono text-[10px] uppercase tracking-widest text-muted"
+                >
+                  {tag}
+                </span>
+              ))}
           </div>
         </div>
 
         {/* Photographer */}
         <div className="mt-6 flex items-center gap-3 border-t border-line pt-5">
-          <img
+          <Avatar
+            name={imageData.user}
             src={imageData.userImageURL}
-            alt={imageData.user}
-            className="h-10 w-10 rounded-full border border-line object-cover"
+            size="md"
           />
           <div>
             <span className="font-display text-sm uppercase tracking-wider text-paper">

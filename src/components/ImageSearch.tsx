@@ -178,6 +178,12 @@ function ImageSearch() {
 
       <ImageList images={results} />
 
+      {loading && results.length > 0 && (
+        <div className="flex justify-center py-8">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-line border-t-safelight" />
+        </div>
+      )}
+
       {/* Load More */}
       {results.length > 0 && results.length < totalHits && (
         <div className="flex justify-center">
