@@ -235,13 +235,13 @@ function Geolocation() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
+    <div className="space-y-6">
       {/* Main Location Card */}
       <Frame frame="COORD/01">
         <div className="p-6">
           <div className="mb-6 flex items-start justify-between gap-4">
             <div>
-              <h2 className="font-display text-xl uppercase tracking-[0.03em] text-paper">
+              <h2 className="font-display text-lg uppercase tracking-[0.03em] text-paper">
                 Current Location
               </h2>
             </div>

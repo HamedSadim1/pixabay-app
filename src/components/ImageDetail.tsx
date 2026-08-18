@@ -117,7 +117,7 @@ const ImageDetail: React.FC = () => {
       <div className="space-y-6">
         <div className="flex items-center gap-4">
           {backButton}
-          <h1 className="font-display text-2xl uppercase tracking-[0.03em] text-paper">
+          <h1 className="font-display text-3xl uppercase tracking-[0.03em] text-paper md:text-4xl">
             Image Details
           </h1>
         </div>
@@ -136,7 +136,7 @@ const ImageDetail: React.FC = () => {
       <div className="space-y-6">
         <div className="flex items-center gap-4">
           {backButton}
-          <h1 className="font-display text-2xl uppercase tracking-[0.03em] text-paper">
+          <h1 className="font-display text-3xl uppercase tracking-[0.03em] text-paper md:text-4xl">
             Image Details
           </h1>
         </div>
@@ -161,7 +161,7 @@ const ImageDetail: React.FC = () => {
       <div className="space-y-6">
         <div className="flex items-center gap-4">
           {backButton}
-          <h1 className="font-display text-2xl uppercase tracking-[0.03em] text-paper">
+          <h1 className="font-display text-3xl uppercase tracking-[0.03em] text-paper md:text-4xl">
             Image Details
           </h1>
         </div>
@@ -187,7 +187,7 @@ const ImageDetail: React.FC = () => {
     <div className="space-y-6">
       <div className="flex items-center gap-4">
         {backButton}
-        <h1 className="font-display text-2xl uppercase tracking-[0.03em] text-paper">
+        <h1 className="font-display text-3xl uppercase tracking-[0.03em] text-paper md:text-4xl">
           Image Details
         </h1>
       </div>
@@ -217,7 +217,7 @@ const ImageDetail: React.FC = () => {
         {/* Image Info */}
         <div className="mt-6 grid gap-6 md:grid-cols-2">
           <div>
-            <h3 className="mb-3 font-display text-sm uppercase tracking-wider text-paper">
+            <h3 className="mb-3 font-display text-lg uppercase tracking-[0.03em] text-paper">
               Image Information
             </h3>
             <dl className="space-y-2">
@@ -251,7 +251,7 @@ const ImageDetail: React.FC = () => {
           </div>
 
           <div>
-            <h3 className="mb-3 font-display text-sm uppercase tracking-wider text-paper">
+            <h3 className="mb-3 font-display text-lg uppercase tracking-[0.03em] text-paper">
               Statistics
             </h3>
             <div className="grid grid-cols-3 gap-3">
@@ -288,7 +288,7 @@ const ImageDetail: React.FC = () => {
 
         {/* Tags */}
         <div className="mt-6">
-          <h3 className="mb-3 font-display text-sm uppercase tracking-wider text-paper">
+          <h3 className="mb-3 font-display text-lg uppercase tracking-[0.03em] text-paper">
             Tags
           </h3>
           <div className="flex flex-wrap gap-2">
