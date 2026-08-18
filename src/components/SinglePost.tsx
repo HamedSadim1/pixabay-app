@@ -28,7 +28,7 @@ function SinglePost() {
             size="md"
           />
           <div>
-            <span className="font-display text-sm uppercase tracking-[0.05em] text-paper">
+            <span className="font-display text-sm uppercase tracking-wider text-paper">
               Sarah
             </span>
             <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted">
@@ -117,7 +117,7 @@ function SinglePost() {
               <Avatar name={comment.name} src={comment.avatar} size="sm" />
               <div className="flex-1 border border-line bg-panel-2 p-3.5">
                 <div className="mb-1 flex items-baseline gap-2">
-                  <span className="font-display text-xs uppercase tracking-[0.05em] text-paper">
+                  <span className="font-display text-xs uppercase tracking-wider text-paper">
                     {comment.name}
                   </span>
                   <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted">

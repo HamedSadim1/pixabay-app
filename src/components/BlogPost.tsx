@@ -29,7 +29,7 @@ const BlogPost: FC<BlockProps> = ({ name, image, text, frame }) => {
       <Avatar name={name} src={image} size="md" />
       <div className="min-w-0 flex-1 pr-14">
         <div className="mb-1.5 flex flex-wrap items-baseline gap-x-2 gap-y-1">
-          <span className="font-display text-sm uppercase tracking-[0.05em] text-paper">
+          <span className="font-display text-sm uppercase tracking-wider text-paper">
             {name}
           </span>
           <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted">

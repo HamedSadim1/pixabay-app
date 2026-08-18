@@ -30,7 +30,7 @@ const ImageList: React.FC<ImageListProps> = ({ images }) => {
           <span className="absolute left-3 top-3 z-10 font-mono text-[10px] uppercase tracking-[0.2em] text-gold">
             FRAME/{String(index + 1).padStart(2, "0")}
           </span>
-          <div className="aspect-[4/3] overflow-hidden bg-panel-2">
+          <div className="aspect-4/3 overflow-hidden bg-panel-2">
             <img
               className="h-full w-full object-cover grayscale transition-[filter,transform] duration-300 group-hover:scale-105 group-hover:grayscale-0"
               src={result.webformatURL}
