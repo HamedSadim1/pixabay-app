@@ -13,6 +13,18 @@ interface ApiError {
   message: string;
 }
 
+// Snapshot of the query + filters used by the last executed search. Used to
+// detect when a new "Search" click would change nothing, so the button can
+// be disabled instead of re-fetching (and causing a layout shift).
+interface LastSearch {
+  q: string;
+  imageType: ImageType;
+  orientation: Orientation;
+  color: Color;
+  minWidth: string;
+  minHeight: string;
+}
+
 // Accepted literal values for the URL-backed filters. These mirror the unions
 // in constants/types.ts so the parsers stay type-safe (a typo here is caught
 // at compile time via the `satisfies` check below).
@@ -67,6 +79,7 @@ export interface SearchState {
   showFilters: boolean;
   totalHits: number;
   hasSearched: boolean;
+  isSearchUnchanged: boolean;
   imageType: ImageType;
   orientation: Orientation;
   color: Color;
@@ -107,6 +120,7 @@ export const useSearch = (): SearchState & SearchActions => {
   const [showFilters, setShowFilters] = useState<boolean>(false);
   const [totalHits, setTotalHits] = useState<number>(0);
   const [hasSearched, setHasSearched] = useState<boolean>(false);
+  const [lastSearch, setLastSearch] = useState<LastSearch | null>(null);
 
   const saveToHistory = useCallback(
     (query: string) => {
@@ -132,7 +146,21 @@ export const useSearch = (): SearchState & SearchActions => {
         setResults([]);
         setTotalHits(0);
         setHasSearched(false);
+        setLastSearch(null);
         return;
+      }
+
+      // Remember what this search committed so a later "Search" click with
+      // unchanged query + filters can be treated as a no-op.
+      if (p === 1 && !append) {
+        setLastSearch({
+          q: qEffective,
+          imageType,
+          orientation,
+          color,
+          minWidth,
+          minHeight,
+        });
       }
 
       // Commit the effective search to the URL (the source of truth).
@@ -251,6 +279,7 @@ export const useSearch = (): SearchState & SearchActions => {
     setResults([]);
     setTotalHits(0);
     setHasSearched(false);
+    setLastSearch(null);
     void setSearchParams({ q: "", page: 1 });
   };
 
@@ -259,6 +288,17 @@ export const useSearch = (): SearchState & SearchActions => {
     void setSearchParams({ page: nextPage });
     performSearch(nextPage, true, q);
   };
+
+  // True when the draft query and all filters still match the last executed
+  // search — i.e. clicking "Search" now would re-fetch identical results.
+  const isSearchUnchanged =
+    lastSearch !== null &&
+    lastSearch.q === search.trim() &&
+    lastSearch.imageType === imageType &&
+    lastSearch.orientation === orientation &&
+    lastSearch.color === color &&
+    lastSearch.minWidth === minWidth &&
+    lastSearch.minHeight === minHeight;
 
   return {
     // State
@@ -270,6 +310,7 @@ export const useSearch = (): SearchState & SearchActions => {
     showFilters,
     totalHits,
     hasSearched,
+    isSearchUnchanged,
     imageType,
     orientation,
     color,

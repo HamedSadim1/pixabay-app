@@ -17,6 +17,7 @@ function ImageSearch() {
     showFilters,
     totalHits,
     hasSearched,
+    isSearchUnchanged,
     searchHistory,
     imageType,
     orientation,
@@ -41,7 +42,7 @@ function ImageSearch() {
 
   const onSubmitForm: React.FormEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
-    if (search.trim()) {
+    if (search.trim() && !isSearchUnchanged) {
       performSearch();
     }
   };
@@ -98,7 +99,7 @@ function ImageSearch() {
           <Button
             type="submit"
             variant="primary"
-            disabled={loading || !search.trim()}
+            disabled={loading || !search.trim() || isSearchUnchanged}
           >
             {loading ? (
               "Searching…"
