@@ -7,7 +7,7 @@ interface SearchHistoryProps {
     trendingSearches: string[];
     searchQuery: string;
     setSearchQuery: (query: string) => void;
-    performSearch: () => void;
+    performSearch: (page?: number, append?: boolean, query?: string) => void;
   };
 }
 
@@ -26,7 +26,7 @@ const SearchHistory: React.FC<SearchHistoryProps> = ({ search }) => {
 
   const handleHistoryClick = (query: string) => {
     setSearchQuery(query);
-    performSearch();
+    performSearch(1, false, query);
   };
 
   return (

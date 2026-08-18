@@ -33,7 +33,7 @@ export interface SearchActions {
   setColor: (color: Color) => void;
   setMinWidth: (width: string) => void;
   setMinHeight: (height: string) => void;
-  performSearch: (page?: number, append?: boolean) => void;
+  performSearch: (page?: number, append?: boolean, query?: string) => void;
   clearSearch: () => void;
   loadMore: () => void;
   searchFromHistory: (query: string) => void;
@@ -114,8 +114,9 @@ export const useSearch = (): SearchState & SearchActions => {
   );
 
   const performSearch = useCallback(
-    async (page: number = 1, append: boolean = false) => {
-      if (!search.trim() && page === 1) {
+    async (page: number = 1, append: boolean = false, query?: string) => {
+      const q = (query ?? search).trim();
+      if (!q && page === 1) {
         setResults([]);
         setTotalHits(0);
         setHasSearched(false);
@@ -135,7 +136,7 @@ export const useSearch = (): SearchState & SearchActions => {
           throw new Error("API configuration missing");
         }
 
-        let queryString = `${baseUrl}?key=${apiKey}&q=${search}&page=${page}&per_page=20`;
+        let queryString = `${baseUrl}?key=${apiKey}&q=${q}&page=${page}&per_page=20`;
 
         // Add filters
         if (imageType !== "all") {
@@ -164,9 +165,9 @@ export const useSearch = (): SearchState & SearchActions => {
           setTotalHits(response.data.totalHits || 0);
           setHasSearched(true);
 
-          if (page === 1 && search.trim()) {
-            saveToHistory(search);
-            updateURL(search, page);
+          if (page === 1 && q) {
+            saveToHistory(q);
+            updateURL(q, page);
           }
         } else {
           throw new Error("Invalid API response format");
@@ -245,7 +246,7 @@ export const useSearch = (): SearchState & SearchActions => {
 
     // If there's a query in URL and state changed, perform search
     if (query.trim() && stateChanged) {
-      performSearch(page, false);
+      performSearch(page, false, query);
     } else if (!query.trim()) {
       setResults([]);
       setTotalHits(0);
@@ -267,7 +268,7 @@ export const useSearch = (): SearchState & SearchActions => {
 
     // Only search if there's a query and we're not already on the right page
     if (query.trim() && (query !== search || page !== currentPage)) {
-      performSearch(page, false);
+      performSearch(page, false, query);
     }
   });
 
@@ -294,7 +295,7 @@ export const useSearch = (): SearchState & SearchActions => {
   const searchFromHistory = (query: string) => {
     setSearch(query);
     updateURL(query, 1);
-    performSearch(1, false);
+    performSearch(1, false, query);
   };
 
   return {
