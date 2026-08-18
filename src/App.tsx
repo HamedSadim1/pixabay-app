@@ -1,5 +1,6 @@
 import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { NuqsAdapter } from "nuqs/adapters/react-router/v7";
 import Navbar from "./components/Navbar";
 import Home from "./components/Home";
 import Geolocation from "./components/Geolocation";
@@ -38,80 +39,82 @@ const PageHeader: React.FC<PageHeaderProps> = ({ index, title, subtitle }) => (
 function App() {
   return (
     <BrowserRouter>
-      <ErrorBoundary>
-        <div className="min-h-screen bg-dark">
-          <Navbar />
-          <main className="mx-auto max-w-6xl px-4 py-8 md:py-10">
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route
-                path="/search"
-                element={
-                  <section className="animate-fade-in">
-                    <PageHeader
-                      index="EXH. 02"
-                      title="Image Search"
-                      subtitle="Query the Pixabay archive"
-                    />
-                    <ImageSearch />
-                  </section>
-                }
-              />
-              <Route
-                path="/posts"
-                element={
-                  <section className="animate-fade-in">
-                    <PageHeader
-                      index="EXH. 03"
-                      title="Blog Posts"
-                      subtitle="Community contact sheet"
-                    />
-                    <SinglePost />
-                  </section>
-                }
-              />
-              <Route
-                path="/location"
-                element={
-                  <section className="animate-fade-in">
-                    <PageHeader
-                      index="EXH. 04"
-                      title="Location"
-                      subtitle="Geolocation darkroom"
-                    />
-                    <Geolocation />
-                  </section>
-                }
-              />
-              <Route
-                path="/image/:id"
-                element={
-                  <section className="animate-fade-in">
-                    <ImageDetail />
-                  </section>
-                }
-              />
-              <Route
-                path="/profile"
-                element={
-                  <section className="animate-fade-in">
-                    <PageHeader
-                      index="EXH. 05"
-                      title="Profile"
-                      subtitle="Member record"
-                    />
-                    <UserCard>
-                      <p className="text-sm leading-relaxed text-muted">
-                        This is some user content.
-                      </p>
-                    </UserCard>
-                  </section>
-                }
-              />
-            </Routes>
-          </main>
-        </div>
-      </ErrorBoundary>
+      <NuqsAdapter>
+        <ErrorBoundary>
+          <div className="min-h-screen bg-dark">
+            <Navbar />
+            <main className="mx-auto max-w-6xl px-4 py-8 md:py-10">
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route
+                  path="/search"
+                  element={
+                    <section className="animate-fade-in">
+                      <PageHeader
+                        index="EXH. 02"
+                        title="Image Search"
+                        subtitle="Query the Pixabay archive"
+                      />
+                      <ImageSearch />
+                    </section>
+                  }
+                />
+                <Route
+                  path="/posts"
+                  element={
+                    <section className="animate-fade-in">
+                      <PageHeader
+                        index="EXH. 03"
+                        title="Blog Posts"
+                        subtitle="Community contact sheet"
+                      />
+                      <SinglePost />
+                    </section>
+                  }
+                />
+                <Route
+                  path="/location"
+                  element={
+                    <section className="animate-fade-in">
+                      <PageHeader
+                        index="EXH. 04"
+                        title="Location"
+                        subtitle="Geolocation darkroom"
+                      />
+                      <Geolocation />
+                    </section>
+                  }
+                />
+                <Route
+                  path="/image/:id"
+                  element={
+                    <section className="animate-fade-in">
+                      <ImageDetail />
+                    </section>
+                  }
+                />
+                <Route
+                  path="/profile"
+                  element={
+                    <section className="animate-fade-in">
+                      <PageHeader
+                        index="EXH. 05"
+                        title="Profile"
+                        subtitle="Member record"
+                      />
+                      <UserCard>
+                        <p className="text-sm leading-relaxed text-muted">
+                          This is some user content.
+                        </p>
+                      </UserCard>
+                    </section>
+                  }
+                />
+              </Routes>
+            </main>
+          </div>
+        </ErrorBoundary>
+      </NuqsAdapter>
     </BrowserRouter>
   );
 }
