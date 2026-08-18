@@ -11,7 +11,11 @@ export const buttonVariants = {
     "border-line bg-transparent text-paper hover:border-safelight hover:text-safelight",
   primary:
     "border-safelight bg-safelight text-dark hover:border-gold hover:bg-gold",
+  ghost:
+    "border-line bg-transparent text-muted hover:border-safelight hover:text-safelight",
+  ghostActive: "border-safelight bg-safelight/10 text-safelight",
   gold: "border-line bg-transparent text-muted hover:border-gold hover:text-gold",
+  goldActive: "border-gold bg-gold/10 text-gold",
 } as const;
 
 export type ButtonSize = keyof typeof buttonSizes;

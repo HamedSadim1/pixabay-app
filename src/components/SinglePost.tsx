@@ -109,44 +109,32 @@ function SinglePost() {
 
         <div className="flex items-center justify-between border-t border-line pt-4">
           <div className="flex items-center gap-2">
-            <button
+            <Button
+              size="sm"
+              variant={isLiked ? "ghostActive" : "ghost"}
               onClick={handleLike}
-              className={`inline-flex items-center gap-1.5 border px-3.5 py-2 font-mono text-[10px] uppercase tracking-meta transition-colors ${
-                isLiked
-                  ? "border-safelight bg-safelight/10 text-safelight"
-                  : "border-line text-muted hover:border-safelight hover:text-safelight"
-              }`}
             >
               <Icon name="heart" /> {likesCount}
-            </button>
-            <button
-              onClick={scrollToComments}
-              className="inline-flex items-center gap-1.5 border border-line px-3.5 py-2 font-mono text-[10px] uppercase tracking-meta text-muted transition-colors hover:border-safelight hover:text-safelight"
-            >
+            </Button>
+            <Button size="sm" variant="ghost" onClick={scrollToComments}>
               <Icon name="comment" /> {comments.length}
-            </button>
-            <button
+            </Button>
+            <Button
+              size="sm"
+              variant={shared ? "goldActive" : "ghost"}
               onClick={handleShare}
-              className={`inline-flex items-center gap-1.5 border border-line px-3.5 py-2 font-mono text-[10px] uppercase tracking-meta transition-colors ${
-                shared
-                  ? "border-gold text-gold"
-                  : "text-muted hover:border-safelight hover:text-safelight"
-              }`}
             >
               <Icon name="share" /> {shared ? "Copied" : "Share"}
-            </button>
+            </Button>
           </div>
-          <button
+          <Button
+            size="sm"
+            variant={isBookmarked ? "goldActive" : "gold"}
             onClick={handleBookmark}
             aria-label="Bookmark"
-            className={`border p-2.5 transition-colors ${
-              isBookmarked
-                ? "border-gold bg-gold/10 text-gold"
-                : "border-line text-muted hover:border-gold hover:text-gold"
-            }`}
           >
             <Icon name="bookmark" />
-          </button>
+          </Button>
         </div>
       </article>
 
