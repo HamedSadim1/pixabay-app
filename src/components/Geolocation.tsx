@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import Button from "./Button";
 import Frame from "./Frame";
 import Icon from "./Icon";
+import LocationMap from "./LocationMap";
 
 interface LocationData {
   latitude: number;
@@ -12,6 +13,21 @@ interface LocationData {
   altitudeAccuracy?: number;
   heading?: number;
   speed?: number;
+}
+
+interface NominatimAddress {
+  house_number?: string;
+  road?: string;
+  postcode?: string;
+  city?: string;
+  town?: string;
+  village?: string;
+  country?: string;
+}
+
+interface NominatimResponse {
+  display_name?: string;
+  address?: NominatimAddress;
 }
 
 function Geolocation() {
@@ -58,19 +74,29 @@ function Geolocation() {
       setLocationData(data);
       setLastUpdated(new Date());
 
-      // Try to get location name using reverse geocoding
+      // Reverse geocode to a human-readable street address via OpenStreetMap
+      // Nominatim (free, no API key).
       try {
         const response = await fetch(
-          `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${data.latitude}&longitude=${data.longitude}&localityLanguage=en`,
+          `https://nominatim.openstreetmap.org/reverse?lat=${data.latitude}&lon=${data.longitude}&format=jsonv2&addressdetails=1&accept-language=en`,
         );
-        const geoData = await response.json();
-        if (geoData.city && geoData.countryName) {
-          setLocationName(`${geoData.city}, ${geoData.countryName}`);
-        } else if (geoData.locality) {
-          setLocationName(geoData.locality);
+        const geoData = (await response.json()) as NominatimResponse;
+        const address = geoData.address;
+        if (address) {
+          const street = [address.house_number, address.road]
+            .filter(Boolean)
+            .join(" ");
+          const locality =
+            address.city || address.town || address.village || "";
+          const parts = [street, address.postcode, locality, address.country]
+            .filter(Boolean)
+            .join(", ");
+          setLocationName(parts || geoData.display_name || "");
+        } else if (geoData.display_name) {
+          setLocationName(geoData.display_name);
         }
       } catch (geoError) {
-        console.warn("Could not fetch location name:", geoError);
+        console.warn("Could not fetch location address:", geoError);
       }
     } catch (err) {
       const error = err as GeolocationPositionError;
@@ -179,11 +205,6 @@ function Geolocation() {
                   <h2 className="font-display text-xl uppercase tracking-[0.03em] text-paper">
                     Current Location
                   </h2>
-                  {locationName && (
-                    <p className="mt-1 font-mono text-xs uppercase tracking-[0.15em] text-safelight">
-                      {locationName}
-                    </p>
-                  )}
                 </div>
                 <button
                   onClick={getLocation}
@@ -212,6 +233,16 @@ function Geolocation() {
                     {formatCoordinate(locationData.longitude, "lng")}
                   </p>
                 </div>
+                {locationName && (
+                  <div className="border border-line bg-panel-2 p-4 md:col-span-2">
+                    <h3 className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-muted">
+                      Address
+                    </h3>
+                    <p className="font-mono text-sm text-paper">
+                      {locationName}
+                    </p>
+                  </div>
+                )}
               </div>
 
               <div className="mt-4 grid gap-4 md:grid-cols-3">
@@ -254,26 +285,20 @@ function Geolocation() {
             </div>
           </Frame>
 
-          {/* Map Placeholder */}
+          {/* Map Preview */}
           <Frame frame="COORD/02">
             <div className="p-6">
               <h3 className="mb-4 font-display text-lg uppercase tracking-[0.03em] text-paper">
                 Location Preview
               </h3>
-              <div className="flex h-56 items-center justify-center border border-dashed border-line bg-panel-2 text-center">
-                <div>
-                  <div className="mb-2 text-3xl text-gold">
-                    <Icon name="location" />
-                  </div>
-                  <p className="font-mono text-xs uppercase tracking-[0.15em] text-muted">
-                    Interactive map would be displayed here
-                  </p>
-                  <p className="mt-1 font-mono text-[10px] text-muted">
-                    {locationData.latitude.toFixed(4)},{" "}
-                    {locationData.longitude.toFixed(4)}
-                  </p>
-                </div>
-              </div>
+              <LocationMap
+                latitude={locationData.latitude}
+                longitude={locationData.longitude}
+              />
+              <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.15em] text-muted">
+                {formatCoordinate(locationData.latitude, "lat")} ·{" "}
+                {formatCoordinate(locationData.longitude, "lng")}
+              </p>
             </div>
           </Frame>
         </div>
