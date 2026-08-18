@@ -113,10 +113,17 @@ function SinglePost() {
               size="sm"
               variant={isLiked ? "ghostActive" : "ghost"}
               onClick={handleLike}
+              aria-label={`Like (${likesCount} likes)`}
+              aria-pressed={isLiked}
             >
               <Icon name="heart" /> {likesCount}
             </Button>
-            <Button size="sm" variant="ghost" onClick={scrollToComments}>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={scrollToComments}
+              aria-label={`Comment (${comments.length} comments)`}
+            >
               <Icon name="comment" /> {comments.length}
             </Button>
             <Button

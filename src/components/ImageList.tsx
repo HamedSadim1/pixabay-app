@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import Icon from "./Icon";
 import type { Hit } from "./../models/IPixabay";
 
@@ -8,33 +8,30 @@ interface ImageListProps {
 }
 
 const ImageList: React.FC<ImageListProps> = ({ images }) => {
-  const navigate = useNavigate();
-
-  const handleImageClick = (imageId: number) => {
-    navigate(`/image/${imageId}`);
-  };
-
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
       {images.map((result, index) => (
-        <button
+        <Link
           key={result.id}
-          type="button"
-          onClick={() => handleImageClick(result.id)}
+          to={`/image/${result.id}`}
+          aria-label={`View image: ${result.tags}`}
           className="group relative block overflow-hidden border border-line bg-panel text-left transition-colors hover:border-gold"
         >
           <span className="vf-corner vf-tl" />
           <span className="vf-corner vf-tr" />
           <span className="vf-corner vf-bl" />
           <span className="vf-corner vf-br" />
-          <span className="absolute left-3 top-3 z-10 font-mono text-[10px] uppercase tracking-label text-gold">
+          <span
+            aria-hidden="true"
+            className="absolute left-3 top-3 z-10 font-mono text-[10px] uppercase tracking-label text-gold"
+          >
             FRAME/{String(index + 1).padStart(2, "0")}
           </span>
           <div className="aspect-4/3 overflow-hidden bg-panel-2">
             <img
               className="h-full w-full object-cover grayscale transition-[filter,transform] duration-300 group-hover:scale-105 group-hover:grayscale-0"
               src={result.webformatURL}
-              alt={result.tags}
+              alt=""
               loading="lazy"
             />
           </div>
@@ -46,7 +43,7 @@ const ImageList: React.FC<ImageListProps> = ({ images }) => {
               <Icon name="heart" /> {result.likes}
             </span>
           </div>
-        </button>
+        </Link>
       ))}
     </div>
   );

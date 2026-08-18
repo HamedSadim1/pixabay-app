@@ -132,7 +132,7 @@ const ImageDetail: React.FC = () => {
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center gap-4">
           {backButton}
           <h1 className="font-display text-3xl uppercase tracking-[0.03em] text-paper md:text-4xl">
             Image Details
@@ -151,7 +151,7 @@ const ImageDetail: React.FC = () => {
   if (error) {
     return (
       <div className="space-y-6">
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center gap-4">
           {backButton}
           <h1 className="font-display text-3xl uppercase tracking-[0.03em] text-paper md:text-4xl">
             Image Details
@@ -176,7 +176,7 @@ const ImageDetail: React.FC = () => {
   if (!imageData) {
     return (
       <div className="space-y-6">
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center gap-4">
           {backButton}
           <h1 className="font-display text-3xl uppercase tracking-[0.03em] text-paper md:text-4xl">
             Image Details
@@ -202,7 +202,7 @@ const ImageDetail: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
+      <div className="flex flex-wrap items-center gap-4">
         {backButton}
         <h1 className="font-display text-3xl uppercase tracking-[0.03em] text-paper md:text-4xl">
           Image Details

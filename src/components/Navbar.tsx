@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { NAV_LINKS } from "../constants/navLinks";
 import { routePreloaders } from "../constants/routeLoaders";
@@ -12,6 +12,22 @@ const Navbar: React.FC = () => {
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const preloadTimers = useRef(new Map<string, number>());
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+
+  // Close the mobile menu on Escape and return focus to the toggle button.
+  useEffect(() => {
+    if (!menuOpen) {
+      return;
+    }
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setMenuOpen(false);
+        menuButtonRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [menuOpen]);
 
   const schedulePreload = (to: string) => {
     const existing = preloadTimers.current.get(to);
@@ -87,6 +103,7 @@ const Navbar: React.FC = () => {
 
         <button
           type="button"
+          ref={menuButtonRef}
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label={menuOpen ? "Close menu" : "Open menu"}
           aria-expanded={menuOpen}

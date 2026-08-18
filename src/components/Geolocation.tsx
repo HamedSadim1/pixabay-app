@@ -286,6 +286,7 @@ function Geolocation() {
 
         {permissionStatus && (
           <div
+            role="status"
             className={`border p-4 font-mono text-xs uppercase tracking-[0.12em] ${
               permissionStatus === "granted"
                 ? "border-gold text-gold"
