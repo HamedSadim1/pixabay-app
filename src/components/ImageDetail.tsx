@@ -199,11 +199,12 @@ const ImageDetail: React.FC = () => {
         {/* Image Info */}
         <div className="mt-6 grid gap-6 md:grid-cols-2">
           <div>
-            <h3 className="mb-3 font-display text-sm uppercase tracking-[0.05em] text-paper">
+            <h3 className="mb-3 font-display text-sm uppercase tracking-wider text-paper">
               Image Information
             </h3>
             <dl className="space-y-2">
               {[
+                ["Frame ID", `#${imageData.id}`],
                 [
                   "Dimensions",
                   `${imageData.imageWidth} × ${imageData.imageHeight}`,
@@ -220,10 +221,19 @@ const ImageDetail: React.FC = () => {
                 </div>
               ))}
             </dl>
+
+            <a
+              href={imageData.pageURL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 inline-flex items-center gap-2 border border-line px-3 py-1.5 font-mono text-xs uppercase tracking-[0.12em] text-muted transition-colors hover:border-gold hover:text-gold"
+            >
+              <Icon name="arrowRight" /> View on Pixabay
+            </a>
           </div>
 
           <div>
-            <h3 className="mb-3 font-display text-sm uppercase tracking-[0.05em] text-paper">
+            <h3 className="mb-3 font-display text-sm uppercase tracking-wider text-paper">
               Statistics
             </h3>
             <div className="grid grid-cols-3 gap-3">
@@ -233,6 +243,12 @@ const ImageDetail: React.FC = () => {
                   ["heart", formatNumber(imageData.likes), "Likes"],
                   ["eye", formatNumber(imageData.views), "Views"],
                   ["download", formatNumber(imageData.downloads), "Downloads"],
+                  ["comment", formatNumber(imageData.comments), "Comments"],
+                  [
+                    "bookmark",
+                    formatNumber(imageData.collections),
+                    "Collections",
+                  ],
                 ] as [IconName, string, string][]
               ).map(([icon, value, label]) => (
                 <div
@@ -254,14 +270,14 @@ const ImageDetail: React.FC = () => {
 
         {/* Tags */}
         <div className="mt-6">
-          <h3 className="mb-3 font-display text-sm uppercase tracking-[0.05em] text-paper">
+          <h3 className="mb-3 font-display text-sm uppercase tracking-wider text-paper">
             Tags
           </h3>
           <div className="flex flex-wrap gap-2">
             {imageData.tags.split(", ").map((tag, index) => (
               <span
                 key={index}
-                className="border border-line px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.1em] text-muted"
+                className="border border-line px-2.5 py-1 font-mono text-[10px] uppercase tracking-widest text-muted"
               >
                 {tag.trim()}
               </span>
@@ -277,11 +293,11 @@ const ImageDetail: React.FC = () => {
             className="h-10 w-10 rounded-full border border-line object-cover"
           />
           <div>
-            <span className="font-display text-sm uppercase tracking-[0.05em] text-paper">
+            <span className="font-display text-sm uppercase tracking-wider text-paper">
               {imageData.user}
             </span>
             <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted">
-              Photographer
+              Photographer · Member #{imageData.user_id}
             </p>
           </div>
         </div>
