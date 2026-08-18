@@ -1,7 +1,11 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { parseAsString, parseAsStringLiteral, useQueryStates } from "nuqs";
-import { searchImages, getErrorMessage } from "../api/pixabay";
+import {
+  searchImages,
+  getErrorMessage,
+  type SearchQuery,
+} from "../api/pixabay";
 import type { Hit } from "./../models/IPixabay";
 import type { Color, ImageType, Orientation } from "../constants/types";
 import { useDebouncedValue } from "./useDebouncedValue";
@@ -110,22 +114,36 @@ export const useSearch = (): SearchState & SearchActions => {
   const debouncedMinWidth = useDebouncedValue(minWidth, FILTER_DEBOUNCE_MS);
   const debouncedMinHeight = useDebouncedValue(minHeight, FILTER_DEBOUNCE_MS);
 
-  // The committed query is the query key: when it changes, React Query
-  // fetches (or serves from cache) automatically. Filters are part of the key,
-  // so changing a filter re-runs the search without a manual "Search" click.
-  const committedQuery = {
-    q,
-    type: imageType,
-    orientation,
-    color,
-    minWidth: debouncedMinWidth,
-    minHeight: debouncedMinHeight,
-  };
+  // Normalize the filter values into the shape the API actually uses, omitting
+  // no-op values ("all" / empty). This object is both the query key and the
+  // request payload, so the devtools key shows only the filters that apply.
+  const searchQuery = useMemo(() => {
+    const params: Omit<SearchQuery, "page"> = { q };
+    if (imageType !== "all") {
+      params.type = imageType;
+    }
+    if (orientation !== "all") {
+      params.orientation = orientation;
+    }
+    if (color !== "all") {
+      params.color = color;
+    }
+    // Only send positive whole numbers, matching the Pixabay API contract.
+    const width = Math.floor(Number(debouncedMinWidth));
+    if (Number.isFinite(width) && width > 0) {
+      params.minWidth = width;
+    }
+    const height = Math.floor(Number(debouncedMinHeight));
+    if (Number.isFinite(height) && height > 0) {
+      params.minHeight = height;
+    }
+    return params;
+  }, [q, imageType, orientation, color, debouncedMinWidth, debouncedMinHeight]);
 
   const query = useInfiniteQuery({
-    queryKey: ["pixabay", "search", committedQuery],
+    queryKey: ["pixabay", "search", searchQuery],
     queryFn: ({ pageParam }) =>
-      searchImages({ ...committedQuery, page: pageParam }),
+      searchImages({ ...searchQuery, page: pageParam }),
     initialPageParam: 1,
     getNextPageParam: (lastPage, allPages) => {
       const loaded = allPages.reduce((sum, page) => sum + page.hits.length, 0);

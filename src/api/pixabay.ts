@@ -7,13 +7,16 @@ import type { Color, ImageType, Orientation } from "../constants/types";
 // search UI and the pagination logic agree on the page size.
 export const PER_PAGE = 20;
 
-export interface SearchParams {
+// The effective parameters sent to the Pixabay API. Optional fields are
+// omitted from the request (and from the React Query key) when they are
+// no-ops — e.g. `type` only appears when it is not "all".
+export interface SearchQuery {
   q: string;
-  type: ImageType;
-  orientation: Orientation;
-  color: Color;
-  minWidth: string;
-  minHeight: string;
+  type?: ImageType;
+  orientation?: Orientation;
+  color?: Color;
+  minWidth?: number;
+  minHeight?: number;
   page: number;
 }
 
@@ -51,28 +54,25 @@ export function getErrorMessage(err: unknown): string {
   return "An unexpected error occurred";
 }
 
-export async function searchImages(params: SearchParams): Promise<Images> {
+export async function searchImages(params: SearchQuery): Promise<Images> {
   const { q, type, orientation, color, minWidth, minHeight, page } = params;
 
   let queryString = `${API_ENDPOINTS.PIXABAY_SEARCH}&q=${encodeURIComponent(q)}&page=${page}&per_page=${PER_PAGE}`;
 
-  if (type !== "all") {
+  if (type) {
     queryString += `&image_type=${type}`;
   }
-  if (orientation !== "all") {
+  if (orientation) {
     queryString += `&orientation=${orientation}`;
   }
-  if (color !== "all") {
+  if (color) {
     queryString += `&colors=${color}`;
   }
-  // Only send positive whole numbers, matching the Pixabay API contract.
-  const width = Math.floor(Number(minWidth));
-  if (Number.isFinite(width) && width > 0) {
-    queryString += `&min_width=${width}`;
+  if (minWidth !== undefined) {
+    queryString += `&min_width=${minWidth}`;
   }
-  const height = Math.floor(Number(minHeight));
-  if (Number.isFinite(height) && height > 0) {
-    queryString += `&min_height=${height}`;
+  if (minHeight !== undefined) {
+    queryString += `&min_height=${minHeight}`;
   }
 
   const response = await axios.get<Images>(queryString, { timeout: 10000 });
