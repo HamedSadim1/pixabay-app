@@ -1,7 +1,14 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { NAV_LINKS } from "../constants/navLinks";
+import { routePreloaders } from "../constants/routeLoaders";
 import Icon from "./Icon";
+
+// Start downloading a route's chunk as soon as the user hovers/focuses its
+// link, so navigation feels instant.
+const preloadRoute = (to: string) => {
+  void routePreloaders[to]?.();
+};
 
 const Navbar: React.FC = () => {
   const location = useLocation();
@@ -45,6 +52,8 @@ const Navbar: React.FC = () => {
                 <Link
                   to={link.to}
                   onClick={() => setMenuOpen(false)}
+                  onMouseEnter={() => preloadRoute(link.to)}
+                  onFocus={() => preloadRoute(link.to)}
                   className={linkClasses(active)}
                 >
                   <Icon name={link.icon} className="text-safelight" />
@@ -76,6 +85,8 @@ const Navbar: React.FC = () => {
                   <Link
                     to={link.to}
                     onClick={() => setMenuOpen(false)}
+                    onMouseEnter={() => preloadRoute(link.to)}
+                    onFocus={() => preloadRoute(link.to)}
                     className={`block ${linkClasses(active)}`}
                   >
                     <Icon name={link.icon} className="text-safelight" />

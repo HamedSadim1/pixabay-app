@@ -7,12 +7,17 @@ import ImageDetail from "./components/ImageDetail";
 import UserCard from "./components/UserCard";
 import ErrorBoundary from "./components/ErrorBoundary";
 import SprocketStrip from "./components/SprocketStrip";
+import {
+  loadGeolocation,
+  loadImageSearch,
+  loadSinglePost,
+} from "./constants/routeLoaders";
 
 // Heavy routes are lazy-loaded so their dependencies (Leaflet, the search UI,
 // the post list) only download when the route is visited.
-const Geolocation = lazy(() => import("./components/Geolocation"));
-const ImageSearch = lazy(() => import("./components/ImageSearch"));
-const SinglePost = lazy(() => import("./components/SinglePost"));
+const Geolocation = lazy(loadGeolocation);
+const ImageSearch = lazy(loadImageSearch);
+const SinglePost = lazy(loadSinglePost);
 
 interface PageHeaderProps {
   index: string;
