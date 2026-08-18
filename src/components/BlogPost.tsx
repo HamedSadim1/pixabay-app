@@ -5,6 +5,7 @@ import Icon from "./Icon";
 import MetaLabel from "./MetaLabel";
 import { useShareFeedback } from "@/hooks/useShareFeedback";
 import { useToggle } from "@/hooks/useToggle";
+import { cn } from "@/utils/cn";
 import { PATHS } from "@/constants/routes";
 
 interface BlockProps {
@@ -49,9 +50,10 @@ const BlogPost: FC<BlockProps> = ({ name, image, text, frame }) => {
           <button
             type="button"
             onClick={toggleLiked}
-            className={`inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-meta transition-colors ${
-              liked ? "text-safelight" : "text-muted hover:text-safelight"
-            }`}
+            className={cn(
+              "inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-meta transition-colors",
+              liked ? "text-safelight" : "text-muted hover:text-safelight",
+            )}
           >
             <Icon name="heart" /> {liked ? "Liked" : "Like"}
           </button>
@@ -67,9 +69,10 @@ const BlogPost: FC<BlockProps> = ({ name, image, text, frame }) => {
             onClick={() =>
               void share(name, `${window.location.origin}${PATHS.posts}`)
             }
-            className={`inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-meta transition-colors ${
-              shared ? "text-gold" : "text-muted hover:text-safelight"
-            }`}
+            className={cn(
+              "inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-meta transition-colors",
+              shared ? "text-gold" : "text-muted hover:text-safelight",
+            )}
           >
             <Icon name="share" /> {shared ? "Copied" : "Share"}
           </button>

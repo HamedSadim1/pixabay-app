@@ -4,6 +4,7 @@ import { PRELOAD_DELAY_MS } from "@/config/api";
 import { NAV_LINKS } from "@/constants/navLinks";
 import { routePreloaders } from "@/constants/routeLoaders";
 import { PATHS } from "@/constants/routes";
+import { cn } from "@/utils/cn";
 import Icon from "./Icon";
 
 const Navbar: React.FC = () => {
@@ -55,11 +56,12 @@ const Navbar: React.FC = () => {
   };
 
   const linkClasses = (active: boolean) =>
-    `flex items-center gap-2 border-b-2 px-3 py-2 font-mono text-xs uppercase tracking-[0.12em] transition-colors ${
+    cn(
+      "flex items-center gap-2 border-b-2 px-3 py-2 font-mono text-xs uppercase tracking-[0.12em] transition-colors",
       active
         ? "border-safelight text-paper"
-        : "border-transparent text-muted hover:text-paper"
-    }`;
+        : "border-transparent text-muted hover:text-paper",
+    );
 
   return (
     <nav className="sticky top-0 z-20 border-b border-line bg-dark/95 backdrop-blur">
@@ -125,7 +127,7 @@ const Navbar: React.FC = () => {
                     onMouseLeave={() => cancelPreload(link.to)}
                     onFocus={() => schedulePreload(link.to)}
                     onBlur={() => cancelPreload(link.to)}
-                    className={`block ${linkClasses(active)}`}
+                    className={cn("block", linkClasses(active))}
                   >
                     <Icon name={link.icon} className="text-safelight" />
                     <span>{link.label}</span>

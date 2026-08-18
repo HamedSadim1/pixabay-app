@@ -1,6 +1,7 @@
 import React from "react";
 import Icon from "./Icon";
 import type { IconName } from "@/constants/icons";
+import { cn } from "@/utils/cn";
 
 type Tone = "neutral" | "warning" | "gold";
 
@@ -35,9 +36,9 @@ const StatusCard: React.FC<StatusCardProps> = ({
   actions,
   className = "",
 }) => (
-  <div className={`border ${TONE_CLASSES[tone]} p-10 text-center ${className}`}>
+  <div className={cn("border p-10 text-center", TONE_CLASSES[tone], className)}>
     {icon && (
-      <div className={`mb-3 text-3xl ${TONE_ICON_CLASSES[tone]}`}>
+      <div className={cn("mb-3 text-3xl", TONE_ICON_CLASSES[tone])}>
         <Icon name={icon} />
       </div>
     )}
@@ -47,7 +48,7 @@ const StatusCard: React.FC<StatusCardProps> = ({
       </h2>
     )}
     {message && (
-      <p className={`font-mono text-xs text-muted ${actions ? "mb-5" : ""}`}>
+      <p className={cn("font-mono text-xs text-muted", actions && "mb-5")}>
         {message}
       </p>
     )}

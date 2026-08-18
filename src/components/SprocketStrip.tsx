@@ -1,4 +1,5 @@
 import React from "react";
+import { cn } from "@/utils/cn";
 
 interface SprocketStripProps {
   label?: string;
@@ -11,7 +12,7 @@ const SprocketStrip: React.FC<SprocketStripProps> = ({
 }) => {
   return (
     <div
-      className={`flex items-center gap-4 ${className}`}
+      className={cn("flex items-center gap-4", className)}
       aria-hidden={!label}
     >
       <span className="sprocket flex-1" aria-hidden="true" />

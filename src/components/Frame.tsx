@@ -1,4 +1,5 @@
 import React from "react";
+import { cn } from "@/utils/cn";
 
 interface FrameProps {
   children: React.ReactNode;
@@ -9,7 +10,7 @@ interface FrameProps {
 
 const Frame: React.FC<FrameProps> = ({ children, className = "", frame }) => {
   return (
-    <div className={`relative border border-line bg-panel ${className}`}>
+    <div className={cn("relative border border-line bg-panel", className)}>
       <span className="vf-corner vf-tl" />
       <span className="vf-corner vf-tr" />
       <span className="vf-corner vf-bl" />

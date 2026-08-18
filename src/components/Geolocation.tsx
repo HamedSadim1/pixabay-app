@@ -9,6 +9,7 @@ import Spinner from "./Spinner";
 import LocationMap from "./LocationMap";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { useReverseGeocode } from "@/hooks/useReverseGeocode";
+import { cn } from "@/utils/cn";
 import {
   formatAccuracy,
   formatCoordinate,
@@ -126,13 +127,14 @@ function Geolocation() {
         {permissionStatus && (
           <div
             role="status"
-            className={`border p-4 font-mono text-xs uppercase tracking-[0.12em] ${
+            className={cn(
+              "border p-4 font-mono text-xs uppercase tracking-[0.12em]",
               permissionStatus === "granted"
                 ? "border-gold text-gold"
                 : permissionStatus === "denied"
                   ? "border-safelight text-safelight"
-                  : "border-line text-muted"
-            }`}
+                  : "border-line text-muted",
+            )}
           >
             Location Permission: {permissionStatus}
           </div>

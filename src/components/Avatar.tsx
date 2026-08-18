@@ -1,4 +1,5 @@
 import React from "react";
+import { cn } from "@/utils/cn";
 import { getInitials } from "@/utils/format";
 
 interface AvatarProps {
@@ -23,16 +24,22 @@ const Avatar: React.FC<AvatarProps> = ({
   className = "",
 }) => {
   return (
-    <div className={`relative shrink-0 ${className}`}>
+    <div className={cn("relative shrink-0", className)}>
       {src ? (
         <img
           src={src}
           alt={`${name} avatar`}
-          className={`${SIZE_CLASSES[size]} rounded-full border border-line object-cover`}
+          className={cn(
+            SIZE_CLASSES[size],
+            "rounded-full border border-line object-cover",
+          )}
         />
       ) : (
         <div
-          className={`${SIZE_CLASSES[size]} flex items-center justify-center rounded-full border border-line bg-panel-2 font-display tracking-wider text-muted`}
+          className={cn(
+            SIZE_CLASSES[size],
+            "flex items-center justify-center rounded-full border border-line bg-panel-2 font-display tracking-wider text-muted",
+          )}
         >
           {getInitials(name)}
         </div>

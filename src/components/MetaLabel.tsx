@@ -1,4 +1,5 @@
 import React from "react";
+import { cn } from "@/utils/cn";
 
 type MetaTone = "muted" | "gold" | "safelight" | "paper";
 type MetaTag = "span" | "p" | "div";
@@ -26,7 +27,11 @@ const MetaLabel: React.FC<MetaLabelProps> = ({
   className = "",
 }) => (
   <Tag
-    className={`font-mono text-[10px] uppercase tracking-meta ${TONES[tone]} ${className}`}
+    className={cn(
+      "font-mono text-[10px] uppercase tracking-meta",
+      TONES[tone],
+      className,
+    )}
   >
     {children}
   </Tag>

@@ -1,4 +1,5 @@
 import React from "react";
+import { cn } from "@/utils/cn";
 
 interface DataFieldProps {
   label: string;
@@ -14,11 +15,11 @@ const DataField: React.FC<DataFieldProps> = ({
   valueClassName = "text-sm text-paper",
   className = "",
 }) => (
-  <div className={`border border-line bg-panel-2 p-4 ${className}`}>
+  <div className={cn("border border-line bg-panel-2 p-4", className)}>
     <div className="mb-2 font-mono text-[10px] uppercase tracking-label text-muted">
       {label}
     </div>
-    <p className={`font-mono ${valueClassName}`}>{children}</p>
+    <p className={cn("font-mono", valueClassName)}>{children}</p>
   </div>
 );
 
