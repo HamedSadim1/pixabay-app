@@ -152,6 +152,10 @@ body {
   background: var(--color-panel-2);
   font-family: var(--font-mono);
 }
+/* Brighten the tiles so street-name labels stay legible on the dark base */
+.leaflet-tile-pane {
+  filter: brightness(1.2) contrast(1.05);
+}
 .leaflet-control-attribution {
   background: rgba(20, 18, 15, 0.7) !important;
   color: var(--color-muted);
@@ -159,11 +163,15 @@ body {
 .leaflet-control-attribution a {
   color: var(--color-gold);
 }
-.leaflet-bar a {
+.leaflet-bar a,
+.leaflet-bar a:hover,
+.leaflet-bar a:focus {
   background: var(--color-panel);
   color: var(--color-paper);
   border-color: var(--color-line);
 }
-.leaflet-bar a:hover {
+.leaflet-bar a:hover,
+.leaflet-bar a:focus {
   background: var(--color-panel-2);
+  color: var(--color-gold);
 }
